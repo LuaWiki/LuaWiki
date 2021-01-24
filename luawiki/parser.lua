@@ -65,7 +65,32 @@ local defs = {
   gen_par_plus = function(t)
     local p_content = table.concat(t)
     if p_content == '' then p_content = '<br>' end
-    local str = '<p>' .. p_content .. '</p>'
+    
+    local s1, e1 = p_content:find('<div .->')
+    local s2, e2 = p_content:find('</div>', e1 and e1 + 1)
+    local fragments = {}
+    if s1 then
+      if s1 > 1 then
+        table.insert(fragments, '<p>' .. p_content:sub(1, s1 - 1) .. '</p>')
+      end
+      if e2 then
+        table.insert(fragments, p_content:sub(s1, e2))
+        if e2 < #p_content then
+          table.insert(fragments, '<p>' .. p_content:sub(e2 + 1) .. '</p>')
+        end
+      else
+        table.insert(fragments, p_content:sub(s1))
+      end
+    elseif e2 then
+      table.insert(fragments, p_content:sub(1, e2))
+      if e2 < #p_content then
+        table.insert(fragments, '<p>' .. p_content:sub(e2 + 1) .. '</p>')
+      end
+    else
+      fragments[1] = '<p>' .. p_content .. '</p>'
+    end
+    
+    local str = table.concat(fragments)
     if t.special then str = str .. t.special end
     return str
   end,

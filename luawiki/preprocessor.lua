@@ -122,7 +122,7 @@ local inspect = require('inspect')
 z.process = function(content, title)
   local tpl_cache = {}
   return re.gsub(content, simple_tpl, function(tpl_text, tpl_name)
-    tpl_name = tpl_name:sub(1, 1):upper() .. tpl_name:sub(2)
+    tpl_name = tpl_name:sub(1, 1):upper() .. tpl_name:sub(2):gsub(' ', '_')
     eval_env._var = setmetatable(tpl_args.parse_args(tpl_text), var_meta)
     eval_env._var._pagename = title
     --print(inspect(eval_env._var))

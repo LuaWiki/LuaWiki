@@ -1,0 +1,1 @@
+<div style="column-count: $cols;">
