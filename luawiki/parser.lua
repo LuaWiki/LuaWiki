@@ -128,17 +128,19 @@ local wiki_grammar = re.compile([=[--lpeg
   list_item      <- {| {[*#:;]+} __ (formatted / {''}) |}
   table          <- { '{|' (!'|}' .)* '|}' }
 
-  formatted      <- (bold_text / italic_text / {"'"}? plain_text)+ ~> merge_text
-  bold_text      <- ("'''" bold_body ("'''"/ ![^%cr%nl]))
-  bold_body      <- ("''" italic_body "''" / {"'"}? plain_text)+ ~> merge_text -> '<b>%1</b>'
-  italic_text    <- ("''" italic_body ("''"/ ![^%cr%nl]))
-  italic_body    <- ("'''" bold_body "'''" / {"'"}? plain_text)+ ~> merge_text -> '<i>%1</i>'
+  formatted      <- (bold_text / italic_text / {"'"} plain_text? / plain_text)+ ~> merge_text
+  bold_text      <- ("'''" bold_body ("'''"/ &[%cr%nl]))
+  bold_body      <- ((it_in_b / plain_text) (it_in_b / {"'"}? plain_text)*) ~> merge_text -> '<b>%1</b>'
+  it_in_b        <- "''" !"'" italic_body "''"
+  italic_text    <- ("''" italic_body ("''"/ &[%cr%nl]))
+  italic_body    <- ((b_in_it / plain_text) (b_in_it / {"'"}? plain_text)*) ~> merge_text -> '<i>%1</i>'
+  b_in_it        <- "'''" !"'" bold_body "'''"
   plain_text     <- (inline_element / {[^%cr%nl'] [^%cr%nl[{']*})+ ~> merge_text
   inline_element <- internal_link / external_link
 
-  ld_formatted   <- (ld_bold_text / ld_italic_text / {"'"}? ld_plain_text)+ ~> merge_text
+  ld_formatted   <- (ld_bold_text / ld_italic_text / {"'"} ld_plain_text? / ld_plain_text)+ ~> merge_text
   ld_bold_text   <- ("'''" ld_bold_body ("'''"/ &(']')))
-  ld_bold_body   <- ("''" ld_italic_body "''" / {"'"}? ld_plain_text)+ ~> merge_text -> '<b>%1</b>'
+  ld_bold_body   <- ("''" !"'" ld_italic_body "''" / {"'"}? ld_plain_text)+ ~> merge_text -> '<b>%1</b>'
   ld_italic_text <- ("''" ld_italic_body ("''"/ &(']')))
   ld_italic_body <- ("'''" ld_bold_body "'''" / {"'"}? ld_plain_text)+ ~> merge_text -> '<i>%1</i>'
   ld_plain_text  <- { [^%cr%nl|[%eb']+ }
