@@ -131,7 +131,7 @@ local wiki_grammar = re.compile([=[--lpeg
   formatted      <- (bold_text / italic_text / {"'"} plain_text? / plain_text)+ ~> merge_text
   bold_text      <- ("'''" bold_body ("'''"/ &[%cr%nl]))
   bold_body      <- ((it_in_b / plain_text) (it_in_b / {"'"}? plain_text)*) ~> merge_text -> '<b>%1</b>'
-  it_in_b        <- "''" !"'" italic_body "''"
+  it_in_b        <- "''" !"'" italic_body "''" !"'"
   italic_text    <- ("''" italic_body ("''"/ &[%cr%nl]))
   italic_body    <- ((b_in_it / plain_text) (b_in_it / {"'"}? plain_text)*) ~> merge_text -> '<i>%1</i>'
   b_in_it        <- "'''" !"'" bold_body "'''"
@@ -140,9 +140,11 @@ local wiki_grammar = re.compile([=[--lpeg
 
   ld_formatted   <- (ld_bold_text / ld_italic_text / {"'"} ld_plain_text? / ld_plain_text)+ ~> merge_text
   ld_bold_text   <- ("'''" ld_bold_body ("'''"/ &(']')))
-  ld_bold_body   <- ("''" !"'" ld_italic_body "''" / {"'"}? ld_plain_text)+ ~> merge_text -> '<b>%1</b>'
+  ld_bold_body   <- ((ld_it_in_b / ld_plain_text) (ld_it_in_b / {"'"}? ld_plain_text)*) ~> merge_text -> '<b>%1</b>'
+  ld_it_in_b     <- "''" !"'" ld_italic_body "''" !"'"
   ld_italic_text <- ("''" ld_italic_body ("''"/ &(']')))
-  ld_italic_body <- ("'''" ld_bold_body "'''" / {"'"}? ld_plain_text)+ ~> merge_text -> '<i>%1</i>'
+  ld_italic_body <- ((ld_b_in_it / ld_plain_text) (ld_b_in_it / {"'"}? ld_plain_text)*) ~> merge_text -> '<i>%1</i>'
+  ld_b_in_it     <- "'''" !"'" ld_bold_body "'''"
   ld_plain_text  <- { [^%cr%nl|[%eb']+ }
   internal_link  <- ('[[' {link_part} ('|' ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ ld_formatted)? ']') -> gen_extlink
@@ -154,6 +156,7 @@ local wiki_grammar = re.compile([=[--lpeg
 
 return {
   parse = function(wikitext)
+    extlink_counter = 0
     return wiki_grammar:match(wikitext)
   end
 }

@@ -21,3 +21,7 @@ hello ''''' blah
 hello '''''''''' blah
 
 hello '''bold '''''''''' blah
+
+hello ''''' blah''' blah
+
+hello ''''' blah'' blah
