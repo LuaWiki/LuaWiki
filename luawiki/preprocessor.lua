@@ -123,19 +123,27 @@ z.process = function(content, title)
   local tpl_cache = {}
   return re.gsub(content, simple_tpl, function(tpl_text, tpl_name)
     tpl_name = tpl_name:sub(1, 1):upper() .. tpl_name:sub(2):gsub(' ', '_')
-    eval_env._var = setmetatable(tpl_args.parse_args(tpl_text), var_meta)
-    eval_env._var._pagename = title
-    --print(inspect(eval_env._var))
-    --print(tpl_name)
+
     if not tpl_cache[tpl_name] then
       local f = io.open('wiki/template/' .. tpl_name .. '.tpl')
       if not f then return tpl_text end
       tpl_cache[tpl_name] = tpl_parse.parse_template(f:read('*a'))
     end
-    print(tpl_parse.dump(tpl_cache[tpl_name], 0))
-    --print(text_visitor(tpl_cache[tpl_name]))
-    return text_visitor(tpl_cache[tpl_name])
-    --print(inspect(text_visitor(tpl_ast)))
+    print(tpl_parse.dump(tpl_cache[tpl_name].ast, 0))
+
+    -- get mapped parameter names and set env
+    local converted_args = {}
+    do
+      local alias_dict = tpl_cache[tpl_name].alias
+      local raw_args = tpl_args.parse_args(tpl_text)
+      for k, v in pairs(raw_args) do
+        converted_args[alias_dict[k] or k] = v
+      end
+    end
+    eval_env._var = setmetatable(converted_args, var_meta)
+    eval_env._var._pagename = title
+    
+    return text_visitor(tpl_cache[tpl_name].ast)
   end)
 end
 

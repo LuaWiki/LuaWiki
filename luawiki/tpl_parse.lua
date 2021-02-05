@@ -25,7 +25,16 @@ end
 
 z.ext_modules = require('internal')
 
-local defs = {
+local alias_list = re.compile[=[--lpeg
+  alias_outer <- '@alias' __ '{' __ alias_body '}' {}
+  alias_body  <- {| alias_line* |}
+  alias_line  <- {| {param_name} __ '=' __ {alias_name} __ ('|' __ {alias_name} __)* |}
+  param_name  <- [_%w]+
+  alias_name  <- ([_-] / [^%s%p])+
+  __          <- %s*
+]=]
+
+local tpl_defs = {
   cache_module = function(m)
     if not z.ext_modules[m] then
       z.ext_modules[m] = require(m)
@@ -50,10 +59,27 @@ local tpl_grammar = re.compile([=[--lpeg
   expr        <- {| {:tag: '' -> 'expr':} {[^,)]+} |}
   wikitext    <- [^@}]+ -> cleanup_text
   __          <- %s*
-]=], defs)
+]=], tpl_defs)
 
 z.parse_template = function(tpl)
-  return tpl_grammar:match(tpl)
+  local alias, end_pos = alias_list:match(tpl)
+  local alias_dict = {}
+  if alias then
+    for i, v in ipairs(alias) do
+      local var_name = v[1]
+      for i = 2, #v do
+        alias_dict[v[i]] = v[1]
+      end
+    end
+  else
+    end_pos = 1
+  end
+  end_pos = end_pos or 1
+  local real_tpl = tpl:sub(end_pos)
+  return {
+    alias = alias_dict,
+    ast = tpl_grammar:match(real_tpl)
+  }
 end
 
 return z

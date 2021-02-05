@@ -1,14 +1,14 @@
+package.path = "../modules/?.lua;" .. package.path;
 local inspect = require('inspect')
-local tpl_args = require('tpl_args')
+local tpl_parse = require('tpl_parse')
 
 local wikitext = [=[
-{{lang-en|Someday or One Day}}
+@alias{
+  a = a1 | a2 | a3
+  b = b1 | b2
+  c = c1 | c2 | c3 | c4
+}
+@lang:lang_name{en}：<span lang="en">$1</span>
 ]=]
 
-print(
-  inspect(tpl_args.parse_args(wikitext))
-)
-
-print(
-  inspect(tpl_args.sub_tpl)
-)
+tpl_parse.parse_template(wikitext)
