@@ -11,5 +11,11 @@ local parser = require('parser')
 local wikitext = f:read('*a')
 wikitext = preprocessor.process(wikitext, title)
 local wiki_html = parser.parse(wikitext)
-ngx.say('<!DOCTYPE html><html><head><title>维基百科，自由的百科全书</title></head><body>' ..
-    '<h1>' .. title .. '</h1>' .. (wiki_html or '') .. '</body></html>')
+ngx.say('<!DOCTYPE html><html><head><title>维基百科，自由的百科全书</title>' ..
+    '<link rel="stylesheet" type="text/css" href="/wiki.css">' ..
+    '</head><body>' ..
+    '<h1>' .. title .. '</h1>' .. (wiki_html:gsub('<((%a+)[^>]-)/>', '<%1></%2>')
+      or '') ..
+    '<script src="/simplequery.js"></script>' ..
+    '<script src="/wiki.js"></script>' ..
+    '</body></html>')

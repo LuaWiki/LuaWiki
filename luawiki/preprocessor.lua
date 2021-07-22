@@ -1,6 +1,7 @@
 local tpl_args = require('tpl_args')
 local tpl_parse = require('tpl_parse')
 local re = require('lpeg.re')
+local inspect = require('inspect')
 
 local eval_env = {
   math = math,
@@ -13,16 +14,17 @@ local text_visitor, eval_single_arg, eval_args, call_visitor
 
 text_visitor = function(node)
   if not node then return '' end
+  local new_node = {}
   for i, v in ipairs(node) do
     if type(v) == 'string' then
-      node[i] = v:gsub('%$([_%w]+);?', function(s)
+      new_node[i] = v:gsub('%$([_%w]+);?', function(s)
         return eval_env._var[s]
       end)
     else -- cast to string in text
-      node[i] = tostring(call_visitor(v) or '')
+      new_node[i] = tostring(call_visitor(v) or '')
     end
   end
-  return table.concat(node)
+  return table.concat(new_node)
 end
 
 eval_single_arg = function(v, fname, i)
@@ -41,6 +43,7 @@ end
 
 eval_args = function(args, fname)
   local arg_size = #args
+  local new_args = {}
   if fname == 'or' then
     local res = nil
     for i = 1, arg_size - 1 do
@@ -58,10 +61,10 @@ eval_args = function(args, fname)
   else
     args.n = arg_size
     for i, v in ipairs(args) do
-      args[i] = eval_single_arg(v, fname, i)
+      new_args[i] = eval_single_arg(v, fname, i)
     end
   end
-  return args
+  return new_args
 end
 
 call_visitor = function(node, in_text)
@@ -82,7 +85,7 @@ call_visitor = function(node, in_text)
     error("attempt to call '" .. mname .. '.' .. fname .. "' (a nil value)")
   end
 
-  return f(eval_args(node.args, fname), in_text)
+  return f(eval_args(node.args, fname), in_text, #node.args)
 end
 
 ----------------------------------------------------------------------------
@@ -117,19 +120,17 @@ local simple_tpl = re.compile[=[--lpeg
   tpl_name <- { ([_/-] / [^%p%nl])+ () }
 ]=]
 
-local inspect = require('inspect')
-
 z.process = function(content, title)
   local tpl_cache = {}
   return re.gsub(content, simple_tpl, function(tpl_text, tpl_name)
-    tpl_name = tpl_name:sub(1, 1):upper() .. tpl_name:sub(2):gsub(' ', '_')
+    tpl_name = tpl_name:sub(1, 1):upper() .. tpl_name:sub(2):gsub(' +$', ''):gsub(' ', '_')
 
     if not tpl_cache[tpl_name] then
       local f = io.open('wiki/template/' .. tpl_name .. '.tpl')
       if not f then return tpl_text end
       tpl_cache[tpl_name] = tpl_parse.parse_template(f:read('*a'))
     end
-    print(tpl_parse.dump(tpl_cache[tpl_name].ast, 0))
+    --print(tpl_parse.dump(tpl_cache[tpl_name].ast, 0))
 
     -- get mapped parameter names and set env
     local converted_args = {}
