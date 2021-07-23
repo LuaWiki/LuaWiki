@@ -1,0 +1,11 @@
+references {
+  display: block;
+  font-size: smaller;
+  margin-left: 3em;
+  counter-reset: list-item;
+}
+ref {
+  display: list-item;
+  list-style: decimal;
+}
+
