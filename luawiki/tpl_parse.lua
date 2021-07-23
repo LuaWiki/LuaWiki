@@ -19,7 +19,7 @@ z.dump = function(t, level)
     return '{' .. (t.tag and (t.tag .. ':') or '') .. '\n' .. base_indent .. '\t' ..
         table.concat(res_list, sep) .. '\n' .. base_indent .. '}'
   else
-    return tostring(t):gsub('%s+', '')
+    return tostring(t):gsub('%s+', ' ')
   end
 end
 
@@ -41,7 +41,7 @@ local tpl_defs = {
     end
   end,
   cleanup_text = function(text)
-    local res = text:gsub('^%s*', ''):gsub('\n%s*', '\n'):gsub('%s*$', '')
+    local res = text:gsub('^%s+', ''):gsub('\n%s+', '\n'):gsub('%s+$', ' ')
     return res
   end
 }

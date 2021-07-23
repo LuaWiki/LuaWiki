@@ -30,7 +30,6 @@ z.join = function(args)
       table.insert(res, list[i])
     end
   end
-  print(table.concat(res, args[2]))
   return table.concat(res, args[2])
 end
 

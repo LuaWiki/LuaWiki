@@ -22,7 +22,7 @@ local defs = {
 -- General Parsing
 local tpl_grammar = re.compile([=[--lpeg
   template      <- {| %ts __ tpl_name ('|' __ param_expr %s*)* %te |}
-  tpl_name      <- { ([_/-] / [^%p])+ }
+  tpl_name      <- { ([_/!-] / [^%p])+ }
   param_expr    <- {| {:tag: param_name :} __ '=' __ any_text / any_text |}
   param_name    <- ([_-] / [^%s%p])+
   any_text      <- {~ (another_tpl -> store_tpl / internal_link / any_char [^|{[%te]*)* ~}
@@ -53,7 +53,8 @@ z.parse_args = function(tpl)
   sub_count = 0
   z.sub_tpl = {}
   local arg_table = tpl_grammar:match(tpl)
-  if arg_table then return reorganize(arg_table)
+  if arg_table then
+    return reorganize(arg_table), z.sub_tpl
   else error(tpl) end
 end
 

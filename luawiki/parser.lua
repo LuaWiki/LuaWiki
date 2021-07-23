@@ -145,7 +145,7 @@ local wiki_grammar = re.compile([=[--lpeg
   ld_italic_text <- ("''" ld_italic_body ("''"/ &(']')))
   ld_italic_body <- ((ld_b_in_it / ld_plain_text) (ld_b_in_it / {"'"}? ld_plain_text)*) ~> merge_text -> '<i>%1</i>'
   ld_b_in_it     <- "'''" !"'" ld_bold_body "'''"
-  ld_plain_text  <- { [^%cr%nl|[%eb']+ }
+  ld_plain_text  <- { [^%cr%nl[%eb']+ }
   internal_link  <- ('[[' {link_part} ('|' ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ ld_formatted)? ']') -> gen_extlink
   link_part      <- [^|[%eb]+
