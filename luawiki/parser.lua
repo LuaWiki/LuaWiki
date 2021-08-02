@@ -9,7 +9,12 @@ local list_marks = {
   [';'] = {'dl','dt'}
 }
 
-local function node_visitor(node, tag)
+-- fetch_list_node does a very simple thing
+-- it returns a last children of the node
+-- whose tag is the given tag;
+-- if the last children is not that tag
+-- create one and return that tag
+local function fetch_list_node(node, tag)
   local len = #node
   if node[len] and node[len].tag == tag then
     node = node[len]
@@ -21,6 +26,10 @@ local function node_visitor(node, tag)
   return node
 end
 
+-- otter_html generates HTML from a DOM tree
+-- (represented by its root node)
+-- a tree node is in form { tag: 'xxx', #1, #2, #3, ... }
+-- the function simulates outerHTML in browser DOM
 local function otter_html(node)
   local str = ''
   for _, v in ipairs(node) do
@@ -44,20 +53,29 @@ local defs = {
     return '<' .. htag .. '>' .. v[1]:gsub('^[ ]*', ''):gsub('[ ]*$', '') ..
       '</' .. htag .. '>'
   end,
+  -- t is formatted in form { { '#:', '123' }, { '###', '456' } }
+  -- and gen_list iterates the list, to create a tree structure
+  -- which could be expanded by otter_html at last
   gen_list = function(t)
     local dom_tree = {}
     for _, v in ipairs(t) do
+      -- let's start from the root node
       local pnode = dom_tree
+      -- first we process all marks except the last one
       local pstr = v[1]:sub(1,-2)
       for c in string.gmatch(pstr, '.') do
         local tags = list_marks[c]
-        pnode = node_visitor(pnode, tags[1])
-        pnode = node_visitor(pnode, tags[2])
+        -- pnode actually increases level when fetched node
+        -- is assigned to it
+        pnode = fetch_list_node(pnode, tags[1])
+        pnode = fetch_list_node(pnode, tags[2])
       end
-      -- last char
+      -- now we process the last mark
       local ostr = v[1]:sub(-1)
       local tags = list_marks[ostr]
-      pnode = node_visitor(pnode, tags[1])
+      pnode = fetch_list_node(pnode, tags[1])
+      -- this pnode is where we could add our innermost node
+      -- with prepared content in v[2]
       pnode[#pnode + 1] = { tag = tags[2], v[2] }
     end
     return otter_html(dom_tree)
