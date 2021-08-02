@@ -1,4 +1,5 @@
 local re = require('lpeg.re')
+local inspect = require('inspect')
 
 local extlink_counter = 0
 
@@ -43,6 +44,8 @@ local function otter_html(node)
   return str
 end
 
+local wiki_grammar = nil
+
 local defs = {
   cr = lpeg.P('\r'),
   t  = lpeg.P('\t'),
@@ -83,32 +86,8 @@ local defs = {
   gen_par_plus = function(t)
     local p_content = table.concat(t)
     if p_content == '' then p_content = '<br>' end
-    
-    local s1, e1 = p_content:find('<div .->')
-    local s2, e2 = p_content:find('</div>', e1 and e1 + 1)
-    local fragments = {}
-    if s1 then
-      if s1 > 1 then
-        table.insert(fragments, '<p>' .. p_content:sub(1, s1 - 1) .. '</p>')
-      end
-      if e2 then
-        table.insert(fragments, p_content:sub(s1, e2))
-        if e2 < #p_content then
-          table.insert(fragments, '<p>' .. p_content:sub(e2 + 1) .. '</p>')
-        end
-      else
-        table.insert(fragments, p_content:sub(s1))
-      end
-    elseif e2 then
-      table.insert(fragments, p_content:sub(1, e2))
-      if e2 < #p_content then
-        table.insert(fragments, '<p>' .. p_content:sub(e2 + 1) .. '</p>')
-      end
-    else
-      fragments[1] = '<p>' .. p_content .. '</p>'
-    end
-    
-    local str = table.concat(fragments)
+    local str = '<p>' .. p_content .. '</p>'
+    if t.html then str = str .. t.html end
     if t.special then str = str .. t.special end
     return str
   end,
@@ -127,17 +106,31 @@ local defs = {
       extlink_counter = extlink_counter + 1
       return s .. extlink_counter .. '</a>'
     end
+  end,
+  parse_inside = function(a)
+    return wiki_grammar:match(a:gsub('\n?$', '\n'))
+  end,
+  gen_block_html = function(t)
+    return '<' .. t[1] .. t[2] .. t[3] ..
+      '</' .. t[1] .. '>'
   end
 }
 
 -- General Parsing
-local wiki_grammar = re.compile([=[--lpeg
-  article        <- ((special_block / paragraph_plus / block) block*) ~> merge_text
-  block          <- sol? (special_block / paragraph_plus)
+wiki_grammar = re.compile([=[--lpeg
+  article        <- ((block_html / special_block / paragraph_plus / block) block*) ~> merge_text
+  block          <- sol? (block_html / special_block / paragraph_plus)
   paragraph_plus <- {| (newline / pline) latter_plines? |} -> gen_par_plus
-  latter_plines  <- {:special: special_block :} / pline (![-={*#:;] pline)* latter_plines?
+  latter_plines  <- {:html: block_html :} / {:special: special_block :} /
+                    pline (![-={*#:;] pline)* latter_plines?
   pline          <- (formatted newline -> ' ') ~> merge_text
   special_block  <- &[-={*#:;] (horizontal_rule / heading / list_block / table) newline?
+  block_html     <- &[<] {| bhtml_start bhtml_body -> parse_inside
+                    bhtml_end |} -> gen_block_html
+  bhtml_body     <- (!bhtml_end . [^<]*)*
+  bhtml_start    <- '<' {bhtml_tags} ' data-lw="' {:lw: %a+ :} '"' {[^<>]* '>'}
+  bhtml_end      <- '</' bhtml_tags ' data-lw="' (=lw) '"' '>'
+  bhtml_tags     <- 'pre' / 'blockquote' /'table' / 'div' / 'h' [1-7]
 
   horizontal_rule <- ('-'^+4 -> '<hr>' (formatted -> '<p>%1</p>')?) ~> merge_text
   heading        <- {| heading_tag {[^=]+} =htag [ %t]* |} -> gen_heading
@@ -172,9 +165,105 @@ local wiki_grammar = re.compile([=[--lpeg
   newline        <- %cr? %nl
 ]=], defs)
 
+local block_tag_pat = [=[--lpeg
+  %nl? '<' {'/'}? {'pre' / 'blockquote' /'table' / 'div' / 'h' [1-7]} { [^<>]* '>' }
+]=]
+block_tag_pat = block_tag_pat:gsub("'(.-)'", function(p)
+  local t = {}
+  local function do_a()
+    p = p:gsub('^%a+', function(pp)
+      pp = pp:gsub('%a', function(letter)
+        return string.format("[%s%s]", letter:lower(), letter:upper())
+      end)
+      table.insert(t, pp)
+      return ''
+    end)
+  end
+  local function do_A()
+    p = p:gsub('^%A+', function(pp)
+      pp = "'" .. pp .. "'"
+      table.insert(t, pp)
+      return ''
+    end)
+  end
+  
+  local flag = true
+  while p:len() > 0 do
+    if flag then
+      do_a()
+      flag = false
+    else
+      do_A()
+      flag = true
+    end
+  end
+  
+  return table.concat(t)
+end)
+
+math.randomseed(os.time())
+local charTable = {}
+do
+  local chars = 'abcdefghijklmnopqrstuvwxyz'
+  for c in chars:gmatch('.') do
+    table.insert(charTable, c)
+  end
+end
+local function random_str()
+  local randomString = {}
+  for i = 1, 7 do
+    randomString[i] = charTable[math.random(1, 26)];
+  end
+  return table.concat(randomString)
+end
+
+local stack = {}
+local tag_counter = {}
+local function block_tag_handler(p1, p2, p3)
+  local luawiki_hash = ''
+  if not p3 then
+    luawiki_hash = random_str()
+    table.insert(stack, { p1, luawiki_hash })
+    tag_counter[p1] = tag_counter[p1] and (tag_counter[p1]+1) or 1
+    return '\n' .. '<' .. p1 .. ' data-lw="' .. luawiki_hash .. '"' .. p2
+  else
+    local p0 = ''
+    if stack[#stack] and p2 == stack[#stack][1] then
+      luawiki_hash = table.remove(stack)[2]
+      tag_counter[p2] = tag_counter[p2] - 1
+      p0 = '</' .. p2 .. ' data-lw="' .. luawiki_hash .. '"' .. '>'
+    elseif tag_counter[p2] and tag_counter[p2] > 0 then
+      local prefix_str = ''
+      while #stack > 0 and p2 ~= stack[#stack][1] do
+        local unbalanced_tag = table.remove(stack)
+        prefix_str = prefix_str .. '</' .. unbalanced_tag[1] .. ' data-lw="' ..
+          unbalanced_tag[2] .. '">'
+        tag_counter[unbalanced_tag[1]] = tag_counter[unbalanced_tag[1]] - 1
+      end
+      luawiki_hash = table.remove(stack)[2]
+      tag_counter[p2] = tag_counter[p2] - 1
+      p0 = prefix_str .. '</' .. p2 .. ' data-lw="' .. luawiki_hash .. '"' .. '>'
+    else
+      return ''
+    end
+    return p0
+  end
+end
+
+function sanitize(wikitext)
+  stack = {}
+  tag_counter = {}
+  local base_html = re.gsub(wikitext, block_tag_pat, block_tag_handler)
+  for i = #stack, 1, -1 do
+    base_html = base_html .. '</' .. stack[i][1] .. '>'
+  end
+  return base_html
+end
+
 return {
+  sanitize = sanitize,
   parse = function(wikitext)
     extlink_counter = 0
-    return wiki_grammar:match(wikitext)
+    return wiki_grammar:match(sanitize(wikitext))
   end
 }
