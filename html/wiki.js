@@ -4,6 +4,7 @@ const refList = [];
 
 function buildRef() {
   var $refs = $('references');
+  $refs.parent().addClass('mw-references-columns');
 
   $('ref').each((_, x) => {
     let $x = $(x);

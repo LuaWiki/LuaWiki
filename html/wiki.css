@@ -1,3 +1,6 @@
+.mw-references-columns {
+  column-width: 30em;
+}
 references {
   display: block;
   font-size: smaller;
@@ -8,4 +11,3 @@ ref {
   display: list-item;
   list-style: decimal;
 }
-

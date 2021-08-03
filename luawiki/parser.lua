@@ -1,5 +1,4 @@
 local re = require('lpeg.re')
-local inspect = require('inspect')
 
 local extlink_counter = 0
 
@@ -108,17 +107,18 @@ local defs = {
     end
   end,
   parse_inside = function(a)
-    return wiki_grammar:match(a:gsub('\n?$', '\n'))
+    local inner_html = wiki_grammar:match(a:gsub('\n?$', '\n'))
+    return inner_html:gsub('^<p>(.-)</p>', '%1'):gsub('<p>(.-)</p>$', '%1')
   end,
   gen_block_html = function(t)
-    return '<' .. t[1] .. t[2] .. t[3] ..
+    return '<' .. t[1] .. t[2] .. (t[3] or '') ..
       '</' .. t[1] .. '>'
   end
 }
 
 -- General Parsing
 wiki_grammar = re.compile([=[--lpeg
-  article        <- ((block_html / special_block / paragraph_plus / block) block*) ~> merge_text
+  article        <- (block+) ~> merge_text
   block          <- sol? (block_html / special_block / paragraph_plus)
   paragraph_plus <- {| (newline / pline) latter_plines? |} -> gen_par_plus
   latter_plines  <- {:html: block_html :} / {:special: special_block :} /
@@ -250,7 +250,7 @@ local function block_tag_handler(p1, p2, p3)
   end
 end
 
-function sanitize(wikitext)
+local function sanitize(wikitext)
   stack = {}
   tag_counter = {}
   local base_html = re.gsub(wikitext, block_tag_pat, block_tag_handler)
@@ -264,6 +264,8 @@ return {
   sanitize = sanitize,
   parse = function(wikitext)
     extlink_counter = 0
-    return wiki_grammar:match(sanitize(wikitext))
+    return wiki_grammar:match(
+      sanitize(wikitext:gsub('\n[ \t]\n', '\n\n'))
+    )
   end
 }
