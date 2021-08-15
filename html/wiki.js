@@ -27,6 +27,34 @@ function buildRef() {
   })
 }
 
+function decodeEntities(encodedString) {
+  var textArea = document.createElement('textarea');
+  textArea.innerHTML = encodedString;
+  return textArea.value;
+}
+
+function buildMath() {
+  $('math').each((_, x) => {
+    let decodedMath = decodeEntities(x.innerHTML);
+    if (x.parentElement.children.length === 1) {
+      katex.render(decodedMath, x, {
+        displayMode: true,
+        fleqn: true
+      });
+    } else {
+      try {
+        katex.render(decodedMath, x);
+      } catch (e) {
+        katex.render(decodedMath, x, {
+          displayMode: true,
+          fleqn: true
+        });
+      }
+    }
+  })
+}
+
 $(document).ready(function(){
   buildRef();
+  buildMath();
 });

@@ -1,5 +1,6 @@
 local tpl_args = require('tpl_args')
 local tpl_parse = require('tpl_parse')
+local nonparse = require('nonparse')
 local re = require('lpeg.re')
 local inspect = require('inspect')
 
@@ -165,7 +166,8 @@ preproc.new = function(title, template_cache)
       self.eval_env._var._pagename = title
       --print(inspect(converted_args))
       
-      return self:text_visitor(self.tpl_cache[tpl_name].ast)
+      local expanded_wikitext = self:text_visitor(self.tpl_cache[tpl_name].ast)
+      return nonparse.decorate(expanded_wikitext)
     end)
   end
   

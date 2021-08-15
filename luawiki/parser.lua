@@ -125,12 +125,12 @@ wiki_grammar = re.compile([=[--lpeg
                     pline (![-={*#:;] pline)* latter_plines?
   pline          <- (formatted newline -> ' ') ~> merge_text
   special_block  <- &[-={*#:;] (horizontal_rule / heading / list_block / table) newline?
-  block_html     <- &[<] {| bhtml_start bhtml_body -> parse_inside
-                    bhtml_end |} -> gen_block_html
+  block_html     <- &[<] '<npblock>' {(!'</npblock>' . [^<]*)*} '</npblock>'
+                    / {| bhtml_start bhtml_body -> parse_inside bhtml_end |} -> gen_block_html
   bhtml_body     <- (!bhtml_end . [^<]*)*
   bhtml_start    <- '<' {bhtml_tags} ' data-lw="' {:lw: %a+ :} '"' {[^<>]* '>'}
   bhtml_end      <- '</' bhtml_tags ' data-lw="' (=lw) '"' '>'
-  bhtml_tags     <- 'pre' / 'blockquote' /'table' / 'div' / 'h' [1-7]
+  bhtml_tags     <- 'blockquote' /'table' / 'div' / 'h' [1-7]
 
   horizontal_rule <- ('-'^+4 -> '<hr>' (formatted -> '<p>%1</p>')?) ~> merge_text
   heading        <- {| heading_tag {[^=]+} =htag [ %t]* |} -> gen_heading
@@ -146,8 +146,8 @@ wiki_grammar = re.compile([=[--lpeg
   italic_text    <- ("''" italic_body ("''"/ &[%cr%nl]))
   italic_body    <- ((b_in_it / plain_text) (b_in_it / {"'"}? plain_text)*) ~> merge_text -> '<i>%1</i>'
   b_in_it        <- "'''" !"'" bold_body "'''"
-  plain_text     <- (inline_element / {[^%cr%nl'] [^%cr%nl[{']*})+ ~> merge_text
-  inline_element <- internal_link / external_link
+  plain_text     <- (inline_element / {[^%cr%nl'] [^%cr%nl[{<']*})+ ~> merge_text
+  inline_element <- np_inline / internal_link / external_link
 
   ld_formatted   <- (ld_bold_text / ld_italic_text / {"'"} ld_plain_text? / ld_plain_text)+ ~> merge_text
   ld_bold_text   <- ("'''" ld_bold_body ("'''"/ &(']')))
@@ -156,7 +156,10 @@ wiki_grammar = re.compile([=[--lpeg
   ld_italic_text <- ("''" ld_italic_body ("''"/ &(']')))
   ld_italic_body <- ((ld_b_in_it / ld_plain_text) (ld_b_in_it / {"'"}? ld_plain_text)*) ~> merge_text -> '<i>%1</i>'
   ld_b_in_it     <- "'''" !"'" ld_bold_body "'''"
-  ld_plain_text  <- { [^%cr%nl[%eb']+ }
+  ld_plain_text  <- (np_inline / { [^%cr%nl[%eb'] [^%cr%nl[<%eb']* })+ ~> merge_text
+  
+  np_inline      <- '<nowiki>' {(!'</nowiki>' . [^<]*)*} '</nowiki>'
+  
   internal_link  <- ('[[' {link_part} ('|' ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ ld_formatted)? ']') -> gen_extlink
   link_part      <- [^|[%eb]+

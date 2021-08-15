@@ -1,5 +1,5 @@
 local block_tag_pat = [=[--lpeg
-  %nl? '<' {'/'}? {'pre' / 'blockquote' /'table' / 'div' / 'h' [1-7]} { [^<>]* '>' }
+  %nl? '<' {'/'}? {'blockquote' /'table' / 'div' / 'h' [1-7]} { [^<>]* '>' }
 ]=]
 block_tag_pat = block_tag_pat:gsub("'(.-)'", function(p)
   local t = {}

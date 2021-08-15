@@ -11,3 +11,10 @@ ref {
   display: list-item;
   list-style: decimal;
 }
+
+.katex-display {
+  margin: unset;
+}
+.katex-display.fleqn > .katex {
+  padding-left: 0;
+}
