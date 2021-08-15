@@ -6,6 +6,20 @@ z.expr = function(args, in_text)
   return args[1]
 end
 
+z.map = function(args)
+  local list = args[1]
+  local func = args[2]
+  util.check_type(1, list, 'table')
+  util.check_type(2, func, 'function')
+  local new_list = {}
+  new_list.n = list.n or #list
+  for i = 1, new_list.n do
+    local v = list[i]
+    new_list[i] = func(v, i)
+  end
+  return new_list
+end
+
 z.arg_table = function(args, _, size)
   local new_args = {}
   for i = 1, size do

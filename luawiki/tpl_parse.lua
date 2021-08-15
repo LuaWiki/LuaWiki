@@ -56,7 +56,8 @@ local tpl_grammar = re.compile([=[--lpeg
   arguments   <- {:args: {| text_param / '(' __ param __ (',' __ param __ )* ')' |} :}
   param       <- text_param / func_call / expr
   text_param  <- {| '{' __ tpl_text '}' |}
-  expr        <- {| {:tag: '' -> 'expr':} {[^,)]+} |}
+  expr        <- {| {:tag: '' -> 'expr':} {([^,()]+ / balanced)+} |}
+  balanced    <- '(' ([^()] / balanced)* ')'
   wikitext    <- [^@}]+ -> cleanup_text
   __          <- %s*
 ]=], tpl_defs)
