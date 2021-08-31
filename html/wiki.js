@@ -2,6 +2,12 @@ const refMap = {};
 let refCounter = 0;
 const refList = [];
 
+function decodeEntities(encodedString) {
+  var textArea = document.createElement('textarea');
+  textArea.innerHTML = encodedString;
+  return textArea.value;
+}
+
 function buildRef() {
   var $refs = $('references');
   $refs.parent().addClass('mw-references-columns');
@@ -51,7 +57,16 @@ function buildMath() {
   })
 }
 
+function buildHighlight() {
+  $('syntaxhighlight').each((_, x) => {
+    x.className = 'language-' + x.lang + ' hljs';
+    x.innerHTML = hljs.highlight(decodeEntities(x.textContent.replace(/^[ \t]*\n/, '')),
+      {language: x.lang}).value;
+  })
+}
+
 $(document).ready(function(){
   buildRef();
   buildMath();
+  buildHighlight();
 });

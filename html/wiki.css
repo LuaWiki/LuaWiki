@@ -25,3 +25,10 @@ ref {
 .katex-display.fleqn > .katex {
   padding-left: 0;
 }
+
+syntaxhighlight {
+  display: block;
+  white-space: pre-wrap;
+  font-family: monospace;
+  padding: 1em;
+}
