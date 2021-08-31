@@ -50,6 +50,16 @@ local defs = {
   t  = lpeg.P('\t'),
   eb = lpeg.P(']'),
   merge_text = function(a, b) return a .. b end,
+  eat_ticks = function(s, i, ticks)
+    local len = #ticks
+    if len > 5 then
+      return i + len - 5, ticks:sub(len-5)
+    end
+    return true
+  end,
+  rep_newline = function(s)
+    return s:gsub('%s+', ' ')
+  end,
   gen_heading = function(v)
     local htag = 'h' .. #v.htag
     return '<' .. htag .. '>' .. v[1]:gsub('^[ ]*', ''):gsub('[ ]*$', '') ..
@@ -116,6 +126,61 @@ local defs = {
   end
 }
 
+-- formatted text in link
+
+defs.plain_text = re.compile([=[--lpeg
+  ( [^'] ("'"? [^']+)* ) -> rep_newline
+]=], defs)
+
+defs.bold_body = re.compile([=[--lpeg
+  bold_body      <- ((it_in_b / %plain_text) (it_in_b /  {"'"}? %plain_text)*) ~> merge_text -> '<b>%1</b>'
+  it_in_b        <- ("''" !"'" %plain_text "''") -> '<i>%1</i>'
+]=], defs)
+
+defs.italic_body = re.compile([=[--lpeg
+  italic_body    <- ((b_in_it / %plain_text) (b_in_it / {"'"}? %plain_text)*) ~> merge_text -> '<i>%1</i>'
+  b_in_it        <- ("'''" !"'" %plain_text "'''") -> '<b>%1</b>'
+]=], defs)
+
+defs.ld_formatted = re.compile([=[--lpeg
+  formatted      <- ((&{"'"+} => eat_ticks)? (bold_text / italic_text / {"'"} %plain_text? / %plain_text))+ ~> merge_text
+  bold_text      <- "'''" (!"'''" . [^']*)+ $> bold_body
+                    ("'''"/ !.)
+  italic_text    <- "''" (!"''" . [^']*)+ $> italic_body
+                    ("''"/ !.)
+]=], defs)
+
+-- general formatted text
+
+defs.plain_text = re.compile([=[--lpeg
+  plain_text     <- (inline_element / {[^%cr%nl'] ("'"? [^%cr%nl[<']+)*})+
+  inline_element <- np_inline / internal_link / external_link
+  
+  np_inline      <- '<nowiki>' {(!'</nowiki>' . [^<]*)*} '</nowiki>'
+  
+  internal_link  <- ('[[' {link_part} ('|' (!']]' . [^%eb]*)+ $> ld_formatted)? ']]') -> gen_link
+  external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ [^%cr%nl%eb]+ $> ld_formatted)? ']') -> gen_extlink
+  link_part      <- [^|[%eb]+
+]=], defs)
+
+defs.bold_body = re.compile([=[--lpeg
+  bold_body      <- ((it_in_b / %plain_text) (it_in_b /  {"'"}? %plain_text)*) ~> merge_text -> '<b>%1</b>'
+  it_in_b        <- ("''" !"'" %plain_text "''") -> '<i>%1</i>'
+]=], defs)
+
+defs.italic_body = re.compile([=[--lpeg
+  italic_body    <- ((b_in_it / %plain_text) (b_in_it / {"'"}? %plain_text)*) ~> merge_text -> '<i>%1</i>'
+  b_in_it        <- ("'''" !"'" %plain_text "'''") -> '<b>%1</b>'
+]=], defs)
+
+defs.formatted = re.compile([=[--lpeg
+  formatted      <- ((&{"'"+} => eat_ticks)? (bold_text / italic_text / {"'"} %plain_text? / %plain_text))+ ~> merge_text
+  bold_text      <- "'''" (!"'''" [^%cr%nl] [^'%cr%nl]*)+ $> bold_body
+                    ("'''"/ &[%cr%nl])
+  italic_text    <- "''" (!"''" [^%cr%nl] [^'%cr%nl]*)+ $> italic_body
+                    ("''"/ &[%cr%nl])
+]=], defs)
+
 -- General Parsing
 wiki_grammar = re.compile([=[--lpeg
   article        <- (block+) ~> merge_text
@@ -123,7 +188,7 @@ wiki_grammar = re.compile([=[--lpeg
   paragraph_plus <- {| (newline / pline) latter_plines? |} -> gen_par_plus
   latter_plines  <- {:html: block_html :} / {:special: special_block :} /
                     pline (![-={*#:;] pline)* latter_plines?
-  pline          <- (formatted newline -> ' ') ~> merge_text
+  pline          <- (%formatted newline -> ' ') ~> merge_text
   special_block  <- &[-={*#:;] (horizontal_rule / heading / list_block / table) newline?
   block_html     <- &[<] '<npblock>' {(!'</npblock>' . [^<]*)*} '</npblock>'
                     / {| bhtml_start bhtml_body -> parse_inside bhtml_end |} -> gen_block_html
@@ -132,37 +197,13 @@ wiki_grammar = re.compile([=[--lpeg
   bhtml_end      <- '</' bhtml_tags ' data-lw="' (=lw) '"' '>'
   bhtml_tags     <- 'blockquote' /'table' / 'div' / 'h' [1-7]
 
-  horizontal_rule <- ('-'^+4 -> '<hr>' (formatted -> '<p>%1</p>')?) ~> merge_text
+  horizontal_rule <- ('-'^+4 -> '<hr>' (%formatted -> '<p>%1</p>')?) ~> merge_text
   heading        <- {| heading_tag {[^=]+} =htag [ %t]* |} -> gen_heading
   heading_tag    <- {:htag: '=' '='^-6 :}
   list_block     <- {| list_item (newline list_item)* |} -> gen_list
-  list_item      <- {| {[*#:;]+} __ (formatted / {''}) |}
+  list_item      <- {| {[*#:;]+} __ (%formatted / {''}) |}
   table          <- { '{|' (!'|}' .)* '|}' }
 
-  formatted      <- (bold_text / italic_text / {"'"} plain_text? / plain_text)+ ~> merge_text
-  bold_text      <- ("'''" bold_body ("'''"/ &[%cr%nl]))
-  bold_body      <- ((it_in_b / plain_text) (it_in_b / {"'"}? plain_text)*) ~> merge_text -> '<b>%1</b>'
-  it_in_b        <- "''" !"'" italic_body "''" !"'"
-  italic_text    <- ("''" italic_body ("''"/ &[%cr%nl]))
-  italic_body    <- ((b_in_it / plain_text) (b_in_it / {"'"}? plain_text)*) ~> merge_text -> '<i>%1</i>'
-  b_in_it        <- "'''" !"'" bold_body "'''"
-  plain_text     <- (inline_element / {[^%cr%nl'] [^%cr%nl[{<']*})+ ~> merge_text
-  inline_element <- np_inline / internal_link / external_link
-
-  ld_formatted   <- (ld_bold_text / ld_italic_text / {"'"} ld_plain_text? / ld_plain_text)+ ~> merge_text
-  ld_bold_text   <- ("'''" ld_bold_body ("'''"/ &(']')))
-  ld_bold_body   <- ((ld_it_in_b / ld_plain_text) (ld_it_in_b / {"'"}? ld_plain_text)*) ~> merge_text -> '<b>%1</b>'
-  ld_it_in_b     <- "''" !"'" ld_italic_body "''" !"'"
-  ld_italic_text <- ("''" ld_italic_body ("''"/ &(']')))
-  ld_italic_body <- ((ld_b_in_it / ld_plain_text) (ld_b_in_it / {"'"}? ld_plain_text)*) ~> merge_text -> '<i>%1</i>'
-  ld_b_in_it     <- "'''" !"'" ld_bold_body "'''"
-  ld_plain_text  <- (np_inline / { [^%cr%nl[%eb'] [^%cr%nl[<%eb']* })+ ~> merge_text
-  
-  np_inline      <- '<nowiki>' {(!'</nowiki>' . [^<]*)*} '</nowiki>'
-  
-  internal_link  <- ('[[' {link_part} ('|' ld_formatted)? ']]') -> gen_link
-  external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ ld_formatted)? ']') -> gen_extlink
-  link_part      <- [^|[%eb]+
   sol            <- __ newline
   __             <- [ %t]*
   newline        <- %cr? %nl
