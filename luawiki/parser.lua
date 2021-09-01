@@ -144,10 +144,8 @@ defs.italic_body = re.compile([=[--lpeg
 
 defs.ld_formatted = re.compile([=[--lpeg
   formatted      <- ((&{"'"+} => eat_ticks)? (bold_text / italic_text / {"'"} %plain_text? / %plain_text))+ ~> merge_text
-  bold_text      <- "'''" (!"'''" . [^']*)+ $> bold_body
-                    ("'''"/ !.)
-  italic_text    <- "''" (!"''" . [^']*)+ $> italic_body
-                    ("''"/ !.)
+  bold_text      <- "'''" ( (!"'''" . [^']*)+ "'"^-5 ) $> bold_body    ("'''"/ !.)
+  italic_text    <- "''"  ( (!"''"  . [^']*)+ "'"^-5 ) $> italic_body  ("''"/ !.)
 ]=], defs)
 
 -- general formatted text
@@ -175,10 +173,8 @@ defs.italic_body = re.compile([=[--lpeg
 
 defs.formatted = re.compile([=[--lpeg
   formatted      <- ((&{"'"+} => eat_ticks)? (bold_text / italic_text / {"'"} %plain_text? / %plain_text))+ ~> merge_text
-  bold_text      <- "'''" (!"'''" [^%cr%nl] [^'%cr%nl]*)+ $> bold_body
-                    ("'''"/ &[%cr%nl])
-  italic_text    <- "''" (!"''" [^%cr%nl] [^'%cr%nl]*)+ $> italic_body
-                    ("''"/ &[%cr%nl])
+  bold_text      <- "'''" ( (!"'''" [^%cr%nl] [^'%cr%nl]*)+ "'"^-5 ) $> bold_body    ("'''"/ &[%cr%nl])
+  italic_text    <- "''"  ( (!"''"  [^%cr%nl] [^'%cr%nl]*)+ "'"^-5 ) $> italic_body  ("''"/ &[%cr%nl])
 ]=], defs)
 
 -- General Parsing
