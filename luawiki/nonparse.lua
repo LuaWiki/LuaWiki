@@ -6,7 +6,7 @@ local inline_tags = { 'nowiki', 'math' }
 --  np_inline_tag  <- _inline_tags_
 
 local defs = {
-  npb_open = '\n<npblock>',
+  newline = '\n',
   escape_html = function(content)
     if content then
       return content:gsub('<', '&lt;'):gsub('>', '&gt;'):gsub('&', '&amp;')
@@ -18,7 +18,7 @@ local defs = {
 
 local np_tags = [=[--lpeg
   article        <- {~ (&[<] (np_block / np_inline) / . [^<]*)+ ~}
-  np_block       <- %nl? -> npb_open np_block_start
+  np_block       <- (!<%nl '' -> newline)? '' -> '<npblock>' np_block_start
                     (!np_block_end . [^<]*)* -> escape_html
                     np_block_end '' -> '</npblock>'
   np_block_start <- '<' {:np: np_block_tag :} {(%s [^>]*)? '>'}
