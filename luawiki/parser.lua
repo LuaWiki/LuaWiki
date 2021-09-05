@@ -1,6 +1,7 @@
 local re = require('lpeg.re')
 
 local extlink_counter = 0
+local global_state = {}
 
 local list_marks = {
   ['*'] = {'ul','li'},
@@ -116,6 +117,11 @@ local defs = {
       return s .. extlink_counter .. '</a>'
     end
   end,
+  gen_table = function(t)
+    return '<table>' .. (t.caption and ('<caption>' .. t.caption:gsub('%s+$', '')
+      .. '</caption>') or '') .. '<tbody>' .. table.concat(t) .. '</tbody>'
+      .. '<table>'
+  end,
   parse_inside = function(a)
     local inner_html = wiki_grammar:match(a:gsub('\n?$', '\n'))
     return inner_html:gsub('^<p>(.-)</p>', '%1'):gsub('<p>(.-)</p>$', '%1')
@@ -123,7 +129,9 @@ local defs = {
   gen_block_html = function(t)
     return '<' .. t[1] .. t[2] .. (t[3] or '') ..
       '</' .. t[1] .. '>'
-  end
+  end,
+  extract_npb = function(i) return global_state.npb_cache[tonumber(i)] end,
+  extract_nw = function(i) return global_state.nw_cache[tonumber(i)] end
 }
 
 -- formatted text in link
@@ -154,7 +162,7 @@ defs.plain_text = re.compile([=[--lpeg
   plain_text     <- (inline_element / {[^%cr%nl'] ("'"? [^%cr%nl[<']+)*})+
   inline_element <- np_inline / internal_link / external_link
   
-  np_inline      <- '<nowiki>' {(!'</nowiki>' . [^<]*)*} '</nowiki>'
+  np_inline      <- '<nw-' {%d+} -> extract_nw '/>'
   
   internal_link  <- ('[[' {link_part} ('|' (!']]' . [^%eb]*)+ $> ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ [^%cr%nl%eb]+ $> ld_formatted)? ']') -> gen_extlink
@@ -186,7 +194,7 @@ wiki_grammar = re.compile([=[--lpeg
                     pline (![-={<*#:;] pline)* latter_plines?
   pline          <- (%formatted newline -> ' ') ~> merge_text
   special_block  <- &[-={*#:;] (horizontal_rule / heading / list_block / table) newline?
-  block_html     <- &[<] '<npblock>' {(!'</npblock>' . [^<]*)*} '</npblock>'
+  block_html     <- &[<] '<npb-' {%d+} -> extract_npb '/>'
                     / {| bhtml_start bhtml_body -> parse_inside bhtml_end |} -> gen_block_html
   bhtml_body     <- (!bhtml_end . [^<]*)*
   bhtml_start    <- '<' {bhtml_tags} ' data-lw="' {:lw: %a+ :} '"' {[^<>]* '>'}
@@ -198,7 +206,23 @@ wiki_grammar = re.compile([=[--lpeg
   heading_tag    <- {:htag: '=' '='^-6 :}
   list_block     <- {| list_item (newline list_item)* |} -> gen_list
   list_item      <- {| {[*#:;]+} __ (%formatted / {''}) |}
-  table          <- { '{|' (!'|}' .)* '|}' }
+  
+  table         <- {| '{|' table_attr? (%nl table_caption)?
+                      ((table_line1) (%nl table_line)*)?
+                    __ %nl %s* '|}' |} -> gen_table
+  table_attr    <- [^%nl]+
+  table_caption <- '|+' __ {:caption: [^%nl]+ :}
+  table_line1   <- (%nl %s* '|-' __ &%nl)? table_row
+  table_line    <- '|-' __ &%nl table_row
+  table_row     <- (__ (%nl %s* (header_cell / data_cell) )
+                    / (header_cell_inline / data_cell_inline) )+
+                    ~> merge_text -> '<tr>%1</tr>'
+  header_cell   <- '!' {th_inline (%nl __ ![|}] th_inline)*} $> formatted -> '<th>%1</th>'
+  data_cell     <- '|' ![}+-] {td_inline (%nl __ ![|}] td_inline)*} $> formatted -> '<td>%1</td>'
+  header_cell_inline <- '!!' {th_inline} $> formatted -> '<th>%1</th>'
+  data_cell_inline   <- '||' {td_inline} $> formatted -> '<td>%1</td>'
+  th_inline     <- (!'!!' [^%nl] [^!%nl]*)+
+  td_inline     <- (!'||' [^%nl] [^|%nl]*)+
 
   sol            <- __ newline
   __             <- [ %t]*
@@ -208,8 +232,9 @@ wiki_grammar = re.compile([=[--lpeg
 local sanitize = require('sanitizer').sanitize
 
 return {
-  parse = function(wikitext)
+  parse = function(wiki_state, wikitext)
     extlink_counter = 0
+    global_state = wiki_state
     return wiki_grammar:match(
       sanitize(wikitext:gsub('\n[ \t]\n', '\n\n'))
     )

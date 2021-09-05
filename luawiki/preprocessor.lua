@@ -32,7 +32,7 @@ local simple_tpl = re.compile[=[--lpeg
 
 local preproc = {}
 
-preproc.new = function(title, template_cache)
+preproc.new = function(wiki_state, template_cache)
   local z = {}
   
   z.tpl_cache = template_cache or {}
@@ -54,7 +54,7 @@ preproc.new = function(title, template_cache)
         new_node[i] = v:gsub('%$([_%w]+);?', function(s)
           return self.eval_env._var[s]
         end):gsub('#(%d+);', function(tpl_num)
-          local another_preproc = preproc.new(title, self.tpl_cache)
+          local another_preproc = preproc.new(wiki_state, self.tpl_cache)
           return another_preproc:process(self.eval_env._tpl[tonumber(tpl_num)])
         end)
       else -- cast to string in text
@@ -77,7 +77,7 @@ preproc.new = function(title, template_cache)
         local ret = f()
         if type(ret) == 'string' then
           ret = ret:gsub('#(%d+);', function(tpl_num)
-            local another_preproc = preproc.new(title, self.tpl_cache)
+            local another_preproc = preproc.new(wiki_state, self.tpl_cache)
             return another_preproc:process(self.eval_env._tpl[tonumber(tpl_num)])
           end)
         end
@@ -163,11 +163,11 @@ preproc.new = function(title, template_cache)
         --print(inspect(sub_tpl))
       end
       self.eval_env._var = setmetatable(converted_args, var_meta)
-      self.eval_env._var._pagename = title
+      self.eval_env._var._pagename = wiki_state.title
       --print(inspect(converted_args))
       
       local expanded_wikitext = self:text_visitor(self.tpl_cache[tpl_name].ast)
-      return nonparse.decorate(expanded_wikitext)
+      return nonparse.decorate(wiki_state, expanded_wikitext)
     end)
   end
   

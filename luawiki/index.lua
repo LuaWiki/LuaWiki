@@ -7,13 +7,20 @@ if not f then
 end
 
 local nonparse = require('nonparse')
-local preprocessor = require('preprocessor').new(title)
 local parser = require('parser')
 local wikitext = f:read('*a')
-local wiki_state = {}
-wikitext = nonparse.decorate(wikitext)
+local wiki_state = {
+  title = title,
+  npb_index = 0,
+  nw_index = 0,
+  npb_cache = {},
+  nw_cache = {}
+}
+wikitext = nonparse.decorate(wiki_state, wikitext)
+
+local preprocessor = require('preprocessor').new(wiki_state)
 wikitext = preprocessor:process(wikitext)
-local wiki_html = parser.parse(wikitext)
+local wiki_html = parser.parse(wiki_state, wikitext)
 ngx.say('<!DOCTYPE html><html><head><title>维基百科，自由的百科全书</title>' ..
     '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">' ..
     '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">' ..
