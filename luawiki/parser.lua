@@ -117,6 +117,14 @@ local defs = {
       return s .. extlink_counter .. '</a>'
     end
   end,
+  gen_th = function(t)
+    return '<th ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
+      .. t[1] .. '</th>'
+  end,
+  gen_td = function(t)
+    return '<td ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
+      .. t[1] .. '</td>'
+  end,
   gen_table = function(t)
     return '<table>' .. (t.caption and ('<caption>' .. t.caption:gsub('%s+$', '')
       .. '</caption>') or '') .. '<tbody>' .. table.concat(t) .. '</tbody>'
@@ -207,22 +215,22 @@ wiki_grammar = re.compile([=[--lpeg
   list_block     <- {| list_item (newline list_item)* |} -> gen_list
   list_item      <- {| {[*#:;]+} __ (%formatted / {''}) |}
   
-  table         <- {| '{|' table_attr? (%nl table_caption)?
-                      ((table_line1) (%nl table_line)*)?
+  table         <- {| '{|' table_attr? (%nl __ table_caption)?
+                      ((table_row1) (%nl %s* table_row)*)?
                     __ %nl %s* '|}' |} -> gen_table
   table_attr    <- [^%nl]+
   table_caption <- '|+' __ {:caption: [^%nl]+ :}
-  table_line1   <- (%nl %s* '|-' __ &%nl)? table_row
-  table_line    <- '|-' __ &%nl table_row
-  table_row     <- (__ (%nl %s* (header_cell / data_cell) )
-                    / (header_cell_inline / data_cell_inline) )+
-                    ~> merge_text -> '<tr>%1</tr>'
-  header_cell   <- '!' {th_inline (%nl __ ![|}] th_inline)*} $> formatted -> '<th>%1</th>'
-  data_cell     <- '|' ![}+-] {td_inline (%nl __ ![|}] td_inline)*} $> formatted -> '<td>%1</td>'
-  header_cell_inline <- '!!' {th_inline} $> formatted -> '<th>%1</th>'
-  data_cell_inline   <- '||' {td_inline} $> formatted -> '<td>%1</td>'
-  th_inline     <- (!'!!' [^%nl] [^!%nl]*)+
-  td_inline     <- (!'||' [^%nl] [^|%nl]*)+
+  table_row1    <- (%nl %s* '|-' __)? tb_row_core
+  table_row     <- '|-' __ tb_row_core
+  tb_row_core   <- (%nl %s* (th_line / td_line) )+ ~> merge_text -> '<tr>%1</tr>'
+  th_line       <- '!' header_cell (__ ('!!' / '||') __ header_cell)*
+  td_line       <- '|' ![}-] data_cell   (__ '||' __ data_cell)*
+  header_cell   <- {| cell_attr? th_inline |} -> gen_th
+  data_cell     <- {| cell_attr? td_inline |} -> gen_td
+  th_inline     <- {(!'!!' !'||' [^%nl])* ( &'!!' / &'||' / tb_restlines )}
+  td_inline     <- {(!'||' [^%nl])*       ( &'||' / tb_restlines )}
+  tb_restlines  <- ( %nl __ ![|!] [^%nl]* )*
+  cell_attr     <- {:attr: (!'[[' [^|%nl] [^|[%nl]*) :} '|' !'|'
 
   sol            <- __ newline
   __             <- [ %t]*
