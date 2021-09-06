@@ -26,15 +26,19 @@ local defs = {
 }
 
 local np_tags = [=[--lpeg
-  article        <- {~ (&[<] (nowiki / np_block / np_inline) / . [^<]*)+ ~}
+  article        <- {~ (&[<] (comment / nowiki / np_block / np_inline) / . [^<]*)+ ~}
+
+  comment        <- ('<!--' (!'-->' . [^-]*)* '-->') -> ''
+  nowiki         <- ('<nowiki>' (!'</nowiki>' . [^<]*)* -> escape_html
+                     '</nowiki>') -> gen_nowiki
+  
   np_block       <- (!<%nl '' -> newline)? {~ np_block_start
                     (!np_block_end . [^<]*)* -> escape_html
                     np_block_end ~} -> gen_npblock
   np_block_start <- '<' {:np: np_block_tag :} {(%s [^>]*)? '>'}
   np_block_end   <- '</' (=np) '>'
   
-  nowiki          <- ('<nowiki>' (!'</nowiki>' . [^<]*)* -> escape_html
-                     '</nowiki>') -> gen_nowiki
+  
   np_inline       <- {~ np_inline_start (!np_inline_end . [^<]*)* -> escape_html
                     np_inline_end ~} -> gen_nowiki
   np_inline_start <- '<' {:nw: np_inline_tag :} (%s [^>]*)? '>'
