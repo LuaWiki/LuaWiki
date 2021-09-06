@@ -1,3 +1,47 @@
+a.new {
+  color: #d33;
+}
+
+.wikitable {
+  background-color: #f8f9fa;
+  color: #202122;
+  margin: 1em 0;
+  border: 1px solid #a2a9b1;
+  border-collapse: collapse;
+}
+
+.wikitable > caption {
+  font-weight: bold;
+}
+
+.wikitable > tr > th, .wikitable > * > tr > th {
+  background-color: #eaecf0;
+  text-align: center;
+}
+
+.wikitable > tr > th, .wikitable > tr > td, .wikitable > * > tr > th, .wikitable > * > tr > td {
+  border: 1px solid #a2a9b1;
+  padding: 0.2em 0.4em;
+}
+
+div.floatleft, table.floatleft {
+  margin: 0 0.5em 0.5em 0;
+}
+
+div.tleft, div.floatleft, table.floatleft {
+  float: left;
+  clear: left;
+}
+
+div.floatright, table.floatright {
+  margin: 0 0 0.5em 0.5em;
+}
+
+div.tright, div.floatright, table.floatright {
+  clear: right;
+  float: right;
+}
+
 .hatnote {
   padding-left: 2em;
   margin-bottom: 0.8em;

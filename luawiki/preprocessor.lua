@@ -143,7 +143,7 @@ preproc.new = function(wiki_state, template_cache)
           if #content == #tpl_text then
             return tpl_text
           else
-            return '{{' .. self:process(tpl_text:sub(3, -3)) .. '}}'
+            return '<a class="new" href="/wiki/Template:' .. tpl_name .. '">Template:' .. tpl_name .. '</a>'
           end
         end
         self.tpl_cache[tpl_name] = tpl_parse.parse_template(f:read('*a'))

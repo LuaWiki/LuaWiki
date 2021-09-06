@@ -1,4 +1,5 @@
 local re = require('lpeg.re')
+local inspect = require('inspect')
 
 local extlink_counter = 0
 local global_state = {}
@@ -42,6 +43,17 @@ local function otter_html(node)
       '</' .. node.tag .. '>'
   end
   return str
+end
+
+local function getFilePath(filename, width)
+  local md5hash = ngx.md5(filename)
+  if width then
+    return 'https://upload.wikimedia.org/wikipedia/commons/thumb/' .. md5hash:sub(1,1) .. '/' .. md5hash:sub(1,2)
+      .. '/' .. filename .. '/' .. width .. '-' ..filename
+  else
+    return 'https://upload.wikimedia.org/wikipedia/commons/' .. md5hash:sub(1,1) .. '/' .. md5hash:sub(1,2)
+      .. '/' .. filename
+  end
 end
 
 local wiki_grammar = nil
@@ -117,6 +129,10 @@ local defs = {
       return s .. extlink_counter .. '</a>'
     end
   end,
+  gen_file = function(t)
+    local filepath = getFilePath(t[1]:sub(1, 1):upper() .. t[1]:sub(2):gsub(' +$', ''):gsub(' ', '_'), t.size and t.size:gsub('x%d.*$', ''))
+    return '<img src="' .. filepath .. '" ' .. (t.alt and ('alt="' .. t.alt .. '"') or '') .. '>'
+  end,
   gen_th = function(t)
     return '<th ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
       .. t[1] .. '</th>'
@@ -176,12 +192,24 @@ defs.ld_formatted = re.compile([=[--lpeg
 
 defs.plain_text = re.compile([=[--lpeg
   plain_text     <- (inline_element / {[^%cr%nl'] ("'"? [^%cr%nl[<']+)*})+
-  inline_element <- np_inline / internal_link / external_link
+  inline_element <- np_inline / file_link / internal_link / external_link
   
   np_inline      <- '<nw-' {%d+} -> extract_nw '/>'
   
   internal_link  <- ('[[' {link_part} ('|' (!']]' . [^%eb]*)+ $> ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ [^%cr%nl%eb]+ $> ld_formatted)? ']') -> gen_extlink
+
+  file_link      <- {| '[[File:' {link_part} ('|' (f_type / f_border / f_location / f_align / f_size
+                      / f_link / f_alt / f_caption))* ']]' |} -> gen_file
+  f_type         <- {:type: 'thumb' / 'frame' / 'frameless' :}
+  f_border       <- {:border: 'border' :}
+  f_location     <- {:loc: 'right' / 'left' / 'center' / 'none' :}
+  f_align        <- {:align: 'baseline' / 'middle' / 'sub' / 'super' / 'text-top' / 'text-bottom' / 'top' / 'bottom' :}
+  f_size         <- {:size: 'upright' / %d+ 'px' ('x' (%d+ 'px'))? :}
+  f_link         <- 'link=' {:link: 'http' 's'? '://' [^ %t%eb]+ :}
+  f_alt          <- 'alt=' {:alt: [^|%eb]* :}
+  f_caption      <- {:caption: [^|%eb]* :}
+  
   link_part      <- [^|[%eb]+
 ]=], defs)
 
@@ -231,13 +259,14 @@ wiki_grammar = re.compile([=[--lpeg
   tb_row_core   <- (%nl %s* (th_line / td_line) )+ ~> merge_text
   th_line       <- '!' header_cell (__ ('!!' / '||') __ header_cell)*
   td_line       <- '|' ![}-] data_cell   (__ '||' __ data_cell)*
-  header_cell   <- {| cell_attr? th_inline $> formatted |} -> gen_th
+  header_cell   <- {| th_attr? th_inline $> formatted |} -> gen_th
   data_cell     <- {| cell_attr? td_inline $> formatted |} -> gen_td
   th_inline     <- {(!'!!' !'||' [^%nl])* ( &'!!' / &'||' / tb_restlines )}
   td_inline     <- {(!'||' [^%nl])*       ( &'||' / tb_restlines )}
   tb_restlines  <- ( %nl __ ![|!] [^%nl]* )*
   table_attr    <- {:attr: [^%nl]+ :}
   cell_attr     <- {:attr: (!'[[' [^|%nl] [^|[%nl]*)* :} '|' !'|'
+  th_attr       <- {:attr: (!'!!' !'[[' [^|%nl] [^|![%nl]*)* :} '|' !'|'
 
   sol            <- __ newline
   __             <- [ %t]*
