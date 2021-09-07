@@ -30,6 +30,10 @@ local simple_tpl = re.compile[=[--lpeg
   tpl_name <- { ([_/!-] / [^%p%nl])+ }
 ]=]
 
+local var_pat = re.compile([=[--lpeg
+  '$' ( '[' {(!']' !%nl .)+} ']' / {[_%w]+})
+]=])
+
 local preproc = {}
 
 preproc.new = function(wiki_state, template_cache)
@@ -51,7 +55,7 @@ preproc.new = function(wiki_state, template_cache)
     local new_node = {}
     for i, v in ipairs(node) do
       if type(v) == 'string' then
-        new_node[i] = v:gsub('%$([_%w]+);?', function(s)
+        new_node[i] = re.gsub(v, var_pat, function(s)
           return self.eval_env._var[s]
         end):gsub('#(%d+);', function(tpl_num)
           local another_preproc = preproc.new(wiki_state, self.tpl_cache)
@@ -71,7 +75,7 @@ preproc.new = function(wiki_state, template_cache)
     elseif tag == 'call' then
       return self:call_visitor(v)
     else--[[if tag == 'expr' then]]
-      local chunk = v[1]:gsub('%$([_%w]+)', '_var["%1"]')
+      local chunk = re.gsub(v[1], var_pat, '_var["%1"]')
       local f, err = load('return ' .. chunk, fname .. '@arg' .. i, 't', self.eval_env)
       if f then
         local ret = f()
@@ -165,7 +169,7 @@ preproc.new = function(wiki_state, template_cache)
       self.eval_env._var = setmetatable(converted_args, var_meta)
       self.eval_env._var._pagename = wiki_state.title
       --print(inspect(converted_args))
-      
+
       local expanded_wikitext = self:text_visitor(self.tpl_cache[tpl_name].ast)
       return nonparse.decorate(wiki_state, expanded_wikitext)
     end)

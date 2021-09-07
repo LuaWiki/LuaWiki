@@ -3,7 +3,8 @@
 }
 @join(@arg_table(
   $author1,
-  {[$url @utils:escape_bracket($title)]},
+  {[$url @or(@and($title, @utils:escape_bracket($title)),
+    @utils:escape_bracket($[script-title]))]},
   @or($website, $work),
   $date,
   @and($accessdate, {[$accessdate]})

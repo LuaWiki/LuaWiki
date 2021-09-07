@@ -48,8 +48,12 @@ end
 local function getFilePath(filename, width)
   local md5hash = ngx.md5(filename)
   if width then
+    local file_ext = ''
+    if not filename:match('[.]png') and not filename:match('[.]jpg') then
+      file_ext = '.png'
+    end
     return 'https://upload.wikimedia.org/wikipedia/commons/thumb/' .. md5hash:sub(1,1) .. '/' .. md5hash:sub(1,2)
-      .. '/' .. filename .. '/' .. width .. '-' ..filename
+      .. '/' .. filename .. '/' .. width .. '-' ..filename .. file_ext
   else
     return 'https://upload.wikimedia.org/wikipedia/commons/' .. md5hash:sub(1,1) .. '/' .. md5hash:sub(1,2)
       .. '/' .. filename
@@ -130,8 +134,27 @@ local defs = {
     end
   end,
   gen_file = function(t)
+    local prefix = ''
+    local suffix = ''
+    local loc_class = ''
+    if t.loc == 'right' or t.loc == '右' then
+      loc_class = ' tright'
+    elseif t.loc == 'left' or t.loc == '左' then
+      loc_class = ' tleft'
+    elseif t.type == 'thumb' or t.type == '缩略图' then
+      loc_class = ' tright'
+    end
+    if t.type == 'thumb' or t.type == '缩略图' then
+      if not t.size then t.size = '220px' end
+      prefix = '<div class="thumbinner' .. loc_class .. '" style="width:222px">'
+      if t.caption then
+        suffix = suffix .. '<div class="thumbcaption">' .. t.caption .. '</div>'
+      end
+      suffix = suffix .. '</div>'
+    end
+    
     local filepath = getFilePath(t[1]:sub(1, 1):upper() .. t[1]:sub(2):gsub(' +$', ''):gsub(' ', '_'), t.size and t.size:gsub('x%d.*$', ''))
-    return '<img src="' .. filepath .. '" ' .. (t.alt and ('alt="' .. t.alt .. '"') or '') .. '>'
+    return prefix .. '<img src="' .. filepath .. '" ' .. (t.alt and ('alt="' .. t.alt .. '"') or '') .. '>' .. suffix
   end,
   gen_th = function(t)
     return '<th ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
@@ -201,14 +224,15 @@ defs.plain_text = re.compile([=[--lpeg
 
   file_link      <- {| '[[File:' {link_part} ('|' (f_type / f_border / f_location / f_align / f_size
                       / f_link / f_alt / f_caption))* ']]' |} -> gen_file
-  f_type         <- {:type: 'thumb' / 'frame' / 'frameless' :}
+  f_type         <- {:type: 'thumb' / 'frame' / 'frameless' / '缩略图' :}
   f_border       <- {:border: 'border' :}
-  f_location     <- {:loc: 'right' / 'left' / 'center' / 'none' :}
+  f_location     <- {:loc: 'right' / 'left' / 'center' / 'none' / '右' / '左' :}
   f_align        <- {:align: 'baseline' / 'middle' / 'sub' / 'super' / 'text-top' / 'text-bottom' / 'top' / 'bottom' :}
   f_size         <- {:size: 'upright' / %d+ 'px' ('x' (%d+ 'px'))? :}
   f_link         <- 'link=' {:link: 'http' 's'? '://' [^ %t%eb]+ :}
   f_alt          <- 'alt=' {:alt: [^|%eb]* :}
-  f_caption      <- {:caption: [^|%eb]* :}
+  f_caption      <- {:caption: ((internal_link / external_link / {[^|[%eb]+})* ~> merge_text) :}
+  f_cap_link     <- '[' ([^[%eb] / f_cap_link)* ']'
   
   link_part      <- [^|[%eb]+
 ]=], defs)
