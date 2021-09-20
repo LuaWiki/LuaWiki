@@ -46,6 +46,7 @@ local function otter_html(node)
 end
 
 local function getFilePath(filename, width)
+  if not ngx then return '' end
   local md5hash = ngx.md5(filename)
   if width then
     local file_ext = ''
@@ -179,6 +180,7 @@ local defs = {
   end,
   parse_inside = function(a)
     local inner_html = wiki_grammar:match(a:gsub('\n?$', '\n'))
+    if not inner_html then return '' end
     return inner_html:gsub('^<p>(.-)</p>', '%1'):gsub('<p>(.-)</p>$', '%1')
   end,
   gen_block_html = function(t)
