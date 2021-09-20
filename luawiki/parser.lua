@@ -159,15 +159,15 @@ local defs = {
   end,
   gen_th = function(t)
     return '<th ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
-      .. t[1] .. '</th>'
+      .. (t[1] or '') .. '</th>'
   end,
   gen_td = function(t)
     return '<td ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
-      .. t[1] .. '</td>'
+      .. (t[1] or '') .. '</td>'
   end,
   gen_tr = function(t)
     return '<tr ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
-      .. t[1] .. '</tr>'
+      .. (t[1] or '') .. '</tr>'
   end,
   gen_tb_caption = function(t)
     return '<caption ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
