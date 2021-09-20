@@ -1,0 +1,1 @@
+<ref group="註" @or($name, 'name="$name"') >$1</ref>

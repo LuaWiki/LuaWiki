@@ -11,7 +11,20 @@ function decodeEntities(encodedString) {
 function buildRef() {
   var $refs = $('references');
   $refs.parent().addClass('mw-references-columns');
-
+  
+  let refMap = {}
+  $refs.each((_, x) => {
+    let $x = $(x);
+    let group = $x.attr('group');
+    let anonAppeared = false
+    if (!group && !anonAppeared) {
+      refMap[''] = $x;
+      anonAppeared = true;
+    } else if (!refMap[group]) {
+      refMap[group] = $x;
+    }
+  })
+  
   $('ref').each((_, x) => {
     let $x = $(x);
     let name = $x.attr('name');
@@ -28,9 +41,12 @@ function buildRef() {
       refCounter++;
       anchor = `cite-note-${refCounter}`;
     }
-    $(x).before(`<sup>[<a href="#${anchor}">${refCounter}</a>]</sup>`);
-    $(x).attr('id', anchor).appendTo($refs);
-  })
+    $x.before(`<sup>[<a href="#${anchor}">${refCounter}</a>]</sup>`);
+    $x.attr('id', anchor);
+    
+    let group = $x.attr('group') || '';
+    if (refMap[group]) $x.appendTo(refMap[group]);
+  });
 }
 
 function buildMath() {
