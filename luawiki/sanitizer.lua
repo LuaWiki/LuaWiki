@@ -1,3 +1,5 @@
+local re = require('lpeg.re')
+
 local block_tag_pat = [=[--lpeg
   %nl? '<' {'/'}? {'blockquote' /'table' / 'div' / 'h' [1-7]} { [^<>]* '>' }
 ]=]
