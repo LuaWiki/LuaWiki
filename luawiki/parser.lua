@@ -307,6 +307,6 @@ return {
     global_state = wiki_state
     return wiki_grammar:match(
       sanitize(wikitext:gsub('\n[ \t]\n', '\n\n'))
-    )
+    ) or ''
   end
 }

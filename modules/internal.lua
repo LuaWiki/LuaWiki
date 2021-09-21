@@ -1,9 +1,29 @@
 local z = {}
 local util = require('library_util')
-local inspect = require('inspect')
 
 z.expr = function(args, in_text)
   return args[1]
+end
+
+z['and'] = z.expr
+z['or'] = z.expr
+
+z.switch = function(args, _, size)
+  if size % 2 == 0 then
+    error('even number of arguments in switch function')
+  end
+  local c = args[1]
+  for i = 2, size, 2 do
+    local cases = args[i]
+    local ret = args[i + 1]
+    if cases == 'default' then return ret end
+    util.check_type(i, cases, 'table')
+    for i = 1, cases.n do
+      if c == cases[i] then
+        return ret
+      end
+    end
+  end 
 end
 
 z.map = function(args)
@@ -29,8 +49,7 @@ z.arg_table = function(args, _, size)
   return new_args
 end
 
-z['and'] = z.expr
-z['or'] = z.expr
+z.cases = z.arg_table
 
 z.join = function(args)
   local list = args[1]

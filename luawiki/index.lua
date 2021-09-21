@@ -26,8 +26,7 @@ ngx.say('<!DOCTYPE html><html><head><title>维基百科，自由的百科全书<
     '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">' ..
     '<link rel="stylesheet" type="text/css" href="/wiki.css">' ..
     '</head><body>' ..
-    '<h1>' .. title .. '</h1>' .. (wiki_html:gsub('<((%a+)[^>]-)/>', '<%1></%2>')
-      or '') ..
+    '<h1>' .. title .. '</h1>' .. wiki_html:gsub('<((%a+)[^>]-)/>', '<%1></%2>') ..
     '<script src="/simplequery.js"></script>' ..
     '<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>' ..
     '<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/mhchem.min.js"></script>' ..

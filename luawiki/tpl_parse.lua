@@ -48,7 +48,7 @@ local tpl_defs = {
 
 local tpl_grammar = re.compile([=[--lpeg
   tpl_grm     <- {| __ tpl_text |}
-  tpl_text    <- {:tag: '' -> 'text':} (func_call __ / wikitext)+
+  tpl_text    <- {:tag: '' -> 'text':} ((func_call __ / wikitext)+ / {''})
   func_call   <- {| {:tag: '' -> 'call':} '@' module_name (':' func_name)? __ ('()' / arguments) |}
   module_name <- {:module: name -> cache_module :}
   func_name   <- {:func: name :}
