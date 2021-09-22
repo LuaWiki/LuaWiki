@@ -26,7 +26,8 @@ local var_meta = {
 
 local simple_tpl = re.compile[=[--lpeg
   simp_tpl <- { tpl }
-  tpl      <- '{{' tpl_name ([^{}] / tpl)* '}}'
+  tpl      <- '{{' tpl_name ([^{}]+ / balanced)* '}}'
+  balanced <- '{' ([^{}] / balanced)* '}'
   tpl_name <- { ([_/!-] / [^%p%nl])+ }
 ]=]
 

@@ -2,6 +2,11 @@ a.new {
   color: #d33;
 }
 
+ul {
+  margin: 0.3em 0 0 1.6em;
+  padding: 0;
+}
+
 .wikitable {
   background-color: #f8f9fa;
   color: #202122;

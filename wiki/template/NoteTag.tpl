@@ -1,1 +1,1 @@
-<ref group="註" @or($name, 'name="$name"') >$1</ref>
+<ref group="註" @and($name, {name="$name"}) >$1</ref>

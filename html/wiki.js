@@ -55,7 +55,7 @@ function buildMath() {
     if (x.nodeName === 'CHEM') {
       decodedMath = '\\ce{' + decodedMath + '}';
     }
-    if (x.parentElement.children.length === 1) {
+    if (x.parentElement.childNodes.length === 1) {
       katex.render(decodedMath, x, {
         displayMode: true,
         fleqn: true

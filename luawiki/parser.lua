@@ -154,8 +154,14 @@ local defs = {
       suffix = suffix .. '</div>'
     end
     
+    t.height = ''
+    if t.size:sub(1,1) == 'x' then
+      t.height = ' height="' .. t.size:sub(2) .. '"'
+      t.size = t.size:gsub('x(%d+)px', function(p1) return 2*tonumber(p1) .. 'px' end)
+    end
+    
     local filepath = getFilePath(t[1]:sub(1, 1):upper() .. t[1]:sub(2):gsub(' +$', ''):gsub(' ', '_'), t.size and t.size:gsub('x%d.*$', ''))
-    return prefix .. '<img src="' .. filepath .. '" ' .. (t.alt and ('alt="' .. t.alt .. '"') or '') .. '>' .. suffix
+    return prefix .. '<img src="' .. filepath .. '" ' .. (t.alt and ('alt="' .. t.alt .. '"') or '') .. t.height .. '>' .. suffix
   end,
   gen_th = function(t)
     return '<th ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
@@ -230,7 +236,7 @@ defs.plain_text = re.compile([=[--lpeg
   f_border       <- {:border: 'border' :}
   f_location     <- {:loc: 'right' / 'left' / 'center' / 'none' / '右' / '左' :}
   f_align        <- {:align: 'baseline' / 'middle' / 'sub' / 'super' / 'text-top' / 'text-bottom' / 'top' / 'bottom' :}
-  f_size         <- {:size: 'upright' / %d+ 'px' ('x' (%d+ 'px'))? :}
+  f_size         <- {:size: 'upright' / %d+ 'px' ('x' (%d+ 'px'))? / 'x' %d+ 'px' :}
   f_link         <- 'link=' {:link: 'http' 's'? '://' [^ %t%eb]+ :}
   f_alt          <- 'alt=' {:alt: [^|%eb]* :}
   f_caption      <- {:caption: ((internal_link / external_link / {[^|[%eb]+})* ~> merge_text) :}
@@ -281,12 +287,12 @@ wiki_grammar = re.compile([=[--lpeg
                     __ %nl %s* '|}' |} -> gen_table
   table_caption <- '|+' {:caption: {| (__ cell_attr)? __ {[^%nl]+} |} -> gen_tb_caption :}
   table_row1    <- {| (%nl %s* '|-' (__ table_attr)? __)? tb_row_core |} -> gen_tr
-  table_row     <- '|-' {| (__ table_attr)? __ tb_row_core |} -> gen_tr
+  table_row     <- '|-' ({| (__ table_attr)? __ tb_row_core |} -> gen_tr / [^%nl]*)
   tb_row_core   <- (%nl %s* (th_line / td_line) )+ ~> merge_text
   th_line       <- '!' header_cell (__ ('!!' / '||') __ header_cell)*
   td_line       <- '|' ![}-] data_cell   (__ '||' __ data_cell)*
-  header_cell   <- {| th_attr? th_inline $> formatted |} -> gen_th
-  data_cell     <- {| cell_attr? td_inline $> formatted |} -> gen_td
+  header_cell   <- {| th_attr? th_inline -> parse_inside |} -> gen_th
+  data_cell     <- {| cell_attr? td_inline -> parse_inside |} -> gen_td
   th_inline     <- {(!'!!' !'||' [^%nl])* ( &'!!' / &'||' / tb_restlines )}
   td_inline     <- {(!'||' [^%nl])*       ( &'||' / tb_restlines )}
   tb_restlines  <- ( %nl __ ![|!] [^%nl]* )*
