@@ -239,7 +239,7 @@ defs.plain_text = re.compile([=[--lpeg
   f_size         <- {:size: 'upright' / %d+ 'px' ('x' (%d+ 'px'))? / 'x' %d+ 'px' :}
   f_link         <- 'link=' {:link: 'http' 's'? '://' [^ %t%eb]+ :}
   f_alt          <- 'alt=' {:alt: [^|%eb]* :}
-  f_caption      <- {:caption: ((internal_link / external_link / {[^|[%eb]+})* ~> merge_text) :}
+  f_caption      <- {:caption: ( (internal_link / external_link / ((!']]' [^|]) (!']]' [^|[] [^|[%eb])*) $> ld_formatted )* ~> merge_text ) :}
   f_cap_link     <- '[' ([^[%eb] / f_cap_link)* ']'
   
   link_part      <- [^|[%eb]+

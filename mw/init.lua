@@ -1,3 +1,4 @@
 mw = {
-  html = require('mw.html')
+  html = require('mw.html'),
+  text = require('mw.text')
 }

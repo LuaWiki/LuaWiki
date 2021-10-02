@@ -82,6 +82,7 @@ function buildHighlight() {
 }
 
 $(document).ready(function(){
+  document.body.innerHTML = doMwConvert(document.body.innerHTML);
   buildRef();
   buildMath();
   buildHighlight();

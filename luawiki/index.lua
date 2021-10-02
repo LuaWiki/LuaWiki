@@ -31,5 +31,6 @@ ngx.say('<!DOCTYPE html><html><head><title>维基百科，自由的百科全书<
     '<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>' ..
     '<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/mhchem.min.js"></script>' ..
     '<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>' ..
+    '<script src="/zh_convert.js"></script>' ..
     '<script src="/wiki.js"></script>' ..
     '</body></html>')

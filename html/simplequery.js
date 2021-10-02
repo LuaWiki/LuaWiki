@@ -273,8 +273,8 @@ $.fn.extend({
         return this;
     },
     remove: function() {
-        return this.each(function() {
-            this.parentNode && this.parentNode.removeChild(this);
+        return this.each(function(_, x) {
+            x.remove();
         });
     },
     detach: function() {
