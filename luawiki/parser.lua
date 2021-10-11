@@ -182,7 +182,7 @@ local defs = {
   gen_table = function(t)
     return '<table ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
       .. (t.caption or '') .. '<tbody>' .. table.concat(t) .. '</tbody>'
-      .. '<table>'
+      .. '</table>'
   end,
   parse_inside = function(a)
     local inner_html = wiki_grammar:match(a:gsub('\n?$', '\n'))

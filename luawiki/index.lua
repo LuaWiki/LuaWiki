@@ -16,17 +16,27 @@ local wiki_state = {
   npb_cache = {},
   nw_cache = {}
 }
+
+-- start timer
+ngx.update_time()
+local begin_time = ngx.now()
+
 wikitext = nonparse.decorate(wiki_state, wikitext)
 
 local preprocessor = require('preprocessor').new(wiki_state)
 wikitext = preprocessor:process(wikitext)
 local wiki_html = parser.parse(wiki_state, wikitext)
+
+-- end timer
+ngx.update_time()
+
 ngx.say('<!DOCTYPE html><html><head><title>维基百科，自由的百科全书</title>' ..
     '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">' ..
     '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">' ..
     '<link rel="stylesheet" type="text/css" href="/wiki.css">' ..
     '</head><body>' ..
     '<h1>' .. title .. '</h1>' .. wiki_html:gsub('<((%a+)[^>]-)/>', '<%1></%2>') ..
+    '<!-- Total parse time: ' .. (ngx.now() - begin_time) .. '-->' ..
     '<script src="/simplequery.js"></script>' ..
     '<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>' ..
     '<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/mhchem.min.js"></script>' ..

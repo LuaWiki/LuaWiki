@@ -57,7 +57,7 @@ preproc.new = function(wiki_state, template_cache)
     for i, v in ipairs(node) do
       if type(v) == 'string' then
         new_node[i] = re.gsub(v, var_pat, function(s)
-          return self.eval_env._var[s]
+          return self.eval_env._var[s] or ''
         end):gsub('#(%d+);', function(tpl_num)
           local another_preproc = preproc.new(wiki_state, self.tpl_cache)
           return another_preproc:process(self.eval_env._tpl[tonumber(tpl_num)])
