@@ -15,7 +15,7 @@ local defs = {
   store_tpl = function(s)
     sub_count = sub_count + 1
     z.sub_tpl[sub_count] = s
-    return '#' .. sub_count .. ';'
+    return '&' .. sub_count .. ';'
   end
 }
 

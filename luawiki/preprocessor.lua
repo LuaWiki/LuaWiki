@@ -58,7 +58,7 @@ preproc.new = function(wiki_state, template_cache)
       if type(v) == 'string' then
         new_node[i] = re.gsub(v, var_pat, function(s)
           return self.eval_env._var[s] or ''
-        end):gsub('#(%d+);', function(tpl_num)
+        end):gsub('&(%d+);', function(tpl_num)
           local another_preproc = preproc.new(wiki_state, self.tpl_cache)
           return another_preproc:process(self.eval_env._tpl[tonumber(tpl_num)])
         end)
@@ -81,7 +81,7 @@ preproc.new = function(wiki_state, template_cache)
       if f then
         local ret = f()
         if type(ret) == 'string' then
-          ret = ret:gsub('#(%d+);', function(tpl_num)
+          ret = ret:gsub('&(%d+);', function(tpl_num)
             local another_preproc = preproc.new(wiki_state, self.tpl_cache)
             return another_preproc:process(self.eval_env._tpl[tonumber(tpl_num)])
           end)
