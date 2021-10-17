@@ -12,31 +12,36 @@ function buildRef() {
   var $refs = $('references');
   $refs.parent().addClass('mw-references-columns');
   
-  let refMap = {}
+  let groupMap = {}
   $refs.each((_, x) => {
     let $x = $(x);
     let group = $x.attr('group');
     let anonAppeared = false
     if (!group && !anonAppeared) {
-      refMap[''] = $x;
+      groupMap[''] = $x;
       anonAppeared = true;
-    } else if (!refMap[group]) {
-      refMap[group] = $x;
+    } else if (!groupMap[group]) {
+      groupMap[group] = $x;
     }
   })
   
+  let refMap = {}
   $('ref').each((_, x) => {
     let $x = $(x);
     let name = $x.attr('name');
     let anchor = 'cite-note-error';
     if (name) {
       if (refMap[name]) {
-        x.outerHTML = `<sup>[${refMap[name]}]</sup>`;
+        anchor = `cite-note-${name}-${refMap[name]}`;
+        if (x.childNodes.length) {
+          $('#' + anchor).html($x.html());
+        }
+        x.outerHTML = `<sup>[<a href="#${anchor}">${refMap[name]}</a>]</sup>`;
         return;
       }
       refCounter++;
       anchor = `cite-note-${name}-${refCounter}`;
-      refMap[name] = `<a href="#${anchor}">${refCounter}</a>`;
+      refMap[name] = refCounter;
     } else {
       refCounter++;
       anchor = `cite-note-${refCounter}`;
@@ -45,7 +50,7 @@ function buildRef() {
     $x.attr('id', anchor);
     
     let group = $x.attr('group') || '';
-    if (refMap[group]) $x.appendTo(refMap[group]);
+    if (groupMap[group]) $x.appendTo(groupMap[group]);
   });
 }
 
