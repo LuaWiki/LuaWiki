@@ -155,7 +155,9 @@ local defs = {
     end
     
     t.height = ''
-    if t.size:sub(1,1) == 'x' then
+    if t.size == 'upright' then
+      t.size = '220px'
+    elseif t.size:sub(1,1) == 'x' then
       t.height = ' height="' .. t.size:sub(2) .. '"'
       t.size = t.size:gsub('x(%d+)px', function(p1) return 2*tonumber(p1) .. 'px' end)
     end
