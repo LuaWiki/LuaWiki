@@ -68,6 +68,7 @@ local defs = {
   t  = lpeg.P('\t'),
   eb = lpeg.P(']'),
   merge_text = function(a, b) return a .. b end,
+  fast_merge = function(t) return table.concat(t) end,
   eat_ticks = function(s, i, ticks)
     local len = #ticks
     if len > 5 then
@@ -258,14 +259,14 @@ defs.italic_body = re.compile([=[--lpeg
 ]=], defs)
 
 defs.formatted = re.compile([=[--lpeg
-  formatted      <- ((&{"'"+} => eat_ticks)? (bold_text / italic_text / {"'"} %plain_text? / %plain_text))+ ~> merge_text
+  formatted      <- {| ((&{"'"+} => eat_ticks)? (bold_text / italic_text / {"'"} %plain_text? / %plain_text))+ |} -> fast_merge
   bold_text      <- "'''" ( (!"'''" [^%cr%nl] [^'%cr%nl]*)+ "'"^-5 ) $> bold_body    ("'''"/ &[%cr%nl])
   italic_text    <- "''"  ( (!"''"  [^%cr%nl] [^'%cr%nl]*)+ "'"^-5 ) $> italic_body  ("''"/ &[%cr%nl])
 ]=], defs)
 
 -- General Parsing
 wiki_grammar = re.compile([=[--lpeg
-  article        <- (block+) ~> merge_text
+  article        <- {| block+ |} -> fast_merge
   block          <- sol? (block_html / special_block / paragraph_plus)
   paragraph_plus <- {| (newline / pline) latter_plines? |} -> gen_par_plus
   latter_plines  <- {:html: block_html :} / {:special: special_block :} /
