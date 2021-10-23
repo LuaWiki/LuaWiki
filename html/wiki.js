@@ -1,5 +1,4 @@
 const refMap = {};
-let refCounter = 0;
 const refList = [];
 
 function decodeEntities(encodedString) {
@@ -15,43 +14,50 @@ function buildRef() {
   let groupMap = {}
   $refs.each((_, x) => {
     let $x = $(x);
-    let group = $x.attr('group');
-    let anonAppeared = false
-    if (!group && !anonAppeared) {
-      groupMap[''] = $x;
-      anonAppeared = true;
-    } else if (!groupMap[group]) {
+    let group = $x.attr('group') || '';
+    if (!groupMap[group]) {
       groupMap[group] = $x;
     }
   })
   
-  let refMap = {}
-  $('ref').each((_, x) => {
-    let $x = $(x);
-    let name = $x.attr('name');
-    let anchor = 'cite-note-error';
-    if (name) {
-      if (refMap[name]) {
-        anchor = `cite-note-${name}-${refMap[name]}`;
-        if (x.childNodes.length) {
-          $('#' + anchor).html($x.html());
+  function buildRefGroup(g, suffix) {
+    let refMap = {}
+    let refCounter = 0;
+    $('ref' + suffix).each((_, x) => {
+      try {
+        let $x = $(x);
+        let name = $x.attr('name');
+        let anchor = 'cite-note-error';
+        if (name) {
+          if (refMap[name]) {
+            anchor = `cite-note-${name}-${refMap[name]}`;
+            if (x.childNodes.length) {
+              $('#' + anchor).html($x.html());
+            }
+            x.outerHTML = `<sup>[<a href="#${anchor}">${refMap[name]}</a>]</sup>`;
+            return;
+          }
+          refCounter++;
+          anchor = `cite-note-${name}-${refCounter}`;
+          refMap[name] = refCounter;
+        } else {
+          refCounter++;
+          anchor = `cite-note-${refCounter}`;
         }
-        x.outerHTML = `<sup>[<a href="#${anchor}">${refMap[name]}</a>]</sup>`;
-        return;
+        $x.before(`<sup>[<a href="#${anchor}">${refCounter}</a>]</sup>`);
+        $x.attr('id', anchor);
+
+        $x.appendTo(groupMap[g]);
+      } catch (e) {
+        console.error(e);
       }
-      refCounter++;
-      anchor = `cite-note-${name}-${refCounter}`;
-      refMap[name] = refCounter;
-    } else {
-      refCounter++;
-      anchor = `cite-note-${refCounter}`;
-    }
-    $x.before(`<sup>[<a href="#${anchor}">${refCounter}</a>]</sup>`);
-    $x.attr('id', anchor);
-    
-    let group = $x.attr('group') || '';
-    if (groupMap[group]) $x.appendTo(groupMap[group]);
-  });
+    });
+  }
+  
+  for (const g in groupMap) {
+    buildRefGroup(g, `[group="${g}"]`);
+  }
+  buildRefGroup('', `:not([group])`);
 }
 
 function buildMath() {

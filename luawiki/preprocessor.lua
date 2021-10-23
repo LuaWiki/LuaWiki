@@ -1,8 +1,15 @@
 local tpl_args = require('tpl_args')
 local tpl_parse = require('tpl_parse')
+local data_parse = require('data_parse')
 local nonparse = require('nonparse')
 local re = require('lpeg.re')
 local inspect = require('inspect')
+
+local debug_flag = false
+local function print_msg(msg)
+  if ngx then ngx.say(msg .. '<br>')
+  else print(msg) end
+end
 
 local var_meta = {
   __index = function(t, key)
@@ -75,6 +82,8 @@ preproc.new = function(wiki_state, template_cache)
       return self:text_visitor(v)
     elseif tag == 'call' then
       return self:call_visitor(v)
+    elseif tag == 'data' then
+      return data_parse.parse_data(v[1])
     else--[[if tag == 'expr' then]]
       local chunk = re.gsub(v[1], var_pat, '_var["%1"]')
       local f, err = load('return ' .. chunk, fname .. '@arg' .. i, 't', self.eval_env)
@@ -119,6 +128,13 @@ preproc.new = function(wiki_state, template_cache)
 
   function z:call_visitor(node, in_text)
     local mname = node.module
+    if mname == 'debug' then
+      debug_flag = true
+      local res = self:eval_single_arg(node.args[1], 'debug', 1)
+      debug_flag = false
+      return res
+    end
+
     local m = tpl_parse.ext_modules[mname]
     local fname, f
     if not m then error('Module ' .. (mname or '?') .. " doesn't exist.")
@@ -135,6 +151,11 @@ preproc.new = function(wiki_state, template_cache)
       error("attempt to call '" .. mname .. '.' .. fname .. "' (a nil value)")
     end
 
+    if debug_flag then
+      local res = f(self:eval_args(node.args, fname), in_text, #node.args)
+      print_msg(fname .. ' returned ' .. inspect(res))
+      return res
+    end
     return f(self:eval_args(node.args, fname), in_text, #node.args)
   end
 
@@ -153,7 +174,7 @@ preproc.new = function(wiki_state, template_cache)
         end
         self.tpl_cache[tpl_name] = tpl_parse.parse_template(f:read('*a'))
       end
-      --print(tpl_parse.dump(self.tpl_cache[tpl_name].ast, 0))
+      print(tpl_parse.dump(self.tpl_cache[tpl_name].ast, 0))
 
       -- get mapped parameter names and set env
       local converted_args = {}

@@ -146,21 +146,25 @@ local defs = {
     elseif t.type == 'thumb' or t.type == '缩略图' then
       loc_class = ' tright'
     end
-    if t.type == 'thumb' or t.type == '缩略图' then
+    if t.type then
       if not t.size then t.size = '220px' end
-      prefix = '<div class="thumbinner' .. loc_class .. '" style="width:222px">'
-      if t.caption then
-        suffix = suffix .. '<div class="thumbcaption">' .. t.caption .. '</div>'
+      if t.type == 'thumb' or t.type == '缩略图' then
+        prefix = '<div class="thumbinner' .. loc_class .. '" style="width:222px">'
+        if t.caption then
+          suffix = suffix .. '<div class="thumbcaption">' .. t.caption .. '</div>'
+        end
+        suffix = suffix .. '</div>'
       end
-      suffix = suffix .. '</div>'
     end
     
     t.height = ''
-    if t.size == 'upright' then
-      t.size = '220px'
-    elseif t.size:sub(1,1) == 'x' then
-      t.height = ' height="' .. t.size:sub(2) .. '"'
-      t.size = t.size:gsub('x(%d+)px', function(p1) return 2*tonumber(p1) .. 'px' end)
+    if t.size then
+      if t.size == 'upright' then
+        t.size = '220px'
+      elseif t.size:sub(1,1) == 'x' then
+        t.height = ' height="' .. t.size:sub(2) .. '"'
+        t.size = t.size:gsub('x(%d+)px', function(p1) return 2*tonumber(p1) .. 'px' end)
+      end
     end
     
     local filepath = getFilePath(t[1]:sub(1, 1):upper() .. t[1]:sub(2):gsub(' +$', ''):gsub(' ', '_'), t.size and t.size:gsub('x%d.*$', ''))
@@ -235,7 +239,7 @@ defs.plain_text = re.compile([=[--lpeg
 
   file_link      <- {| '[[File:' {link_part} ('|' (f_type / f_border / f_location / f_align / f_size
                       / f_link / f_alt / f_caption))* ']]' |} -> gen_file
-  f_type         <- {:type: 'thumb' / 'frame' / 'frameless' / '缩略图' :}
+  f_type         <- {:type: 'thumb' / 'frameless' / 'frame' / '缩略图' :}
   f_border       <- {:border: 'border' :}
   f_location     <- {:loc: 'right' / 'left' / 'center' / 'none' / '右' / '左' :}
   f_align        <- {:align: 'baseline' / 'middle' / 'sub' / 'super' / 'text-top' / 'text-bottom' / 'top' / 'bottom' :}
@@ -288,7 +292,7 @@ wiki_grammar = re.compile([=[--lpeg
   
   table         <- {| '{|' table_attr? (%nl __ table_caption)? ((table_row1) (%nl %s* table_row)*)?
                     __ %nl %s* '|}' |} -> gen_table
-  table_caption <- '|+' {:caption: {| (__ cell_attr)? __ {[^%nl]+} |} -> gen_tb_caption :}
+  table_caption <- '|+' {:caption: {| (__ cell_attr)? __ [^%nl]+ -> parse_inside |} -> gen_tb_caption :}
   table_row1    <- {| (%nl %s* '|-' (__ table_attr)? __)? tb_row_core |} -> gen_tr
   table_row     <- '|-' ({| (__ table_attr)? __ tb_row_core |} -> gen_tr / [^%nl]*)
   tb_row_core   <- (%nl %s* (th_line / td_line) )+ ~> merge_text
@@ -296,8 +300,8 @@ wiki_grammar = re.compile([=[--lpeg
   td_line       <- '|' ![}-] data_cell   (__ '||' __ data_cell)*
   header_cell   <- {| th_attr? th_inline -> parse_inside |} -> gen_th
   data_cell     <- {| cell_attr? td_inline -> parse_inside |} -> gen_td
-  th_inline     <- {(!'!!' !'||' [^%nl])* ( &'!!' / &'||' / tb_restlines )}
-  td_inline     <- {(!'||' [^%nl])*       ( &'||' / tb_restlines )}
+  th_inline     <- {(!'!!' !'||' ([^%nl] / %nl '<'))* ( &'!!' / &'||' / tb_restlines )}
+  td_inline     <- {(!'||' ([^%nl] / %nl '<'))*       ( &'||' / tb_restlines )}
   tb_restlines  <- ( %nl __ ![|!] [^%nl]* )*
   table_attr    <- {:attr: [^%nl]+ :}
   cell_attr     <- {:attr: (!'[[' [^|%nl] [^|[%nl]*)* :} '|' !'|'

@@ -39,6 +39,7 @@ local function reorganize(t)
   for i = 2, #t do
     local item = t[i]
     item[1] = item[1] and item[1]:gsub('%s+$', '')
+    if item[1] == '' then item[1] = nil end
     if item.tag then
       new_t[item.tag] = item[1]
     else

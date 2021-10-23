@@ -41,7 +41,8 @@ local tpl_defs = {
     end
   end,
   cleanup_text = function(text)
-    local res = text:gsub('^%s+', ''):gsub('\n%s+', '\n'):gsub('%s+$', ' ')
+    local res = text:gsub('^%s+', ''):gsub('%s+$', ' ')
+                    :gsub('\n[ \t]*(%S)', ' %1')
     return res
   end
 }
@@ -49,13 +50,14 @@ local tpl_defs = {
 local tpl_grammar = re.compile([=[--lpeg
   tpl_grm     <- {| __ tpl_text |}
   tpl_text    <- {:tag: '' -> 'text':} ((func_call __ / wikitext)+ / {''})
-  func_call   <- {| {:tag: '' -> 'call':} '@' module_name (':' func_name)? __ ('()' / arguments) |}
+  func_call   <- {| {:tag: '@' -> 'call':} module_name (':' func_name)? __ ('()' / arguments) |}
   module_name <- {:module: name -> cache_module :}
   func_name   <- {:func: name :}
   name        <- %w [_%w%d]*
   arguments   <- {:args: {| text_param / '(' __ param __ (',' __ param __ )* ')' |} :}
-  param       <- text_param / func_call / expr
+  param       <- text_param / func_call / data / expr
   text_param  <- {| '{' __ tpl_text '}' |}
+  data        <- {| {:tag: '<%' -> 'data':} {(!'%>' .)*} '%>' |}
   expr        <- {| {:tag: '' -> 'expr':} {([^,()]+ / balanced)+} |}
   balanced    <- '(' ([^()] / balanced)* ')'
   wikitext    <- ([^@}]+ / '|}')+ -> cleanup_text
