@@ -11,6 +11,17 @@ ul {
   padding: 0;
 }
 
+code {
+  border-radius: 2px;
+  padding: 1px 4px;
+}
+
+pre, code {
+  background-color: #f8f9fa;
+  color: #000;
+  border: 1px solid #eaecf0;
+}
+
 .wikitable {
   background-color: #f8f9fa;
   color: #202122;

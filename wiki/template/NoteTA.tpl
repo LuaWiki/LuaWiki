@@ -1,0 +1,1 @@
+<noteta>@noteta($_all)</noteta>

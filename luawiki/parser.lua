@@ -143,13 +143,17 @@ local defs = {
       loc_class = ' tright'
     elseif t.loc == 'left' or t.loc == '左' then
       loc_class = ' tleft'
+    elseif t.loc == 'center' then
+      -- do nothing
     elseif t.type == 'thumb' or t.type == '缩略图' then
       loc_class = ' tright'
     end
     if t.type then
       if not t.size then t.size = '220px' end
       if t.type == 'thumb' or t.type == '缩略图' then
-        prefix = '<div class="thumbinner' .. loc_class .. '" style="width:222px">'
+        local size_num = t.size:match('^(%d+)') or 222
+        prefix = '<div class="thumbinner' .. loc_class .. '" style="width:' ..
+          (size_num + 2) .. 'px">'
         if t.caption then
           suffix = suffix .. '<div class="thumbcaption">' .. t.caption .. '</div>'
         end
@@ -226,6 +230,27 @@ defs.ld_formatted = re.compile([=[--lpeg
   italic_text    <- "''"  ( (!"''"  . [^']*)+ "'"^-5 ) $> italic_body  ("''"/ !.)
 ]=], defs)
 
+defs.table = re.compile([=[--lpeg
+  table         <- {| '{|' table_attr? (%nl __ table_caption)? ((table_row1) (%nl %s* table_row)*)?
+                    __ %nl %s* '|}' |} -> gen_table
+  table_caption <- '|+' {:caption: {| (__ cell_attr)? __ [^%nl]+ -> parse_inside |} -> gen_tb_caption :}
+  table_row1    <- {| (%nl %s* '|-' (__ table_attr)? __)? tb_row_core |} -> gen_tr
+  table_row     <- '|-' ({| (__ table_attr)? __ tb_row_core |} -> gen_tr / [^%nl]*)
+  tb_row_core   <- (%nl %s* (th_line / td_line) )+ ~> merge_text
+  th_line       <- '!' header_cell (__ ('!!' / '||') __ header_cell)*
+  td_line       <- '|' ![}-] data_cell   (__ '||' __ data_cell)*
+  header_cell   <- {| th_attr? th_inline -> parse_inside |} -> gen_th
+  data_cell     <- {| cell_attr? td_inline -> parse_inside |} -> gen_td
+  th_inline     <- {(!'!!' !'||' ([^%nl] / %nl '<'))* ( &'!!' / &'||' / tb_restlines )}
+  td_inline     <- {(!'||' ([^%nl] / %nl '<'))*       ( &'||' / tb_restlines )}
+  tb_restlines  <- ( %nl __ ![|!] [^%nl]* )*
+  table_attr    <- {:attr: [^%nl]+ :}
+  cell_attr     <- {:attr: (!'[[' [^|%nl] [^|[%nl]*)* :} '|' !'|'
+  th_attr       <- {:attr: (!'!!' !'[[' [^|%nl] [^|![%nl]*)* :} '|' !'|'
+  
+  __            <- [ %t]*
+]=], defs)
+
 -- general formatted text
 
 defs.plain_text = re.compile([=[--lpeg
@@ -237,7 +262,7 @@ defs.plain_text = re.compile([=[--lpeg
   internal_link  <- ('[[' {link_part} ('|' (!']]' . [^%eb]*)+ $> ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ [^%cr%nl%eb]+ $> ld_formatted)? ']') -> gen_extlink
 
-  file_link      <- {| '[[File:' {link_part} ('|' (f_type / f_border / f_location / f_align / f_size
+  file_link      <- {| '[[' ('File' / 'Image') ':' {link_part} ('|' (f_type / f_border / f_location / f_align / f_size
                       / f_link / f_alt / f_caption))* ']]' |} -> gen_file
   f_type         <- {:type: 'thumb' / 'frameless' / 'frame' / '缩略图' :}
   f_border       <- {:border: 'border' :}
@@ -246,7 +271,8 @@ defs.plain_text = re.compile([=[--lpeg
   f_size         <- {:size: 'upright' / %d+ 'px' ('x' (%d+ 'px'))? / 'x' %d+ 'px' :}
   f_link         <- 'link=' {:link: 'http' 's'? '://' [^ %t%eb]+ :}
   f_alt          <- 'alt=' {:alt: [^|%eb]* :}
-  f_caption      <- {:caption: ( (internal_link / external_link / ((!']]' [^|]) (!']]' [^|[] [^|[%eb])*) $> ld_formatted )* ~> merge_text ) :}
+  f_caption      <- {:caption: ( (internal_link / external_link / %table
+                    / ((!']]' [^|]) (!']]' [^|[{] [^|[%eb{])*) $> ld_formatted )* ~> merge_text ) :}
   f_cap_link     <- '[' ([^[%eb] / f_cap_link)* ']'
   
   link_part      <- [^|[%eb]+
@@ -276,7 +302,7 @@ wiki_grammar = re.compile([=[--lpeg
   latter_plines  <- {:html: block_html :} / {:special: special_block :} /
                     pline (![-={<*#:;] pline)* latter_plines?
   pline          <- (%formatted newline -> ' ') ~> merge_text
-  special_block  <- &[-={*#:;] (horizontal_rule / heading / list_block / table) newline?
+  special_block  <- &[-={*#:;] (horizontal_rule / heading / list_block / %table) newline?
   block_html     <- &[<] '<npb-' {%d+} -> extract_npb '/>'
                     / {| bhtml_start bhtml_body -> parse_inside bhtml_end |} -> gen_block_html
   bhtml_body     <- (!bhtml_end . [^<]*)*
@@ -289,23 +315,6 @@ wiki_grammar = re.compile([=[--lpeg
   heading_tag    <- {:htag: '=' '='^-6 :}
   list_block     <- {| list_item (newline list_item)* |} -> gen_list
   list_item      <- {| {[*#:;]+} __ (%formatted / {''}) |}
-  
-  table         <- {| '{|' table_attr? (%nl __ table_caption)? ((table_row1) (%nl %s* table_row)*)?
-                    __ %nl %s* '|}' |} -> gen_table
-  table_caption <- '|+' {:caption: {| (__ cell_attr)? __ [^%nl]+ -> parse_inside |} -> gen_tb_caption :}
-  table_row1    <- {| (%nl %s* '|-' (__ table_attr)? __)? tb_row_core |} -> gen_tr
-  table_row     <- '|-' ({| (__ table_attr)? __ tb_row_core |} -> gen_tr / [^%nl]*)
-  tb_row_core   <- (%nl %s* (th_line / td_line) )+ ~> merge_text
-  th_line       <- '!' header_cell (__ ('!!' / '||') __ header_cell)*
-  td_line       <- '|' ![}-] data_cell   (__ '||' __ data_cell)*
-  header_cell   <- {| th_attr? th_inline -> parse_inside |} -> gen_th
-  data_cell     <- {| cell_attr? td_inline -> parse_inside |} -> gen_td
-  th_inline     <- {(!'!!' !'||' ([^%nl] / %nl '<'))* ( &'!!' / &'||' / tb_restlines )}
-  td_inline     <- {(!'||' ([^%nl] / %nl '<'))*       ( &'||' / tb_restlines )}
-  tb_restlines  <- ( %nl __ ![|!] [^%nl]* )*
-  table_attr    <- {:attr: [^%nl]+ :}
-  cell_attr     <- {:attr: (!'[[' [^|%nl] [^|[%nl]*)* :} '|' !'|'
-  th_attr       <- {:attr: (!'!!' !'[[' [^|%nl] [^|![%nl]*)* :} '|' !'|'
 
   sol            <- __ newline
   __             <- [ %t]*

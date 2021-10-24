@@ -4,10 +4,10 @@
 }
 @join(@array(
   @citation:authors($_all),
-  @join(@array(
+  @and($title, @join(@array(
     @or(@and($url, {[$url @utils:escape_bracket($title)]}), $title),
     $edition
-  ), ' '),
+  ), ' ')),
   @join(@array(
     $location, $publisher
   ), ': '),

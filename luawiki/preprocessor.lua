@@ -70,7 +70,10 @@ preproc.new = function(wiki_state, template_cache)
           return another_preproc:process(self.eval_env._tpl[tonumber(tpl_num)])
         end)
       else -- cast to string in text
-        new_node[i] = tostring(self:call_visitor(v) or '')
+        new_node[i] = tostring(self:call_visitor(v) or ''):gsub('&(%d+);', function(tpl_num)
+          local another_preproc = preproc.new(wiki_state, self.tpl_cache)
+          return another_preproc:process(self.eval_env._tpl[tonumber(tpl_num)])
+        end)
       end
     end
     return table.concat(new_node)
@@ -174,7 +177,7 @@ preproc.new = function(wiki_state, template_cache)
         end
         self.tpl_cache[tpl_name] = tpl_parse.parse_template(f:read('*a'))
       end
-      print(tpl_parse.dump(self.tpl_cache[tpl_name].ast, 0))
+      --print(tpl_parse.dump(self.tpl_cache[tpl_name].ast, 0))
 
       -- get mapped parameter names and set env
       local converted_args = {}
