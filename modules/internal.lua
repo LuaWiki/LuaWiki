@@ -40,7 +40,7 @@ z.map = function(args)
   return new_list
 end
 
-z.arg_table = function(args, _, size)
+z.array = function(args, _, size)
   local new_args = {}
   for i = 1, size do
     new_args[i] = args[i]
@@ -63,7 +63,8 @@ z.join = function(args)
       table.insert(res, list[i])
     end
   end
-  return table.concat(res, args[2])
+  if next(res) then return table.concat(res, args[2])
+  else return nil end
 end
 
 z.join_last = function(args)

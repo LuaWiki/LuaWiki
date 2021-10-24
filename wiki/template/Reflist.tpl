@@ -1,2 +1,2 @@
 @and($refs, {<div class="hidden">$refs</div>})
-<references/>
+<references @and($group, {group="$group"})></references>
