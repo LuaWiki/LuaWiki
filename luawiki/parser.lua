@@ -151,7 +151,7 @@ local defs = {
     if t.type then
       if not t.size then t.size = '220px' end
       if t.type == 'thumb' or t.type == '缩略图' then
-        local size_num = t.size:match('^(%d+)') or 222
+        local size_num = t.size:match('^(%d+)') or 220
         prefix = '<div class="thumbinner' .. loc_class .. '" style="width:' ..
           (size_num + 2) .. 'px">'
         if t.caption then
