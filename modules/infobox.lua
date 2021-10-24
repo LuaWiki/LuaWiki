@@ -20,50 +20,50 @@ local function get_arg_keys(prefix)
 end
 
 local function render_title()
-	if not args.title then return end
+  if not args.title then return end
   if type(args.title) == 'string' then
     args.title = { data = args.title }
   end
 
-	root
-		:tag('caption')
-			:addClass(args.title.titleclass)
-			:cssText(args.title.titlestyle)
-			:wikitext("'''" .. args.title.data .. "'''")
+  root
+    :tag('caption')
+      :addClass(args.title.titleclass)
+      :cssText(args.title.titlestyle)
+      :wikitext("'''" .. args.title.data .. "'''")
 end
 
 local function render_above_row()
-	if not args.above then return end
+  if not args.above then return end
   if type(args.above) == 'string' then
     args.above = { data = args.above }
   end
 
-	root
-		:tag('tr')
-			:tag('th')
-				:attr('colspan', 2)
-				:addClass(args.above.aboveclass)
-				:css('text-align', 'center')
-				:css('font-size', '125%')
-				:css('font-weight', 'bold')
-				:cssText(args.above.abovestyle)
-				:wikitext(args.above.data)
+  root
+    :tag('tr')
+      :tag('th')
+        :attr('colspan', 2)
+        :addClass(args.above.aboveclass)
+        :css('text-align', 'center')
+        :css('font-size', '125%')
+        :css('font-weight', 'bold')
+        :cssText(args.above.abovestyle)
+        :wikitext(args.above.data)
 end
 
 local function render_below_row()
-	if not args.below then return end
+  if not args.below then return end
   if type(args.below) == 'string' then
     args.below = { data = args.below }
   end
 
-	root
-		:tag('tr')
-			:tag('th')
-				:attr('colspan', 2)
-				:addClass(args.below.belowclass)
-				:css('text-align', 'center')
-				:cssText(args.below.belowstyle)
-				:wikitext(args.below.data)
+  root
+    :tag('tr')
+      :tag('th')
+        :attr('colspan', 2)
+        :addClass(args.below.belowclass)
+        :css('text-align', 'center')
+        :cssText(args.below.belowstyle)
+        :wikitext(args.below.data)
 end
 
 local function add_row(row_args)
@@ -134,29 +134,29 @@ local function render_rows()
 end
 
 local function render_images()
-	if args.image then
-		args.image1 = args.image
-	end
-	local images = get_arg_keys('image')
-	for _, v in ipairs(images) do
+  if args.image then
+    args.image1 = args.image
+  end
+  local images = get_arg_keys('image')
+  for _, v in ipairs(images) do
     local image_data = args[v]
     if type(image_data) == 'string' then
       image_data = { data = image_data }
     end
-		local data = mw.html.create():wikitext(image_data.data)
-		if image_data.caption then
-			data
-				:tag('div')
-					:cssText(args.captionstyle)
-					:wikitext(image_data.caption)
-		end
-		add_row({
-			data = tostring(data),
-			datastyle = args.imagestyle,
-			class = args.imageclass,
-			rowclass = image_data.imagerowclass
-		})
-	end
+    local data = mw.html.create():wikitext(image_data.data)
+    if image_data.caption then
+      data
+        :tag('div')
+          :cssText(args.captionstyle)
+          :wikitext(image_data.caption)
+    end
+    add_row({
+      data = tostring(data),
+      datastyle = args.imagestyle,
+      class = args.imageclass,
+      rowclass = image_data.imagerowclass
+    })
+  end
 end
 
 
