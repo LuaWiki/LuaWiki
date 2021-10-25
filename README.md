@@ -6,6 +6,13 @@ MediaWiki parser in Lua
   - cjson lpeg luajit luapower-repos nginx openssl pcre resty.http resty-core resty-lrucache zlib
 
 ## Deploy Steps
+
+If you are using Linux, and don't want to mix Lua / OpenResty environment, you may try 
+1. `./preconfigure.sh` to download and compile OpenResty and Luarocks locally. However, this script is still in alpha. Report to [GitHub: Geno1024](https://github.com/Geno1024) if you meet any questions. 
+2. `./openresty/bin/openresty -p . -c nginx.conf` to start OpenResty.
+
+Otherwise you can use the
+
 1. Clone this repository.
 2. Download and extract [the latest Luapower release](https://github.com/luapower/all/archive/master.zip), then use the extracted directory as Current Working Directory.
 3. Replace `lpeg/re.lua` with [my edition](https://github.com/AlexanderMisel/LPeg/blob/master/re.lua).
