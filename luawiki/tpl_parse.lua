@@ -53,7 +53,7 @@ local tpl_grammar = re.compile([=[--lpeg
   func_call   <- {| {:tag: '@' -> 'call':} module_name (':' func_name)? __ ('()' / arguments) |}
   module_name <- {:module: name -> cache_module :}
   func_name   <- {:func: name :}
-  name        <- %w [_%w%d]*
+  name        <- %a [_%w]*
   arguments   <- {:args: {| text_param / '(' __ param __ (',' __ param __ )* ')' |} :}
   param       <- text_param / func_call / data / expr
   text_param  <- {| '{' __ tpl_text '}' |}
