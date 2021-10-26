@@ -32,7 +32,7 @@ function buildRef() {
           if (refMap[name]) {
             anchor = `cite-note-${name}-${refMap[name]}`;
             if (x.childNodes.length) {
-              $('#' + anchor).removeClass('cite-note-error').html($x.html());
+              $('#' + anchor).removeClass('cite-note-error').html(decodeEntities(x.textContent));
             }
             x.outerHTML = `<sup>[<a href="#${anchor}">${refMap[name]}</a>]</sup>`;
             return;
