@@ -26,30 +26,33 @@ function buildRef() {
     $('ref' + suffix).each((_, x) => {
       try {
         let $x = $(x);
-        let name = $x.attr('name');
-        let anchor = 'cite-note-error';
+        let name = $x.attr('name')
+        let anchor = 'cite_note-error';
         if (name) {
+          name = name.replace(/ /g, '_');
           if (refMap[name]) {
-            anchor = `cite-note-${name}-${refMap[name]}`;
+            anchor = `cite_note-${name}-${refMap[name]}`;
             if (x.childNodes.length) {
-              $('#' + anchor).removeClass('cite-note-error').html(decodeEntities(x.textContent));
+              const targetElement = document.getElementById(anchor);
+              targetElement.className = '';
+              targetElement.innerHTML = decodeEntities(x.textContent);
             }
             x.outerHTML = `<sup>[<a href="#${anchor}">${refMap[name]}</a>]</sup>`;
             return;
           }
           refCounter++;
-          anchor = `cite-note-${name}-${refCounter}`;
+          anchor = `cite_note-${name}-${refCounter}`;
           refMap[name] = refCounter;
         } else {
           refCounter++;
-          anchor = `cite-note-${refCounter}`;
+          anchor = `cite_note-${refCounter}`;
         }
         $x.before(`<sup>[<a href="#${anchor}">${refCounter}</a>]</sup>`);
         $x.attr('id', anchor);
         if (x.textContent) {
           $x.html(decodeEntities(x.textContent));
         } else {
-          $x.addClass('cite-note-error');
+          $x.addClass('cite_note-error');
           $x.html(`引用错误：没有为名为<code>${name}</code>的参考文献提供内容`)
         }
 
