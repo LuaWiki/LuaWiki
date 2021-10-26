@@ -32,7 +32,7 @@ function buildRef() {
           if (refMap[name]) {
             anchor = `cite-note-${name}-${refMap[name]}`;
             if (x.childNodes.length) {
-              $('#' + anchor).html($x.html());
+              $('#' + anchor).removeClass('cite-note-error').html($x.html());
             }
             x.outerHTML = `<sup>[<a href="#${anchor}">${refMap[name]}</a>]</sup>`;
             return;
@@ -46,6 +46,12 @@ function buildRef() {
         }
         $x.before(`<sup>[<a href="#${anchor}">${refCounter}</a>]</sup>`);
         $x.attr('id', anchor);
+        if (x.textContent) {
+          $x.html(decodeEntities(x.textContent));
+        } else {
+          $x.addClass('cite-note-error');
+          $x.html(`引用错误：没有为名为<code>${name}</code>的参考文献提供内容`)
+        }
 
         $x.appendTo(groupMap[g]);
       } catch (e) {
