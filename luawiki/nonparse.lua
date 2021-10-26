@@ -1,4 +1,5 @@
 local re = require('lpeg.re')
+local html_utils = require('html_utils')
 local block_tags = { 'pre', 'syntaxhighlight', 'graph' }
 local inline_tags = { 'nowiki', 'math' }
 
@@ -6,13 +7,7 @@ local global_state = {}
 
 local defs = {
   newline = '\n',
-  escape_html = function(content)
-    if content then
-      return content:gsub('<', '&lt;'):gsub('>', '&gt;'):gsub('&', '&amp;')
-    else
-      return ''
-    end
-  end,
+  escape_html = html_utils.escape_html,
   gen_npblock = function(content)
     global_state.npb_index = global_state.npb_index + 1
     global_state.npb_cache[global_state.npb_index] = content

@@ -1,4 +1,5 @@
 local re = require('lpeg.re')
+local html_utils = require('html_utils')
 local inspect = require('inspect')
 
 local extlink_counter = 0
@@ -67,6 +68,7 @@ local defs = {
   cr = lpeg.P('\r'),
   t  = lpeg.P('\t'),
   eb = lpeg.P(']'),
+  escape_html = html_utils.escape_html,
   merge_text = function(a, b) return a .. b end,
   fast_merge = function(t) return table.concat(t) end,
   eat_ticks = function(s, i, ticks)
@@ -255,9 +257,10 @@ defs.table = re.compile([=[--lpeg
 
 defs.plain_text = re.compile([=[--lpeg
   plain_text     <- (inline_element / {[^%cr%nl'] ("'"? [^%cr%nl[<']+)*})+
-  inline_element <- np_inline / file_link / internal_link / external_link
+  inline_element <- np_inline / ref_inline / file_link / internal_link / external_link
   
-  np_inline      <- '<nw-' {%d+} -> extract_nw '/>'
+  np_inline      <- '<nw-' %d+ -> extract_nw '/>'
+  ref_inline     <- {~ '<ref' (' ' [^>]*)? (<'/' '>' / '>' (!'</ref>' .)* -> parse_inside -> escape_html {'</ref>'}) ~}
   
   internal_link  <- ('[[' {link_part} ('|' (!']]' . [^%eb]*)+ $> ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ [^%cr%nl%eb]+ $> ld_formatted)? ']') -> gen_extlink
