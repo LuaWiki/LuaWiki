@@ -1,8 +1,9 @@
+local re = require('lpeg.re')
+local sandbox = require('sandbox')
 local tpl_args = require('tpl_args')
 local tpl_parse = require('tpl_parse')
 local data_parse = require('data_parse')
 local nonparse = require('nonparse')
-local re = require('lpeg.re')
 local inspect = require('inspect')
 
 local debug_flag = false
@@ -43,6 +44,20 @@ local var_pat = re.compile([=[--lpeg
 ]=])
 
 local preproc = {}
+local mod_env = sandbox.env_table()
+mod_env.fun = require('iter')
+mod_env.require = function(m)
+  local ok, f = xpcall(function()
+    return loadfile('modules/'.. m .. '.lua', 't', env)
+  end, function(err)
+    error('Module ' .. m .. ': ' .. err)
+  end)
+  if ok and f then
+    return f()
+  else
+    return nil
+  end
+end
 
 preproc.new = function(wiki_state, template_cache)
   local z = {}
@@ -175,7 +190,7 @@ preproc.new = function(wiki_state, template_cache)
             return '<a class="new" href="/wiki/Template:' .. tpl_name .. '">Template:' .. tpl_name .. '</a>'
           end
         end
-        self.tpl_cache[tpl_name] = tpl_parse.parse_template(f:read('*a'))
+        self.tpl_cache[tpl_name] = tpl_parse.parse_template(f:read('*a'), mod_env)
       end
       --print(tpl_parse.dump(self.tpl_cache[tpl_name].ast, 0))
 

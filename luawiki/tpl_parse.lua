@@ -2,6 +2,7 @@ package.path = './modules/?.lua;' .. package.path
 
 local z = {}
 local re = require('lpeg.re')
+local env = _G
 
 z.dump = function(t, level)
   if type(t) == 'table' then
@@ -37,7 +38,8 @@ local alias_list = re.compile[=[--lpeg
 local tpl_defs = {
   cache_module = function(m)
     if not z.ext_modules[m] then
-      z.ext_modules[m] = require(m)
+      local f = assert(loadfile('modules/'.. m .. '.lua', 't', env))
+      z.ext_modules[m] = f()
     end
   end,
   cleanup_text = function(text)
@@ -64,7 +66,8 @@ local tpl_grammar = re.compile([=[--lpeg
   __          <- %s*
 ]=], tpl_defs)
 
-z.parse_template = function(tpl)
+z.parse_template = function(tpl, mod_env)
+  env = mod_env or _G
   local alias, end_pos = alias_list:match(tpl)
   local alias_dict = {}
   if alias then

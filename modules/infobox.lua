@@ -2,21 +2,23 @@
 -- removed fixChildBoxes from Wikipedia
 
 local z = {}
-local inspect = require('inspect')
 
 local args = {}
 local root
 
+-- returns iterator for sorted keys
 local function get_arg_keys(prefix)
   local keys = {}
-  local pattern = '^' .. prefix .. '[1-9]%d*$'
+  local pattern = '^' .. prefix .. '([1-9]%d*)$'
+  
   for k in pairs(args) do
-    if k:match(pattern) then
-      table.insert(keys, k)
+    local num = k:match(pattern)
+    if num then
+      table.insert(keys, tonumber(num))
     end
   end
   table.sort(keys)
-  return keys
+  return fun.array(keys):map(function(x) return prefix .. x end)
 end
 
 local function render_title()
@@ -123,8 +125,7 @@ local function add_row(row_args)
 end
 
 local function render_rows()
-  local all_rows = get_arg_keys('row')
-  for _, v in ipairs(all_rows) do
+  for v in get_arg_keys('row') do
     local row = args[v]
     row.headerstyle = args.headerstyle
     row.labelstyle = args.labelstyle
@@ -137,8 +138,7 @@ local function render_images()
   if args.image then
     args.image1 = args.image
   end
-  local images = get_arg_keys('image')
-  for _, v in ipairs(images) do
+  for v in get_arg_keys('image') do
     local image_data = args[v]
     if type(image_data) == 'string' then
       image_data = { data = image_data }
@@ -162,7 +162,6 @@ end
 
 z.main = function(frame_args)
   args = frame_args[1]
-  print(inspect(args))
   if next(args) then
     root = mw.html.create('table')
     root

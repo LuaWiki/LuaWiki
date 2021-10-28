@@ -12,9 +12,9 @@ z.main = function(args)
   for i = 1, 30 do
     local g_id = 'G' .. i
     if args[g_id] then
-      local group_file = loadfile('./modules/cgroup/' .. args[g_id] .. '.lua')
+      local group_file = require('cgroup/' .. args[g_id])
       if group_file then
-        local g_cont = group_file().content
+        local g_cont = group_file.content
         for _, v in ipairs(g_cont) do
           if v.type == 'item' then
             table.insert(lc_data.rules, v.rule)
