@@ -3,4 +3,4 @@
 	url = https://github.com/AlexanderMisel/LPeg.git
 [submodule "wiki"]
 	path = wiki
-	url = https://github.com/AlexanderMisel/LuaWIki_wiki.git
+	url = https://github.com/AlexanderMisel/LuaWiki_wiki.git
