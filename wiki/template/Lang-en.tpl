@@ -1,1 +1,0 @@
-@lang:lang_name{en}：<span lang="en">$1</span>

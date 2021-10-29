@@ -1,1 +1,0 @@
-<ref group="註" @and($name, {name="$name"}) >$1</ref>
