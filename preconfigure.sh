@@ -28,6 +28,6 @@ cd ..
 
 while read -r line; do
   ./openresty/luajit/bin/luarocks install "$line"
-done < luarocks_requirements.txt
+done < rocks_requirements.txt
 
 mkdir logs
