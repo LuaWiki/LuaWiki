@@ -1,0 +1,1 @@
+<a href="#CITEREF@join($_num, '')">@footnotes:havard($_num, $pp)</a>

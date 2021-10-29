@@ -2,6 +2,7 @@
   title = script-title
   accessdate = access_date
 }
+@and($ref == 'harv', {<cite id="@citation:harv_id($_all)">})
 @join(@array(
   @citation:authors($_all),
   @join(@array(
@@ -19,3 +20,4 @@
   @and($isbn, {ISBN: $isbn}),
   @and($doi, {[https://dx.doi.org/$doi doi:$doi]})
 ), '. ')
+@and($ref == 'harv', {</cite>})

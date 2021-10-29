@@ -121,6 +121,18 @@ ref {
   display: list-item;
   list-style: decimal;
 }
+cite {
+  font-style: normal;
+}
+.refbegin {
+  font-size: 90%;
+}
+.refbegin dl {
+  margin-top: 0;
+}
+.refbegin dl dd {
+  text-indent: -2em;
+}
 
 .katex-display {
   margin: unset;

@@ -7,6 +7,7 @@ local global_state = {}
 
 local defs = {
   newline = '\n',
+  t = lpeg.P('\t'),
   escape_html = html_utils.escape_html,
   gen_npblock = function(content)
     global_state.npb_index = global_state.npb_index + 1
@@ -23,7 +24,7 @@ local defs = {
 local np_tags = [=[--lpeg
   article        <- {~ (&[<] (comment / nowiki / np_block / np_inline) / . [^<]*)+ ~}
 
-  comment        <- ('<!--' (!'-->' . [^-]*)* '-->') -> ''
+  comment        <- ('<!--' (!'-->' . [^-]*)* '-->' ([ %t]* %nl)?) -> ''
   nowiki         <- ('<nowiki>' (!'</nowiki>' . [^<]*)* -> escape_html
                      '</nowiki>') -> gen_nowiki
   

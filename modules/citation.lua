@@ -1,4 +1,5 @@
 local z = {}
+local inspect = require('inspect')
 
 z.authors = function(args)
   args = args[1]
@@ -27,6 +28,19 @@ z.authors = function(args)
   end
   if next(res) then return table.concat(res, '; ')
   else return nil end
+end
+
+z.harv_id = function(args)
+  args = args[1]
+  print(inspect(args))
+  args.last1 = args.last1 or args.last
+  local res = {}
+  for i = 1, 9 do
+    if args['last' .. i] then
+      table.insert(res, args['last' .. i])
+    end
+  end
+  return 'CITEREF' .. table.concat(res) .. (args.year or args.date)
 end
 
 return z

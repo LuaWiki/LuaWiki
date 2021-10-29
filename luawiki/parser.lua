@@ -115,7 +115,7 @@ local defs = {
   end,
   gen_par_plus = function(t)
     local p_content = table.concat(t)
-    if p_content == '' then p_content = '<br>' end
+    -- if p_content == '' then p_content = '<br>' end
     local str = '<p>' .. p_content .. '</p>'
     if t.html then str = str .. t.html end
     if t.special then str = str .. t.special end
@@ -265,7 +265,7 @@ defs.plain_text = re.compile([=[--lpeg
   internal_link  <- ('[[' {link_part} ('|' (!']]' . [^%eb]*)+ $> ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ [^%cr%nl%eb]+ $> ld_formatted)? ']') -> gen_extlink
 
-  file_link      <- {| '[[' ('File' / 'Image') ':' {link_part} ('|' (f_type / f_border / f_location / f_align / f_size
+  file_link      <- {| '[[' ([Ff] 'ile' / [Ii] 'mage') ':' {link_part} ('|' (f_type / f_border / f_location / f_align / f_size
                       / f_link / f_alt / f_caption))* ']]' |} -> gen_file
   f_type         <- {:type: 'thumb' / 'frameless' / 'frame' / '缩略图' :}
   f_border       <- {:border: 'border' :}
