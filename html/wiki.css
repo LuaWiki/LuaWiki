@@ -116,10 +116,10 @@ references {
   font-size: smaller;
   margin-left: 3em;
   counter-reset: list-item;
+  list-style: decimal;
 }
 ref {
   display: list-item;
-  list-style: decimal;
 }
 cite {
   font-style: normal;

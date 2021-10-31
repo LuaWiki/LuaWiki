@@ -12,6 +12,7 @@ local defs = {
   eb = lpeg.P(']'),
   ts = lpeg.P('{{'),
   te = lpeg.P('}}'),
+  merge_text = function(a, b) return a .. b end,
   store_tpl = function(s)
     sub_count = sub_count + 1
     z.sub_tpl[sub_count] = s
@@ -25,10 +26,11 @@ local tpl_grammar = re.compile([=[--lpeg
   tpl_name      <- { ([_/!-] / [^%p])+ }
   param_expr    <- {| {:tag: param_name :} __ '=' __ any_text / any_text |}
   param_name    <- ([_-] / [^%s%p])+
-  any_text      <- {~ (another_tpl -> store_tpl / internal_link / any_char [^|{[%te]*)* ~}
-  any_char      <- [^|%te]
-  another_tpl   <- %ts ([^%ts%te] [^{}]* / another_tpl)* %te
-  internal_link <- '[[' [^%nl%eb]* ']]'
+  any_text      <- (another_tpl / inlink_like / { char_no_pipe [^|{[%te]* })+
+                      ~> merge_text / ''
+  char_no_pipe  <- [^|%te]
+  inlink_like   <- {'[['} (another_tpl / { [^[%eb] [^[{%eb]* })+ {']]'}
+  another_tpl   <- {~ (%ts ([^%te] [^{}]* / another_tpl)* %te) -> store_tpl ~}
   __            <- [ %t]*
 ]=], defs)
 

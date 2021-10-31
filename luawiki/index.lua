@@ -30,12 +30,25 @@ local wiki_html = parser.parse(wiki_state, wikitext)
 -- end timer
 ngx.update_time()
 
+local html_stag_map = {}
+local html_single_tags = {
+  'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 
+  'link', 'meta', 'param', 'source', 'track', 'wbr'
+}
+for _, v in ipairs(html_single_tags) do
+  html_stag_map[v] = true
+end
+
 ngx.say('<!DOCTYPE html><html><head><title>维基百科，自由的百科全书</title>' ..
     '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">' ..
     '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">' ..
     '<link rel="stylesheet" type="text/css" href="/wiki.css">' ..
     '</head><body>' ..
-    '<h1>' .. title .. '</h1>' .. wiki_html:gsub('<((%a+)[^>]-)/>', '<%1></%2>') ..
+    '<h1>' .. title .. '</h1>' .. wiki_html:gsub('<((%a+)[^>]-)/>', function(p1, p2)
+      if not html_stag_map[p2] then
+        return '<' .. p1 .. '></' .. p2 .. '>'
+      end
+    end) ..
     '<!-- Total parse time: ' .. (ngx.now() - begin_time) .. '-->' ..
     '<script src="/simplequery.js"></script>' ..
     '<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>' ..
