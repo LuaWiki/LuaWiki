@@ -55,9 +55,9 @@ local flag, content = pcall(function()
  
   -- create account
   res, err, errcode, sqlstate = -- get user_id whose user_name is the same as new username
-    db:query("INSERT INTO user (user_name, user_password, user_newpassword, user_email, user_touched) VALUES (" .. 
-      wrap(post_args.username) .. "," .. wrap(post_args.password) .. ",'','',"
-      .. wrap(os.date('%Y%m%d%H%M%S', os.time())) .. ")")
+    db:query("INSERT INTO user (user_name, user_password, user_newpassword, user_email, user_touched) VALUES (" ..
+      wrap(post_args.username) .. "," .. wrap(post_args.password) .. ",'',''," ..
+      wrap(os.date('%Y%m%d%H%M%S', os.time())) .. ")")
   if not res then sql_error('bad result') end
 end)
 
