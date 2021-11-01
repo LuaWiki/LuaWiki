@@ -103,9 +103,17 @@ preproc.new = function(wiki_state, template_cache)
     elseif tag == 'data' then
       return data_parse.parse_data(v[1])
     else--[[if tag == 'expr' then]]
-      local chunk = re.gsub(v[1], var_pat, '_var["%1"]')
-      local f, err = load('return ' .. chunk, fname .. '@arg' .. i, 't', self.eval_env)
+      local f, err
+      if v.precompiled then
+        f = v.precompiled
+      else
+        local chunk = re.gsub(v[1], var_pat, '_var["%1"]')
+        f, err = load('return ' .. chunk, fname .. '@arg' .. i, 't')
+        if f then v.precompiled = f end
+      end
+      
       if f then
+        setfenv(f, self.eval_env)
         local ret = f()
         if type(ret) == 'string' then
           ret = ret:gsub('&(%d+);', function(tpl_num)
