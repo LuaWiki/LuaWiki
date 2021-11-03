@@ -63,6 +63,11 @@ local function getFilePath(filename, width)
 end
 
 local wiki_grammar = nil
+local function parse_inside(a)
+  local inner_html = wiki_grammar:match(a:gsub('\n?$', '\n'))
+  if not inner_html then return '' end
+  return inner_html:gsub('^<p>(.-)</p>', '%1'):gsub('<p>(.-)</p>$', '%1')
+end
 
 local defs = {
   cr = lpeg.P('\r'),
@@ -197,14 +202,15 @@ local defs = {
       .. (t.caption or '') .. '<tbody>' .. table.concat(t) .. '</tbody>'
       .. '</table>'
   end,
-  parse_inside = function(a)
-    local inner_html = wiki_grammar:match(a:gsub('\n?$', '\n'))
-    if not inner_html then return '' end
-    return inner_html:gsub('^<p>(.-)</p>', '%1'):gsub('<p>(.-)</p>$', '%1')
-  end,
+  parse_inside = parse_inside,
   gen_block_html = function(t)
     return '<' .. t[1] .. t[2] .. (t[3] or '') ..
       '</' .. t[1] .. '>'
+  end,
+  decide_f_caption = function(s, i, p)
+    local next_char = s:sub(i, i)
+    if next_char == '|' then return true end
+    if s:sub(i, i+1) == ']]' then return true, parse_inside(p) end
   end,
   extract_npb = function(i) return global_state.npb_cache[tonumber(i)] end,
   extract_nw = function(i) return global_state.nw_cache[tonumber(i)] end
@@ -265,18 +271,20 @@ defs.plain_text = re.compile([=[--lpeg
   internal_link  <- ('[[' {link_part} ('|' (!']]' . [^%eb]*)+ $> ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ [^%cr%nl%eb]+ $> ld_formatted)? ']') -> gen_extlink
 
-  file_link      <- {| '[[' ([Ff] 'ile' / [Ii] 'mage') ':' {link_part} ('|' (f_type / f_border / f_location / f_align / f_size
-                      / f_link / f_alt / f_caption))* ']]' |} -> gen_file
+  file_link      <- {| '[[' ([Ff] 'ile' / [Ii] 'mage') ':' {link_part} ('|' (f_type / f_border 
+                      / f_location / f_align / f_size / f_link / f_alt
+                      / f_caption))* ']]' |} -> gen_file
   f_type         <- {:type: 'thumb' / 'frameless' / 'frame' / '缩略图' :}
   f_border       <- {:border: 'border' :}
   f_location     <- {:loc: 'right' / 'left' / 'center' / 'none' / '右' / '左' :}
   f_align        <- {:align: 'baseline' / 'middle' / 'sub' / 'super' / 'text-top' / 'text-bottom' / 'top' / 'bottom' :}
-  f_size         <- {:size: 'upright' / %d+ 'px' ('x' (%d+ 'px'))? / 'x' %d+ 'px' :}
+  f_size         <- {:size: {'upright'} ('=' [^|]*)? / %d+ 'px' ('x' (%d+ 'px'))? / 'x' %d+ 'px' :}
   f_link         <- 'link=' {:link: 'http' 's'? '://' [^ %t%eb]+ :}
   f_alt          <- 'alt=' {:alt: [^|%eb]* :}
-  f_caption      <- {:caption: ( (internal_link / external_link / %table
-                    / ((!']]' [^|]) (!']]' [^|[{] [^|[%eb{])*) $> ld_formatted )* ~> merge_text ) :}
-  f_cap_link     <- '[' ([^[%eb] / f_cap_link)* ']'
+  
+  f_fake_link    <- '[[' (!']]' . [^%eb]*)* ']]'
+  f_fake_table   <- '{|' (!'|}' . [^|]*)* '|}'
+  f_caption      <- {:caption: { ( f_fake_link / f_fake_table / !']]' [^|] )* } => decide_f_caption -> parse_inside :}
   
   link_part      <- [^|[%eb]+
 ]=], defs)
