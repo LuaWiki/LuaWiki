@@ -284,7 +284,7 @@ defs.plain_text = re.compile([=[--lpeg
   
   f_fake_link    <- '[[' (!']]' . [^%eb]*)* ']]'
   f_fake_table   <- '{|' (!'|}' . [^|]*)* '|}'
-  f_caption      <- {:caption: { ( f_fake_link / f_fake_table / !']]' [^|] )* } => decide_f_caption -> parse_inside :}
+  f_caption      <- {:caption: { ( f_fake_link / f_fake_table / !']]' [^|] )* } => decide_f_caption :}
   
   link_part      <- [^|[%eb]+
 ]=], defs)
