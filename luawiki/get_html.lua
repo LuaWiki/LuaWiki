@@ -8,9 +8,10 @@ if ngx.var.request_method ~= 'GET' then
   return
 end
 
+local pagename = ngx.var[1]
+
 local fetch_wikitext = require('fetch_wikitext')
 
-local pagename = ngx.var[1]
 local flag, content = fetch_wikitext(pagename)
 
 if not flag then

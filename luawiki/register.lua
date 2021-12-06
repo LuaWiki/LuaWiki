@@ -13,9 +13,7 @@ local inspect = require('inspect')
 local db, err = mysql:new()
 local wrap = ngx.quote_sql_str
 
-ngx.req.read_body()
-
-local post_args = ngx.req.get_post_args()
+local post_args = require('post_args')()
 
 if not post_args.username or post_args.username == '' or
     not post_args.password or post_args.password == '' then
@@ -34,15 +32,7 @@ local flag, content = pcall(function()
     error(msg .. ': ' .. err .. ': ' .. errcode .. ' ' .. sqlstate)
   end
 
-  ok, err, errcode, sqlstate = db:connect{
-    host = "127.0.0.1",
-    port = 3306,
-    database = "zhwiki",
-    user = "root",
-    password = "123456",
-    charset = "utf8mb4",
-    max_packet_size = 1024 * 1024,
-  }
+  ok, err, errcode, sqlstate = db:connect(dbconf)
   if not ok then sql_error('failed to connect') end
   
   -- check duplicate
@@ -61,12 +51,20 @@ local flag, content = pcall(function()
   if not res then sql_error('bad result') end
 end)
 
-db:close()
+local ok, err = db:set_keepalive(10000, 100)
+if not ok then
+  ngx.say("failed to set keepalive: ", err)
+  return
+end
 
 if not flag then
   ngx.status = ngx.HTTP_INTERNAL_SERVER_ERROR
   ngx.say(cjson.encode({
     error = content
   }))
-  return
+else
+  ngx.say(cjson.encode({
+    code = 0,
+    result = 'success'
+  }))
 end
