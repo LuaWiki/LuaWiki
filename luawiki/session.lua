@@ -28,6 +28,12 @@ local function cache_fallback(stoken)
   if not db:connect(dbconf) then return end
   
   local res = db:query('SELECT user_id FROM user WHERE user_token = ' .. wrap(stoken))
+  
+  local ok, err = db:set_keepalive(10000, 100)
+  if not ok then
+    print("failed to set keepalive: ", err)
+  end
+  
   if res and res[1] then
     return res[1].user_id
   end

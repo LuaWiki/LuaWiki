@@ -1,4 +1,3 @@
-require('mobdebug').start('127.0.0.1')
 local cjson = require('cjson')
 
 local mysql = require('resty.mysql')
