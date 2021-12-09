@@ -24,6 +24,7 @@ if not post_args.username or post_args.username == '' or
 end
 
 local session = require('session')
+local save_token = false
 
 local flag, content = pcall(function()
   local err, errcode, sqlstate = '', '', ''
@@ -38,21 +39,20 @@ local flag, content = pcall(function()
   
   -- check duplicate
   res, err, errcode, sqlstate = -- get user_id whose user_name is the same as new username
-    db:query('SELECT user_id FROM user WHERE user_name = ' .. wrap(post_args.username) ..
+    db:query('SELECT user_id, user_token FROM user WHERE user_name = ' .. wrap(post_args.username) ..
       ' AND user_password = ' .. wrap(post_args.password), 1)
   if not res then sql_error('bad result') end
   
   local res = res[1]
   if not res then error('username or password is wrong!') end
   
-  return session.new_session(res.user_id)
+  if res.user_token ~= ngx.null then
+    return res.user_token
+  else
+    save_token = true
+    return session.new_session(res.user_id)
+  end
 end)
-
-local ok, err = db:set_keepalive(10000, 100)
-if not ok then
-  ngx.say("failed to set keepalive: ", err)
-  return
-end
 
 if not flag then
   ngx.say(cjson.encode({
@@ -66,4 +66,14 @@ else
     code = 0,
     result = 'success'
   }))
+end
+
+ngx.sleep(5)
+
+db:query(([[UPDATE user SET user_token = '%s' WHERE user_name = %s;]])
+  :format(content, wrap(post_args.username)))
+
+local ok, err = db:set_keepalive(10000, 100)
+if not ok then
+  print("failed to set keepalive: ", err)
 end
