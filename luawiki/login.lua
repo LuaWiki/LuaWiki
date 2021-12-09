@@ -24,7 +24,6 @@ if not post_args.username or post_args.username == '' or
 end
 
 local session = require('session')
-local save_token = false
 
 local flag, content = pcall(function()
   local err, errcode, sqlstate = '', '', ''
@@ -49,7 +48,8 @@ local flag, content = pcall(function()
   if res.user_token ~= ngx.null then
     return res.user_token
   else
-    save_token = true
+    db:query(([[UPDATE user SET user_token = '%s' WHERE user_name = %s;]])
+      :format(content, wrap(post_args.username)))
     return session.new_session(res.user_id)
   end
 end)
@@ -67,11 +67,6 @@ else
     result = 'success'
   }))
 end
-
-ngx.sleep(5)
-
-db:query(([[UPDATE user SET user_token = '%s' WHERE user_name = %s;]])
-  :format(content, wrap(post_args.username)))
 
 local ok, err = db:set_keepalive(10000, 100)
 if not ok then

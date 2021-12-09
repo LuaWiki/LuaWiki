@@ -53,8 +53,7 @@ end)
 
 local ok, err = db:set_keepalive(10000, 100)
 if not ok then
-  ngx.say("failed to set keepalive: ", err)
-  return
+  print("failed to set keepalive: ", err)
 end
 
 if not flag then
