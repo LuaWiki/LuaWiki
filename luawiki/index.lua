@@ -46,7 +46,11 @@ ngx.say('<!DOCTYPE html><html><head><title>维基百科，自由的百科全书<
     '</head><body>' ..
     '<h1>' .. title .. '</h1>' .. wiki_html:gsub('<((%a+)[^>]-)/>', function(p1, p2)
       if not html_stag_map[p2] then
-        return '<' .. p1 .. '></' .. p2 .. '>'
+        if p2 == 'references' then
+          return '<div><' .. p1 .. '></' .. p2 .. '></div>'
+        else
+          return '<' .. p1 .. '></' .. p2 .. '>'
+        end
       end
     end) ..
     '<!-- Total parse time: ' .. (ngx.now() - begin_time) .. '-->' ..
@@ -56,4 +60,12 @@ ngx.say('<!DOCTYPE html><html><head><title>维基百科，自由的百科全书<
     '<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>' ..
     '<script src="/zh_convert.js"></script>' ..
     '<script src="/wiki.js"></script>' ..
+    [[<script>
+    $(document).ready(function(){
+      document.body.innerHTML = doMwConvert(document.body.innerHTML);
+      buildRef();
+      buildMath();
+      buildHighlight();
+    });
+    </script>]] ..
     '</body></html>')

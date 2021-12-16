@@ -120,8 +120,13 @@ local defs = {
   end,
   gen_par_plus = function(t)
     local p_content = table.concat(t)
-    -- if p_content == '' then p_content = '<br>' end
-    local str = '<p>' .. p_content .. '</p>'
+    local str = nil
+    if p_content:match('^</?references[^/>]*>') then
+      str = p_content:gsub('^(<references[^>]*>)', '<div>%1')
+                     :gsub('(</references[^>]*>)', '%1</div>')
+    else
+      str = '<p>' .. p_content .. '</p>'
+    end
     if t.html then str = str .. t.html end
     if t.special then str = str .. t.special end
     return str

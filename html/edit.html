@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LuaWiki Editor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">
+  <link rel="stylesheet" type="text/css" href="/wiki.css">
+<style>
+body {
+  background: #eee;
+  margin: 0;
+}
+h1 {
+  margin: 0 1em;
+}
+.editor {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100vh - 100px);
+}
+.panel {
+  background: #fff;
+}
+.gutter {
+  background-color: #eee;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+  cursor: col-resize;
+}
+#source-editor {
+  height: 100%;
+}
+#viewer-panel {
+  padding: 0 2em;
+  overflow: auto;
+}
+</style>
+</head>
+<body>
+  <button style="float: right" onclick="showPreview()">Preview</button>
+  <h1>LUAWIKI EDITOR</h1>
+  <div class="editor">
+    <div id="source-panel" class="panel">
+      <div id="source-editor"></div>
+    </div>
+    <div id="viewer-panel" class="panel"></div>
+  </div>
+
+<script type="module">
+import Split from '/split.js'
+Split(['#source-panel', '#viewer-panel'], {
+  onDragEnd: function() {
+    if (editor) {
+      editor.resize();
+    }
+  }
+});
+</script>
+
+<script src="/simplequery.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/mhchem.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>
+<script src="/zh_convert.js"></script>
+<script src="/wiki.js"></script>
+
+<script src="ace-lw/ace.js"></script>
+<script>
+var editor = ace.edit("source-editor", {
+  mode: "ace/mode/mediawiki",
+  wrap: true
+});
+editor.setOption("showPrintMargin", false);
+editor.setOption("wrapMethod", "text");
+editor.setHighlightActiveLine(false);
+editor.commands.addCommand({
+  name: 'bold',
+  bindKey: {win: 'Ctrl-B',  mac: 'Command-B'},
+  exec: function(editor) {
+    let selectedText = editor.session.getTextRange(editor.getSelectionRange());
+    if (selectedText && selectedText.indexOf('\n') < 0) {
+      editor.insert("'''" + selectedText + "'''");
+    }
+  }
+});
+editor.commands.addCommand({
+  name: 'italic',
+  bindKey: {win: 'Ctrl-I',  mac: 'Command-I'},
+  exec: function(editor) {
+    let selectedText = editor.session.getTextRange(editor.getSelectionRange());
+    if (selectedText && selectedText.indexOf('\n') < 0) {
+      editor.insert("''" + selectedText + "''");
+    }
+  }
+});
+
+function buildFormData(data) {
+  const formData = new FormData();
+  for (const key in data) {
+    formData.append(key, data[key]);
+  }
+  return formData;
+}
+
+function showPreview() {
+  fetch('/preview/test', {
+    method: 'POST',
+    body: buildFormData({
+      content: editor.getValue()
+    })
+  }).then(res => res.json())
+  .then(data => {
+    document.getElementById('viewer-panel').innerHTML = doMwConvert(data.result);
+    buildRef();
+    buildMath();
+    buildHighlight();
+  });
+}
+
+editor.session.on('change', function(delta) {
+  console.log(delta)
+});
+</script>
+
+</body>
+</html>

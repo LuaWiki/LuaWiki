@@ -9,6 +9,12 @@ function decodeEntities(encodedString) {
 
 function buildRef() {
   var $refs = $('references');
+  var $hidrefs = $('.hidden');
+  if (!$hidrefs.length) {
+    $('<div class="hidden"></div>').appendTo($refs.parent());
+    $hidrefs = $('.hidden');
+  }
+  $refs.children().appendTo($hidrefs);
   $refs.parent().addClass('mw-references-columns');
   
   let groupMap = {}
@@ -100,10 +106,3 @@ function buildHighlight() {
       {language: x.lang}).value;
   })
 }
-
-$(document).ready(function(){
-  document.body.innerHTML = doMwConvert(document.body.innerHTML);
-  buildRef();
-  buildMath();
-  buildHighlight();
-});
