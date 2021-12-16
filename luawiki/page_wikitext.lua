@@ -96,7 +96,7 @@ elseif ngx.var.request_method == 'POST' then
     
     local comment = post_args.comment or ''
     local c_hash = ngx.crc32_short(comment)
-    local content = post_args.content or ''
+    local content = post_args.content and post_args.content:gsub('\n?$', '\n') or ''
 
     local r_sha1 = ngx.md5(content)
     

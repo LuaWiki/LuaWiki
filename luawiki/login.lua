@@ -48,9 +48,10 @@ local flag, content = pcall(function()
   if res.user_token ~= ngx.null then
     return res.user_token
   else
+    local stoken = session.new_session(res.user_id)
     db:query(([[UPDATE user SET user_token = '%s' WHERE user_name = %s;]])
-      :format(content, wrap(post_args.username)))
-    return session.new_session(res.user_id)
+      :format(stoken, wrap(post_args.username)))
+    return stoken
   end
 end)
 
