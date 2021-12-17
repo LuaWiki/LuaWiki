@@ -144,7 +144,7 @@ local defs = {
     if b then return s .. b .. '</a>'
     else
       extlink_counter = extlink_counter + 1
-      return s .. extlink_counter .. '</a>'
+      return s .. '[' .. extlink_counter .. ']</a>'
     end
   end,
   gen_file = function(t)

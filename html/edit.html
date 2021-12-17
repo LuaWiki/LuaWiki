@@ -122,9 +122,17 @@ function showPreview() {
   });
 }
 
+let changed = false;
 editor.session.on('change', function(delta) {
-  console.log(delta)
+  changed = true;
 });
+
+setInterval(() => {
+  if (changed) {
+    showPreview();
+    changed = false;
+  }
+}, 2000);
 </script>
 
 </body>

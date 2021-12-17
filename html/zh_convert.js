@@ -29743,9 +29743,6 @@ function mergeGlobalRules(data, variant) {
 }
 addConversionData(zh2hans);
 addConversionData(zh2cn);
-$('noteta').each((_, x)=>{
-    mergeGlobalRules(JSON.parse(x.textContent), 'zh-cn');
-}).remove();
 function doConvert(str) {
     let cursor = 0;
     let strlen = str.length;
@@ -29810,7 +29807,16 @@ function pickVariant(str, variant) {
     }
     return ruleMap['default'] || '';
 }
+function decodeEntities(encodedString) {
+  var textArea = document.createElement('textarea');
+  textArea.innerHTML = encodedString;
+  return textArea.value;
+}
 function doMwConvert(str) {
+    str = str.replace(/\<noteta\>(.*?)\<\/noteta\>/gi, function(_, p1) {
+        mergeGlobalRules(JSON.parse(decodeEntities(p1)), 'zh-cn');
+        return '';
+    });
     const matches = str.matchAll(convPattern);
     let matchEnd = 0;
     const resList = [];
