@@ -61,7 +61,7 @@ if not flag then
     error = content
   }))
 else
-  local expires = 3600 * 24  -- 1 day
+  local expires = 3600 * 30  -- 30 days
   ngx.header["Set-Cookie"] = 'session=' .. content .. '; Path=/; Expires=' .. ngx.cookie_time(ngx.time() + expires)
   ngx.say(cjson.encode({
     code = 0,

@@ -2,7 +2,7 @@ local z = {}
 
 z.escape_html = function(content)
   if content then
-    return content:gsub('<', '&lt;'):gsub('>', '&gt;'):gsub('&', '&amp;')
+    return content:gsub('&', '&amp;'):gsub('<', '&lt;'):gsub('>', '&gt;')
   else
     return ''
   end

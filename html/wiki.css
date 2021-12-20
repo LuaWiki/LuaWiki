@@ -136,6 +136,7 @@ cite {
 
 .katex-display {
   margin: unset;
+  display: inline;
 }
 .katex-display.fleqn > .katex {
   padding-left: 0;
