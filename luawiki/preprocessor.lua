@@ -96,6 +96,16 @@ preproc.new = function(wiki_state, template_cache)
     end
     return table.concat(new_node)
   end
+  
+  function z:data_visitor(t)
+    for k, v in pairs(t) do
+      if v.tag == 'text' then
+        t[k] = self:text_visitor(v)
+      else
+        self:data_visitor(v)
+      end
+    end
+  end
 
   function z:eval_single_arg(v, fname, i)
     local tag = v.tag
@@ -104,7 +114,8 @@ preproc.new = function(wiki_state, template_cache)
     elseif tag == 'call' then
       return self:call_visitor(v)
     elseif tag == 'data' then
-      return data_parse.parse_data(v[1])
+      self:data_visitor(v[1])
+      return v[1]
     else--[[if tag == 'expr' then]]
       local f, err
       if v.precompiled then

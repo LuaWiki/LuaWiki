@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign in example • Pico.css</title>
+    <meta name="description" content="LuaWiki Login">
+
+    <!-- Pico.css -->
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+    <!-- Custom styles for this example -->
+    <link rel="stylesheet" href="login.css">
+  </head>
+
+  <body>
+
+    <!-- Nav -->
+    <nav class="container-fluid">
+      <ul>
+        <li><a href="./" class="contrast" onclick="event.preventDefault()"><strong>LuaWiki</strong></a></li>
+      </ul>
+    </nav><!-- ./ Nav -->
+
+    <!-- Main -->
+    <main class="container">
+      <article class="grid">
+        <div>
+          <hgroup>
+            <h1>Sign in</h1>
+            <h2>A minimalist layout for Login pages</h2>
+          </hgroup>
+          <form>
+            <input type="text" name="username" placeholder="Username" aria-label="Username" autocomplete="nickname" required>
+            <input type="password" name="password" placeholder="Password" aria-label="Password" autocomplete="current-password" required>
+            <fieldset>
+              <label for="remember">
+                <input type="checkbox" role="switch" id="remember" name="remember">
+                Remember me
+              </label>
+            </fieldset>
+            <button type="submit" class="contrast" onclick="event.preventDefault(); window.login()">Login</button>
+          </form>
+        </div>
+        <div></div>
+      </article>
+    </main><!-- ./ Main -->
+
+    <!-- Footer -->
+    <footer class="container-fluid">
+      <small>Built with <a href="https://picocss.com" class="secondary">Pico</a> • <a href="https://github.com/picocss/examples/tree/master/sign-in/" class="secondary">Source code</a></small>
+    </footer><!-- ./ Footer -->
+
+    <script>
+    function login() {
+      var formElement = document.querySelector("form");
+      var formData = new FormData(formElement);
+      fetch('/login', {
+        method: 'POST',
+        body: formData
+      });
+    }
+    </script>
+  </body>
+
+</html>

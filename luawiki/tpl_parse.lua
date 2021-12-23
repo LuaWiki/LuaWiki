@@ -35,7 +35,37 @@ local alias_list = re.compile[=[--lpeg
   __          <- %s*
 ]=]
 
+local tpl_grammar = nil
+
+local data_defs = {
+  t = lpeg.P('\t'),
+  new_table = function() return {} end,
+  add_params = function(t, name, value)
+    if value then
+      if type(value) == 'table' then
+        t[name] = value
+      else
+        value = value:gsub('%s+$', '')
+        t[name] = tpl_grammar:match(value)
+      end
+    end
+    return t
+  end
+}
+
+local data_grammar = re.compile([=[--lpeg
+  data       <- ('' -> new_table __ param_expr*) ~> add_params
+  param_expr <- {: {param_name} __ '=' [ %t]* (object / raw_value) __ :}
+  param_name <- ([_-] / [^%s%p])+
+  object     <- ( '{' -> new_table __ param_expr* '}' ) ~> add_params
+  raw_value  <- {[^%nl]*}
+  __         <- %s*
+]=], data_defs)
+
 local tpl_defs = {
+  parse_data = function(s)
+    return data_grammar:match(s)
+  end,
   cache_module = function(m)
     if not z.ext_modules[m] then
       local f = assert(loadfile('modules/'.. m .. '.lua', 't', env))
@@ -49,7 +79,7 @@ local tpl_defs = {
   end
 }
 
-local tpl_grammar = re.compile([=[--lpeg
+tpl_grammar = re.compile([=[--lpeg
   tpl_grm     <- {| __ tpl_text |}
   tpl_text    <- {:tag: '' -> 'text':} ((func_call __ / wikitext)+ / {''})
   func_call   <- {| {:tag: '@' -> 'call':} module_name (':' func_name)? __ ('()' / arguments) |}
@@ -59,7 +89,7 @@ local tpl_grammar = re.compile([=[--lpeg
   arguments   <- {:args: {| text_param / '(' __ param __ (',' __ param __ )* ')' |} :}
   param       <- text_param / func_call / data / expr
   text_param  <- {| '{' __ tpl_text '}' |}
-  data        <- {| {:tag: '<%' -> 'data':} {(!'%>' .)*} '%>' |}
+  data        <- {| {:tag: '<%' -> 'data':} (!'%>' .)* -> parse_data '%>' |}
   expr        <- {| {:tag: '' -> 'expr':} {([^,()]+ / balanced)+} |}
   balanced    <- '(' ([^()] / balanced)* ')'
   wikitext    <- ([^@}]+ / '|}')+ -> cleanup_text

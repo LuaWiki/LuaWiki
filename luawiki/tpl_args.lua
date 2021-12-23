@@ -25,7 +25,8 @@ local tpl_grammar = re.compile([=[--lpeg
   template      <- {| %ts __ tpl_name ('|' __ param_expr %s*)* %te |}
   tpl_name      <- { ([_/!-] / [^%p])+ }
   param_expr    <- {| {:tag: param_name :} __ '=' __ any_text / any_text |}
-  param_name    <- ([_-] / [^%s%p])+
+  param_name    <- {~ param_word (__ -> '_' param_word)* ~} 
+  param_word    <- ([_-] / [^%s%p])+
   any_text      <- (another_tpl / inlink_like / { char_no_pipe [^|{[%te]* })+
                       ~> merge_text / ''
   char_no_pipe  <- [^|%te]
