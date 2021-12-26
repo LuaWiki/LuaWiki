@@ -40,7 +40,7 @@ var MediaWikiHighlightRules = function() {
                     "punctuation.separator.dictionary.key-value",
                     "meta.structure.dictionary"
                 ],
-                regex: /(\|)(\s*)([\w_-]*)(\s*)(=)(\s*)/,
+                regex: /(\|)(\s*)([\w_-]*(?:\s*[\w_-]+)*)(\s*)(=)(\s*)/,
                 push: [ 'template', 'link_internal', {
                     token: "meta.structure.dictionary",
                     regex: /(?=}}|[|])/,
