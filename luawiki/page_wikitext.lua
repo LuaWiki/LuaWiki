@@ -26,7 +26,7 @@ if ngx.var.request_method == 'GET' then
   
 elseif ngx.var.request_method == 'POST' then
   local pagename = ngx.var[1]
-  local post_args = require('post_args')()
+  local post_args = require('utils/post_args')()
   local session = require('session')
   
   if pagename == '' then

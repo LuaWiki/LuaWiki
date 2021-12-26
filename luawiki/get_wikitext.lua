@@ -22,8 +22,8 @@ if not flag then
 end
 
 -- main parsing
-local nonparse = require('nonparse')
-local parser = require('parser')
+local nonparse = require('core/nonparse')
+local parser = require('core/parser')
 local wikitext = content
 local wiki_state = {
   title = pagename,
@@ -39,7 +39,7 @@ local begin_time = ngx.now()
 
 wikitext = nonparse.decorate(wiki_state, wikitext)
 
-local preprocessor = require('preprocessor').new(wiki_state)
+local preprocessor = require('core/preprocessor').new(wiki_state)
 wikitext = preprocessor:process(wikitext)
 local wiki_html = parser.parse(wiki_state, wikitext)
 

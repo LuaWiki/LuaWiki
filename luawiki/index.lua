@@ -6,8 +6,8 @@ if not f then
   return ngx.say('Page not found')
 end
 
-local nonparse = require('nonparse')
-local parser = require('parser')
+local nonparse = require('core/nonparse')
+local parser = require('core/parser')
 local wikitext = f:read('*a')
 local wiki_state = {
   title = title,
@@ -23,7 +23,7 @@ local begin_time = ngx.now()
 
 wikitext = nonparse.decorate(wiki_state, wikitext)
 
-local preprocessor = require('preprocessor').new(wiki_state)
+local preprocessor = require('core/preprocessor').new(wiki_state)
 wikitext = preprocessor:process(wikitext)
 local wiki_html = parser.parse(wiki_state, wikitext)
 

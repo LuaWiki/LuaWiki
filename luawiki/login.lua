@@ -12,7 +12,7 @@ local mysql = require('resty.mysql')
 local db, err = mysql:new()
 local wrap = ngx.quote_sql_str
 
-local post_args = require('post_args')()
+local post_args = require('utils/post_args')()
 
 if not post_args.username or post_args.username == '' or
     not post_args.password or post_args.password == '' then

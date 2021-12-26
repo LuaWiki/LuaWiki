@@ -1,6 +1,6 @@
 package.path = "../modules/?.lua;" .. package.path;
 local inspect = require('inspect')
-local preprocessor = require('preprocessor').new()
+local preprocessor = require('core/preprocessor').new()
 
 print(
 

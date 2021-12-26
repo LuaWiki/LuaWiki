@@ -1,5 +1,5 @@
 local re = require('lpeg.re')
-local html_utils = require('html_utils')
+local html_utils = require('utils/html_utils')
 local inspect = require('inspect')
 
 local extlink_counter = 0
@@ -337,7 +337,7 @@ wiki_grammar = re.compile([=[--lpeg
   newline        <- %cr? %nl
 ]=], defs)
 
-local sanitize = require('sanitizer').sanitize
+local sanitize = require('core/sanitizer').sanitize
 
 return {
   parse = function(wiki_state, wikitext)

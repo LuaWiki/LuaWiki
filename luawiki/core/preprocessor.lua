@@ -1,9 +1,8 @@
 local re = require('lpeg.re')
 local sandbox = require('sandbox')
-local tpl_args = require('tpl_args')
-local tpl_parse = require('tpl_parse')
-local data_parse = require('data_parse')
-local nonparse = require('nonparse')
+local tpl_args = require('core/tpl_args')
+local tpl_parse = require('core/tpl_parse')
+local nonparse = require('core/nonparse')
 local inspect = require('inspect')
 
 local debug_flag = false

@@ -1,5 +1,5 @@
 local re = require('lpeg.re')
-local html_utils = require('html_utils')
+local html_utils = require('utils/html_utils')
 local block_tags = { 'pre', 'syntaxhighlight', 'graph' }
 local inline_tags = { 'nowiki', 'math' }
 

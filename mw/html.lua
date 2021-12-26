@@ -16,7 +16,7 @@
 local HtmlBuilder = {}
 local options = {}
 
-local util = require 'library_util'
+local util = require 'utils/library_util'
 local check_type = util.check_type
 local check_type_multi = util.check_type_multi
 

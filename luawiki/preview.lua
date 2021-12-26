@@ -9,7 +9,7 @@ if ngx.var.request_method ~= 'POST' then
 end
 
 local pagename = ngx.var[1]
-local post_args = require('post_args')()
+local post_args = require('utils/post_args')()
 local session = require('session')
 
 if pagename == '' then
@@ -38,8 +38,8 @@ if not user_id then
 end
 
 -- main parsing
-local nonparse = require('nonparse')
-local parser = require('parser')
+local nonparse = require('core/nonparse')
+local parser = require('core/parser')
 local wikitext = post_args.content and post_args.content:gsub('\r', ''):gsub('\n?$', '\n') or ''
 local wiki_state = {
   title = pagename,
@@ -55,7 +55,7 @@ local begin_time = ngx.now()
 
 wikitext = nonparse.decorate(wiki_state, wikitext)
 
-local preprocessor = require('preprocessor').new(wiki_state)
+local preprocessor = require('core/preprocessor').new(wiki_state)
 wikitext = preprocessor:process(wikitext)
 local wiki_html = parser.parse(wiki_state, wikitext)
 
