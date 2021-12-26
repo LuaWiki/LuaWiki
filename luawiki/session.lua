@@ -9,6 +9,13 @@ local session_cache = mlcache.new('lw_cache', 'cache_dict', {
   ipc_shm  = 'ipc_dict'
 })
 
+local csrf_cache = mlcache.new('csrf_cache', 'cache_dict', {
+  lru_size = 500,          -- size of the L1 (Lua VM) cache
+  ttl      = 3600,         -- 1 hour ttl for hits
+  neg_ttl  = 30,           -- 30s ttl for misses
+  ipc_shm  = 'ipc_dict'
+})
+
 local z = {}
 
 z.new_session = function(user_id)
@@ -45,6 +52,24 @@ end
 
 z.remove_session = function(stoken)
   return session_cache:delete(stoken)
+end
+
+z.new_csrf = function(user_groups)
+  local strong_random = resty_random.bytes(16, true)
+  while strong_random == nil do
+    strong_random = resty_random.bytes(16, true)
+  end
+  strong_random = str.to_hex(strong_random)
+  csrf_cache:set(strong_random, nil, user_groups)
+  return strong_random
+end
+
+z.get_csrf = function(stoken)
+  return csrf_cache:get(stoken)
+end
+
+z.remove_csrf = function(stoken)
+  return csrf_cache:delete(stoken)
 end
 
 return z
