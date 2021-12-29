@@ -32,34 +32,24 @@ var MediaWikiHighlightRules = function() {
                 regex: /}}/,
                 next: "pop"
             }, {
-                token: [
-                    "storage",
-                    "meta.structure.dictionary",
-                    "support.type.property-name",
-                    "meta.structure.dictionary",
-                    "punctuation.separator.dictionary.key-value",
-                    "meta.structure.dictionary"
-                ],
-                regex: /(\|)(\s*)([\w_-]*(?:\s*[\w_-]+)*)(\s*)(=)(\s*)/,
-                push: [ 'template', 'link_internal', {
-                    token: "meta.structure.dictionary",
-                    regex: /(?=}}|[|])/,
-                    next: "pop"
-                }, {
-                    defaultToken: "meta.structure.dictionary"
-                } ]
-            }, {
-                token: ["storage", "meta.template.value"],
-                regex: /(\|)(.*?)/,
+                token: ["storage", 'text', 'support.type.property-name',
+                    'punctuation.separator.dictionary.key-value'],
+                regex: /(\|)(\s*)(\w[\s\w_-]*)(=)/,
                 push: [{
-                    token: [],
                     regex: /(?=}}|[|])/,
                     next: "pop"
-                }, 'start', {
-                    defaultToken: "meta.template.value"
+                }, 'template', 'link_internal', {
+                    defaultToken: 'text'
                 }]
             }, {
-                defaultToken: "meta.template"
+                token: ['storage'],
+                regex: /(\|)/,
+                push: [{
+                    regex: /(?=}}|[|])/,
+                    next: "pop"
+                }, 'template', 'link_internal', {
+                    defaultToken: 'text'
+                }]
             }]
         }],
         heading: [{
@@ -176,7 +166,7 @@ oop.inherits(MediaWikiHighlightRules, TextHighlightRules);
 exports.MediaWikiHighlightRules = MediaWikiHighlightRules;
 });
 
-define("ace/mode/mediawiki",["require","exports","module","ace/lib/oop","ace/mode/text","ace/mode/mediawiki_highlight_rules"], function(require, exports, module) {
+define("ace/mode/mediawiki",["require","exports","module","ace/lib/oop","ace/mode/text","ace/mode/mediawiki_highlight_rules","ace/mode/folding/mediawiki"], function(require, exports, module) {
 "use strict";
 
 var oop = require("../lib/oop");

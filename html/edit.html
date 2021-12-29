@@ -75,6 +75,7 @@ var editor = ace.edit("source-editor", {
   mode: "ace/mode/mediawiki",
   wrap: true
 });
+editor.setTheme("ace/theme/behave");
 editor.setOption("showPrintMargin", false);
 editor.setOption("wrapMethod", "text");
 editor.setHighlightActiveLine(false);
@@ -120,6 +121,63 @@ function showPreview() {
     buildMath();
     buildHighlight();
   });
+}
+
+function realFoldAll(foldingStartMarker, foldingStopMarker) {
+  if (!foldingStartMarker || !foldingStopMarker) return;
+  let row = 0;
+  let endRow = editor.session.getLength();
+  
+  let line = null;
+  
+  function getFoldWidgetRange(offset) {
+    let match = line.match(foldingStartMarker);
+    if (match) {
+      var rObj = { startRow: row, startColumn: match.index + offset };
+      let newStart = match.index + match[0].length;
+      let sameLine = line.substring(newStart);
+      match = sameLine.match(foldingStopMarker);
+      if (match) {
+          match.index += newStart + offset;
+      } else {
+          while (++row < endRow) {
+              line = editor.session.getLine(row);
+              match = line.match(foldingStopMarker);
+              if (match || row - rObj.startRow === 10) break;
+          }
+      }
+
+      if (match) {
+          return new ace.Range(rObj.startRow, rObj.startColumn, row, match.index + match[0].length);
+      }
+    }
+  }
+  
+  line = editor.session.getLine(row);
+  let offset = 0
+  while (row < endRow) {
+    let range = getFoldWidgetRange(offset);
+    if (range) {
+      range.collapseChildren = 1;
+      editor.session.addFold('...', range);
+      let new_offset = range.end.column;
+      if (new_offset === offset) {
+        console.log(line);
+        break;
+      }
+      line = line.substring(new_offset - offset);
+      offset = new_offset;
+    } else {
+      line = editor.session.getLine(++row);
+      offset = 0;
+    }
+  }
+}
+
+function foldRef() {
+  realFoldAll(/\<ref(?:\>| [^\/]*?\>)/, /\<\/ref\>/);
+  realFoldAll(/\<ref [^\/>]*\//, /\>/);
+  realFoldAll(/{{(?:r[|]|sfn|efn|备注)/, /}}/);
 }
 
 let changed = false;

@@ -1,7 +1,7 @@
 local mp_parser = require('resty/multipart/parser')
 
 local function getFile(file_name)
-  local f = assert(io.open(file_name, 'r'))
+  local f = assert(io.open(file_name, 'rb'))
   local string = f:read("*all")
   f:close()
   return string
