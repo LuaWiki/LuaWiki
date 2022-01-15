@@ -75,6 +75,53 @@ body {
   overflow: auto;
 }
 
+.tool-bar {
+  background: #1c1c1e;
+  border-bottom: 1px solid #343434;
+  color: #ccc;
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  font-size: 16px;
+  height: 42px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: none;
+  
+  padding: 8px 10px;
+}
+.tool-bar a.active, .tool-bar a:hover {
+  background: #212121;
+  border-color: #aaa;
+}
+.tool-bar a {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none !important;
+  color: #ccc !important;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.tool-bar a + a {
+  margin-left: 10px;
+}
+.tool-bar .separator {
+  display: inline-block;
+  width: 0;
+  border-left: 1px solid #4d4d4d;
+  color: transparent;
+  text-indent: -10px;
+  margin: 0 10px;
+}
+.tool-bar a::before {
+  line-height: 22px;
+}
+
 /* toggle view */
 .preview #source-panel, .source #viewer-panel,
 .preview .gutter, .source .gutter {
@@ -90,9 +137,9 @@ body {
     <ul>
       <li><i class="icon icon-article-ltr"></i><strong>LUAWIKI</strong></li>
       <li class="btn-group">
-        <button class="icon icon-edit secondary outline"></button>
-        <button class="icon icon-columns secondary outline"></button>
-        <button class="icon icon-eye secondary outline"></button>
+        <button class="icon-edit secondary outline"></button>
+        <button class="icon-columns secondary outline active"></button>
+        <button class="icon-eye secondary outline"></button>
       </li>
     </ul>
     <ul>
@@ -103,6 +150,23 @@ body {
   </nav>
   <div class="editor">
     <div id="source-panel" class="panel">
+      <div class="tool-bar">
+        <a title="bold" class="icon-bold-b"></a>
+        <a title="italic" class="icon-italic-i"></a>
+        <a title="delete line" class="icon-strikethrough-s"></a>
+        <a title="headings">H</a>
+        <span class="separator">|</span>
+        <a title="code" class="icon-code"></a>
+        <a title="quote" class="icon-quotes-ltr"></a>
+        <a title="bullet list" class="icon-listBullet-ltr"></a>
+        <a title="number list" class="icon-listNumbered-ltr"></a>
+        <span class="separator">|</span>
+        <a title="link" class="icon-link"></a>
+        <a title="image" class="icon-image"></a>
+        <a title="table" class="icon-table"></a>
+        <a title="math equation" class="icon-mathematics"></a>
+        <a title="nowiki" class="icon-noWikiText"></a>
+      </div>
       <div id="source-editor"></div>
     </div>
     <div id="viewer-panel" class="panel parser-output"></div>
