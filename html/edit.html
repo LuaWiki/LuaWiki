@@ -2,22 +2,57 @@
 <html>
 <head>
   <title>LuaWiki Editor</title>
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+  <link rel="stylesheet" href="/ooicon/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">
   <link rel="stylesheet" type="text/css" href="/wiki.css">
 <style>
-body {
-  background: #eee;
-  margin: 0;
+html {
+  height: 100%;
 }
-h1 {
-  margin: 0 1em;
+nav li {
+  padding: 0.5em calc(var(--spacing) * .5);
+}
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: revert;
+}
+.btn-group {
+  display: flex;
+}
+.btn-group button {
+  padding: 0.6em 0.7em;
+  border-color: #ccc;
+  background-color: #fff;
+  font-size: 0.7em;
+}
+.btn-group button.active {
+  background-color: #e6e6e6;
+  box-shadow: inset 0 3px 5px rgba( 0, 0, 0, .125 );
+}
+.btn-group > button:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.btn-group > button:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.btn-group > button:not(:first-child):not(:last-child) {
+  border-radius: 0;
+}
+body {
+  background: #f8f8f8;
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 .editor {
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  height: calc(100vh - 100px);
+  flex: 1;
+  min-height: 0px;
 }
 .panel {
   background: #fff;
@@ -39,16 +74,38 @@ h1 {
   padding: 0 2em;
   overflow: auto;
 }
+
+/* toggle view */
+.preview #source-panel, .source #viewer-panel,
+.preview .gutter, .source .gutter {
+  display: none;
+}
+.preview #viewer-panel, .source #source-panel {
+  width: 100% !important;
+}
 </style>
 </head>
 <body>
-  <button style="float: right" onclick="showPreview()">Preview</button>
-  <h1>LUAWIKI EDITOR</h1>
+  <nav class="container-fluid">
+    <ul>
+      <li><i class="icon icon-article-ltr"></i><strong>LUAWIKI</strong></li>
+      <li class="btn-group">
+        <button class="icon icon-edit secondary outline"></button>
+        <button class="icon icon-columns secondary outline"></button>
+        <button class="icon icon-eye secondary outline"></button>
+      </li>
+    </ul>
+    <ul>
+      <li><a href="#">Link</a></li>
+      <li><a href="#">Link</a></li>
+      <li><a href="#">Link</a></li>
+    </ul>
+  </nav>
   <div class="editor">
     <div id="source-panel" class="panel">
       <div id="source-editor"></div>
     </div>
-    <div id="viewer-panel" class="panel"></div>
+    <div id="viewer-panel" class="panel parser-output"></div>
   </div>
 
 <script type="module">
@@ -75,9 +132,24 @@ var editor = ace.edit("source-editor", {
   mode: "ace/mode/mediawiki",
   wrap: true
 });
+
+$('.btn-group button').click(function() {
+  $('.btn-group .active').removeClass('active');
+  let $this = $(this);
+  $this.addClass('active');
+  if ($this.hasClass('icon-edit')) {
+    $('.editor').removeClass('preview').addClass('source');
+    editor.resize();
+  } else if ($this.hasClass('icon-eye')) {
+    $('.editor').removeClass('source').addClass('preview');
+  } else {
+    $('.editor').removeClass('preview').removeClass('source');
+    editor.resize();
+  }
+});
+
 editor.setTheme("ace/theme/behave");
 editor.setOption("showPrintMargin", false);
-editor.setOption("wrapMethod", "text");
 editor.setHighlightActiveLine(false);
 editor.commands.addCommand({
   name: 'bold',

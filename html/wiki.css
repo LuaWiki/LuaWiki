@@ -6,7 +6,7 @@ a.new {
   color: #d33;
 }
 
-ul {
+.parser-output ul {
   margin: 0.3em 0 0 1.6em;
   padding: 0;
 }
