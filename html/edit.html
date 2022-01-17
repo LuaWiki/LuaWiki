@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>LuaWiki Editor</title>
-  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
   <link rel="stylesheet" href="/ooicon/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">
@@ -68,7 +68,7 @@ body {
   cursor: col-resize;
 }
 #source-editor {
-  height: 100%;
+  height: calc(100% - 42px);
 }
 #viewer-panel {
   padding: 0 2em;
@@ -151,26 +151,49 @@ body {
   <div class="editor">
     <div id="source-panel" class="panel">
       <div class="tool-bar">
-        <a title="bold" class="icon-bold-b"></a>
-        <a title="italic" class="icon-italic-i"></a>
-        <a title="delete line" class="icon-strikethrough-s"></a>
+        <a title="bold" class="icon-bold-b" onclick="addBold()"></a>
+        <a title="italic" class="icon-italic-i" onclick="addItalic()"></a>
+        <a title="delete line" class="icon-strikethrough-s" onclick="addDel()"></a>
         <a title="headings">H</a>
         <span class="separator">|</span>
         <a title="code" class="icon-code"></a>
-        <a title="quote" class="icon-quotes-ltr"></a>
+        <a title="quote" class="icon-quotes-ltr" onclick="addQuote()"></a>
         <a title="bullet list" class="icon-listBullet-ltr"></a>
         <a title="number list" class="icon-listNumbered-ltr"></a>
         <span class="separator">|</span>
-        <a title="link" class="icon-link"></a>
+        <a title="link" class="icon-link" onclick="addLink()"></a>
         <a title="image" class="icon-image"></a>
         <a title="table" class="icon-table"></a>
-        <a title="math equation" class="icon-mathematics"></a>
-        <a title="nowiki" class="icon-noWikiText"></a>
+        <a title="math equation" class="icon-mathematics" onclick="addMath()"></a>
+        <a title="nowiki" class="icon-noWikiText" onclick="addNowiki()"></a>
+        <a title="fold references" class="icon-outdent-ltr" onclick="foldRef()"></a>
       </div>
       <div id="source-editor"></div>
     </div>
     <div id="viewer-panel" class="panel parser-output"></div>
   </div>
+  
+  <dialog id="linkModal">
+    <article>
+      <form>
+        <label for="text">
+          Link target
+          <input type="text" id="linkTarget" name="linkTarget" placeholder="Link target" required>
+        </label>
+        
+        <label for="text">
+          Link target
+          <input type="text" id="linkText" name="linkText" placeholder="Link text">
+        </label>
+      </form>
+      <footer>
+        <a href="#cancel" role="button" class="secondary" data-target="linkModal"
+          onClick="closeModal(event)">Cancel</a>
+        <a href="#confirm" role="button" data-target="linkModal"
+          onClick="submitLink(event)">Confirm</a>
+      </footer>
+    </article>
+  </dialog>
 
 <script type="module">
 import Split from '/split.js'
@@ -187,11 +210,20 @@ Split(['#source-panel', '#viewer-panel'], {
 <script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/mhchem.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dialog-polyfill@latest/dist/dialog-polyfill.min.js"></script>
 <script src="/zh_convert.js"></script>
 <script src="/wiki.js"></script>
 
 <script src="ace-lw/ace.js"></script>
 <script>
+// polyfill all dialogs
+const testDialog = document.createElement('dialog');
+if (!testDialog.showModal) {
+  $('dialog').each(function() {
+    dialogPolyfill.registerDialog(this);
+  });
+}
+
 var editor = ace.edit("source-editor", {
   mode: "ace/mode/mediawiki",
   wrap: true
@@ -215,25 +247,60 @@ $('.btn-group button').click(function() {
 editor.setTheme("ace/theme/behave");
 editor.setOption("showPrintMargin", false);
 editor.setHighlightActiveLine(false);
+
+function encloseWith(start, end) {
+  if (!end) end = start;
+  return function() {
+    let selectedText = editor.session.getTextRange(editor.getSelectionRange());
+    if (selectedText && selectedText.indexOf('\n') < 0) {
+      editor.insert(start + selectedText + end);
+    }
+  }
+}
+
+function closeModal(event) {
+  event.preventDefault();
+  const modal = document.getElementById(event.target.getAttribute('data-target'));
+  if (modal) {
+    modal.close();
+  }
+}
+
+function submitLink(event) {
+  const modalId = event.target.getAttribute('data-target');
+  const form = $(`#${modalId} form`).get(0)
+  if (form.reportValidity()) {
+    let linkTarget = $('#linkTarget').val().trim();
+    let linkText = $('#linkText').val().trim();
+    if (linkTarget.match(/^(http|ftp)/)) {
+      editor.insert(linkText ? `[${linkTarget} ${linkText}]` : `[${linkTarget}]`);
+    } else {
+      editor.insert(linkText ? `[[${linkTarget}|${linkText}]]` : `[[${linkTarget}]]`);
+    }
+    form.reset();
+    closeModal(event);
+  }
+}
+
+let addBold = encloseWith("'''");
+let addItalic = encloseWith("''");
+let addDel = encloseWith(`<s>`, `</s>`);
+let addQuote = encloseWith(`<blockquote>`, `</blockquote>`);
+let addMath = encloseWith(`<math>`, `</math>`);
+let addNowiki = encloseWith(`<nowiki>`, `</nowiki>`);
+let addLink = function() {
+  document.getElementById('linkModal').showModal();
+}
+
 editor.commands.addCommand({
   name: 'bold',
   bindKey: {win: 'Ctrl-B',  mac: 'Command-B'},
-  exec: function(editor) {
-    let selectedText = editor.session.getTextRange(editor.getSelectionRange());
-    if (selectedText && selectedText.indexOf('\n') < 0) {
-      editor.insert("'''" + selectedText + "'''");
-    }
-  }
+  exec: addBold
 });
 editor.commands.addCommand({
   name: 'italic',
   bindKey: {win: 'Ctrl-I',  mac: 'Command-I'},
-  exec: function(editor) {
-    let selectedText = editor.session.getTextRange(editor.getSelectionRange());
-    if (selectedText && selectedText.indexOf('\n') < 0) {
-      editor.insert("''" + selectedText + "''");
-    }
-  }
+  exec: addItalic
 });
 
 function buildFormData(data) {

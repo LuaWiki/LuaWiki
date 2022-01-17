@@ -3,6 +3,8 @@ local re = require('lpeg.re')
 local block_tag_pat = [=[--lpeg
   %nl? '<' {'/'}? {'blockquote' /'table' / 'div' / 'h' [1-7]} { [^<>]* '>' }
 ]=]
+
+-- produce case insensitive pattern
 block_tag_pat = block_tag_pat:gsub("'(.-)'", function(p)
   local t = {}
   local function do_a()
@@ -57,6 +59,7 @@ local tag_counter = {}
 local function block_tag_handler(p1, p2, p3)
   local luawiki_hash = ''
   if not p3 then
+    -- an open tag
     luawiki_hash = random_str()
     table.insert(stack, { p1, luawiki_hash })
     tag_counter[p1] = tag_counter[p1] and (tag_counter[p1]+1) or 1
@@ -64,10 +67,12 @@ local function block_tag_handler(p1, p2, p3)
   else
     local p0 = ''
     if stack[#stack] and p2 == stack[#stack][1] then
+      -- best case: the closing tag has an open tag in stack
       luawiki_hash = table.remove(stack)[2]
       tag_counter[p2] = tag_counter[p2] - 1
       p0 = '</' .. p2 .. ' data-lw="' .. luawiki_hash .. '"' .. '>'
     elseif tag_counter[p2] and tag_counter[p2] > 0 then
+      -- some tags are unclosed in stack, but tag to pair with p2 can be found
       local prefix_str = ''
       while #stack > 0 and p2 ~= stack[#stack][1] do
         local unbalanced_tag = table.remove(stack)
@@ -79,6 +84,7 @@ local function block_tag_handler(p1, p2, p3)
       tag_counter[p2] = tag_counter[p2] - 1
       p0 = prefix_str .. '</' .. p2 .. ' data-lw="' .. luawiki_hash .. '"' .. '>'
     else
+      -- default case: cannot find tag to pair with p2
       return ''
     end
     return p0

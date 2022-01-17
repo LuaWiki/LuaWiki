@@ -10417,7 +10417,7 @@ EditSession.$uid = 0;
         var indent = 0;
         while (displayLength - lastSplit > wrapLimit - indent) {
             var split = lastSplit + wrapLimit - indent;
-            if (tokens[split - 1] >= SPACE && tokens[split] >= SPACE) {
+            if (tokens[split] >= SPACE || tokens[split - 1] == CHAR_EXT || tokens[split] == CHAR_EXT) {
                 addSplit(split);
                 continue;
             }
@@ -10444,9 +10444,6 @@ EditSession.$uid = 0;
                 continue;
             }
             var minSplit = Math.max(split - (wrapLimit -(wrapLimit>>2)), lastSplit - 1);
-            while (split > minSplit && tokens[split] < PLACEHOLDER_START) {
-                split --;
-            }
             if (isCode) {
                 while (split > minSplit && tokens[split] < PLACEHOLDER_START) {
                     split --;
@@ -10455,7 +10452,7 @@ EditSession.$uid = 0;
                     split --;
                 }
             } else {
-                while (split > minSplit && tokens[split] < SPACE) {
+                while (split > minSplit && tokens[split] == CHAR) {
                     split --;
                 }
             }
