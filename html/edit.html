@@ -224,10 +224,20 @@ if (!testDialog.showModal) {
   });
 }
 
-var editor = ace.edit("source-editor", {
+var shadow = document.getElementById('source-editor').attachShadow({mode: 'open'});
+
+const editorElem = document.createElement('div');
+editorElem.id = 'editorElem'
+editorElem.style.width = '100%';
+editorElem.style.height = '100%';
+shadow.appendChild(editorElem);
+
+var editor = ace.edit(shadow.querySelector('#editorElem'), {
   mode: "ace/mode/mediawiki",
   wrap: true
 });
+
+shadow.appendChild(document.getElementById('ace_editor.css'));
 
 $('.btn-group button').click(function() {
   $('.btn-group .active').removeClass('active');
