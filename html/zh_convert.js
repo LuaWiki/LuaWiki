@@ -29677,7 +29677,7 @@ function addSingleConv(from, to) {
     curNode._ = to;
 }
 function addConversionData(data) {
-    for (const pair of zh2hans){
+    for (const pair of data){
         addSingleConv(pair[0], pair[1]);
     }
 }
