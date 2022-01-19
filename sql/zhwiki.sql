@@ -23,7 +23,7 @@ CREATE TABLE `archive`  (
   UNIQUE INDEX `ar_revid_uniq`(`ar_rev_id`) USING BTREE,
   INDEX `ar_name_title_timestamp`(`ar_namespace`, `ar_title`, `ar_timestamp`) USING BTREE,
   INDEX `ar_actor_timestamp`(`ar_actor`, `ar_timestamp`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for bot_passwords
@@ -37,7 +37,7 @@ CREATE TABLE `bot_passwords`  (
   `bp_restrictions` blob NOT NULL,
   `bp_grants` blob NOT NULL,
   PRIMARY KEY (`bp_user`, `bp_app_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for category
@@ -52,7 +52,7 @@ CREATE TABLE `category`  (
   PRIMARY KEY (`cat_id`) USING BTREE,
   UNIQUE INDEX `cat_title`(`cat_title`) USING BTREE,
   INDEX `cat_pages`(`cat_pages`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for categorylinks
@@ -65,12 +65,12 @@ CREATE TABLE `categorylinks`  (
   `cl_sortkey_prefix` varbinary(255) NOT NULL DEFAULT '',
   `cl_timestamp` timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP(0),
   `cl_collation` varbinary(32) NOT NULL DEFAULT '',
-  `cl_type` enum('page','subcat','file') CHARACTER SET binary COLLATE binary NOT NULL DEFAULT 'page',
+  `cl_type` enum('page','subcat','file') CHARACTER SET `binary` COLLATE `binary` NOT NULL DEFAULT 'page',
   PRIMARY KEY (`cl_from`, `cl_to`) USING BTREE,
   INDEX `cl_sortkey`(`cl_to`, `cl_type`, `cl_sortkey`, `cl_from`) USING BTREE,
   INDEX `cl_timestamp`(`cl_to`, `cl_timestamp`) USING BTREE,
   INDEX `cl_collation_ext`(`cl_collation`, `cl_to`, `cl_type`, `cl_from`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for change_tag
@@ -88,7 +88,7 @@ CREATE TABLE `change_tag`  (
   UNIQUE INDEX `change_tag_log_tag_id`(`ct_log_id`, `ct_tag_id`) USING BTREE,
   UNIQUE INDEX `change_tag_rev_tag_id`(`ct_rev_id`, `ct_tag_id`) USING BTREE,
   INDEX `change_tag_tag_id_id`(`ct_tag_id`, `ct_rc_id`, `ct_rev_id`, `ct_log_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for change_tag_def
@@ -103,7 +103,7 @@ CREATE TABLE `change_tag_def`  (
   UNIQUE INDEX `ctd_name`(`ctd_name`) USING BTREE,
   INDEX `ctd_count`(`ctd_count`) USING BTREE,
   INDEX `ctd_user_defined`(`ctd_user_defined`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for comment
@@ -116,7 +116,7 @@ CREATE TABLE `comment`  (
   `comment_data` blob NULL,
   PRIMARY KEY (`comment_id`) USING BTREE,
   INDEX `comment_hash`(`comment_hash`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for cu_changes
@@ -147,7 +147,7 @@ CREATE TABLE `cu_changes`  (
   INDEX `cuc_user_ip_time`(`cuc_user`, `cuc_ip`, `cuc_timestamp`) USING BTREE,
   INDEX `cuc_xff_hex_time`(`cuc_xff_hex`, `cuc_timestamp`) USING BTREE,
   INDEX `cuc_timestamp`(`cuc_timestamp`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for cu_log
@@ -171,7 +171,7 @@ CREATE TABLE `cu_log`  (
   INDEX `cul_target_hex`(`cul_target_hex`, `cul_timestamp`) USING BTREE,
   INDEX `cul_range_start`(`cul_range_start`, `cul_timestamp`) USING BTREE,
   INDEX `cul_timestamp`(`cul_timestamp`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for externallinks
@@ -189,7 +189,7 @@ CREATE TABLE `externallinks`  (
   INDEX `el_index`(`el_index`(60)) USING BTREE,
   INDEX `el_index_60`(`el_index_60`, `el_id`) USING BTREE,
   INDEX `el_from_index_60`(`el_from`, `el_index_60`, `el_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for filearchive
@@ -209,8 +209,8 @@ CREATE TABLE `filearchive`  (
   `fa_height` int(11) NULL DEFAULT 0,
   `fa_metadata` mediumblob NULL,
   `fa_bits` int(11) NULL DEFAULT 0,
-  `fa_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE','3D') CHARACTER SET binary COLLATE binary NULL DEFAULT NULL,
-  `fa_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart','chemical') CHARACTER SET binary COLLATE binary NULL DEFAULT 'unknown',
+  `fa_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE','3D') CHARACTER SET `binary` COLLATE `binary` NULL DEFAULT NULL,
+  `fa_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart','chemical') CHARACTER SET `binary` COLLATE `binary` NULL DEFAULT 'unknown',
   `fa_minor_mime` varbinary(100) NULL DEFAULT 'unknown',
   `fa_description_id` bigint(20) UNSIGNED NOT NULL,
   `fa_actor` bigint(20) UNSIGNED NOT NULL,
@@ -223,7 +223,7 @@ CREATE TABLE `filearchive`  (
   INDEX `fa_deleted_timestamp`(`fa_deleted_timestamp`) USING BTREE,
   INDEX `fa_actor_timestamp`(`fa_actor`, `fa_timestamp`) USING BTREE,
   INDEX `fa_sha1`(`fa_sha1`(10)) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for image
@@ -236,8 +236,8 @@ CREATE TABLE `image`  (
   `img_height` int(11) NOT NULL DEFAULT 0,
   `img_metadata` mediumblob NOT NULL,
   `img_bits` int(11) NOT NULL DEFAULT 0,
-  `img_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE','3D') CHARACTER SET binary COLLATE binary NULL DEFAULT NULL,
-  `img_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart','chemical') CHARACTER SET binary COLLATE binary NOT NULL DEFAULT 'unknown',
+  `img_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE','3D') CHARACTER SET `binary` COLLATE `binary` NULL DEFAULT NULL,
+  `img_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart','chemical') CHARACTER SET `binary` COLLATE `binary` NOT NULL DEFAULT 'unknown',
   `img_minor_mime` varbinary(100) NOT NULL DEFAULT 'unknown',
   `img_description_id` bigint(20) UNSIGNED NOT NULL,
   `img_actor` bigint(20) UNSIGNED NOT NULL,
@@ -249,7 +249,7 @@ CREATE TABLE `image`  (
   INDEX `img_timestamp`(`img_timestamp`) USING BTREE,
   INDEX `img_sha1`(`img_sha1`(10)) USING BTREE,
   INDEX `img_media_mime`(`img_media_type`, `img_major_mime`, `img_minor_mime`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for imagelinks
@@ -262,7 +262,7 @@ CREATE TABLE `imagelinks`  (
   PRIMARY KEY (`il_from`, `il_to`) USING BTREE,
   INDEX `il_to`(`il_to`, `il_from`) USING BTREE,
   INDEX `il_backlinks_namespace`(`il_from_namespace`, `il_to`, `il_from`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for interwiki
@@ -276,7 +276,7 @@ CREATE TABLE `interwiki`  (
   `iw_local` tinyint(1) NOT NULL,
   `iw_trans` tinyint(4) NOT NULL DEFAULT 0,
   PRIMARY KEY (`iw_prefix`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for ip_changes
@@ -289,7 +289,7 @@ CREATE TABLE `ip_changes`  (
   PRIMARY KEY (`ipc_rev_id`) USING BTREE,
   INDEX `ipc_rev_timestamp`(`ipc_rev_timestamp`) USING BTREE,
   INDEX `ipc_hex_time`(`ipc_hex`, `ipc_rev_timestamp`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for ipblocks
@@ -321,7 +321,7 @@ CREATE TABLE `ipblocks`  (
   INDEX `ipb_timestamp`(`ipb_timestamp`) USING BTREE,
   INDEX `ipb_expiry`(`ipb_expiry`) USING BTREE,
   INDEX `ipb_parent_block_id`(`ipb_parent_block_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for ipblocks_restrictions
@@ -333,7 +333,7 @@ CREATE TABLE `ipblocks_restrictions`  (
   `ir_value` int(11) NOT NULL,
   PRIMARY KEY (`ir_ipb_id`, `ir_type`, `ir_value`) USING BTREE,
   INDEX `ir_type_value`(`ir_type`, `ir_value`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for iwlinks
@@ -346,7 +346,7 @@ CREATE TABLE `iwlinks`  (
   PRIMARY KEY (`iwl_from`, `iwl_prefix`, `iwl_title`) USING BTREE,
   INDEX `iwl_prefix_title_from`(`iwl_prefix`, `iwl_title`, `iwl_from`) USING BTREE,
   INDEX `iwl_prefix_from_title`(`iwl_prefix`, `iwl_from`, `iwl_title`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for job
@@ -370,7 +370,7 @@ CREATE TABLE `job`  (
   INDEX `job_cmd_token_id`(`job_cmd`, `job_token`, `job_id`) USING BTREE,
   INDEX `job_cmd`(`job_cmd`, `job_namespace`, `job_title`, `job_params`(128)) USING BTREE,
   INDEX `job_timestamp`(`job_timestamp`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for l10n_cache
@@ -381,7 +381,7 @@ CREATE TABLE `l10n_cache`  (
   `lc_key` varbinary(255) NOT NULL,
   `lc_value` mediumblob NOT NULL,
   PRIMARY KEY (`lc_lang`, `lc_key`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for langlinks
@@ -393,7 +393,7 @@ CREATE TABLE `langlinks`  (
   `ll_title` varbinary(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`ll_from`, `ll_lang`) USING BTREE,
   INDEX `ll_lang`(`ll_lang`, `ll_title`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for log_search
@@ -405,7 +405,7 @@ CREATE TABLE `log_search`  (
   `ls_log_id` int(10) UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (`ls_field`, `ls_value`, `ls_log_id`) USING BTREE,
   INDEX `ls_log_id`(`ls_log_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for logging
@@ -431,7 +431,7 @@ CREATE TABLE `logging`  (
   INDEX `log_actor_type_time`(`log_actor`, `log_type`, `log_timestamp`) USING BTREE,
   INDEX `log_page_id_time`(`log_page`, `log_timestamp`) USING BTREE,
   INDEX `log_type_action`(`log_type`, `log_action`, `log_timestamp`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for moderation
@@ -479,7 +479,7 @@ CREATE TABLE `moderation`  (
   INDEX `moderation_folder_merged`(`mod_merged_revid`, `mod_timestamp`) USING BTREE,
   INDEX `moderation_folder_spam`(`mod_rejected_auto`, `mod_timestamp`) USING BTREE,
   INDEX `moderation_signup`(`mod_preload_id`, `mod_preloadable`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for moderation_block
@@ -494,7 +494,7 @@ CREATE TABLE `moderation_block`  (
   `mb_timestamp` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
   PRIMARY KEY (`mb_id`) USING BTREE,
   UNIQUE INDEX `moderation_block_address`(`mb_address`(255)) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for module_deps
@@ -505,7 +505,7 @@ CREATE TABLE `module_deps`  (
   `md_skin` varbinary(32) NOT NULL,
   `md_deps` mediumblob NOT NULL,
   PRIMARY KEY (`md_module`, `md_skin`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for oathauth_users
@@ -516,7 +516,7 @@ CREATE TABLE `oathauth_users`  (
   `module` varbinary(255) NOT NULL,
   `data` blob NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for objectcache
@@ -528,7 +528,7 @@ CREATE TABLE `objectcache`  (
   `exptime` binary(14) NOT NULL,
   PRIMARY KEY (`keyname`) USING BTREE,
   INDEX `exptime`(`exptime`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for oldimage
@@ -545,8 +545,8 @@ CREATE TABLE `oldimage`  (
   `oi_actor` bigint(20) UNSIGNED NOT NULL,
   `oi_timestamp` binary(14) NOT NULL,
   `oi_metadata` mediumblob NOT NULL,
-  `oi_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE','3D') CHARACTER SET binary COLLATE binary NULL DEFAULT NULL,
-  `oi_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart','chemical') CHARACTER SET binary COLLATE binary NOT NULL DEFAULT 'unknown',
+  `oi_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE','3D') CHARACTER SET `binary` COLLATE `binary` NULL DEFAULT NULL,
+  `oi_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart','chemical') CHARACTER SET `binary` COLLATE `binary` NOT NULL DEFAULT 'unknown',
   `oi_minor_mime` varbinary(100) NOT NULL DEFAULT 'unknown',
   `oi_deleted` tinyint(3) UNSIGNED NOT NULL DEFAULT 0,
   `oi_sha1` varbinary(32) NOT NULL DEFAULT '',
@@ -554,7 +554,7 @@ CREATE TABLE `oldimage`  (
   INDEX `oi_name_timestamp`(`oi_name`, `oi_timestamp`) USING BTREE,
   INDEX `oi_name_archive_name`(`oi_name`, `oi_archive_name`(14)) USING BTREE,
   INDEX `oi_sha1`(`oi_sha1`(10)) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for page
@@ -579,7 +579,7 @@ CREATE TABLE `page`  (
   INDEX `page_random`(`page_random`) USING BTREE,
   INDEX `page_len`(`page_len`) USING BTREE,
   INDEX `page_redirect_namespace_len`(`page_is_redirect`, `page_namespace`, `page_len`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for page_props
@@ -593,7 +593,7 @@ CREATE TABLE `page_props`  (
   PRIMARY KEY (`pp_page`, `pp_propname`) USING BTREE,
   UNIQUE INDEX `pp_propname_page`(`pp_propname`, `pp_page`) USING BTREE,
   UNIQUE INDEX `pp_propname_sortkey_page`(`pp_propname`, `pp_sortkey`, `pp_page`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for page_restrictions
@@ -612,7 +612,7 @@ CREATE TABLE `page_restrictions`  (
   INDEX `pr_typelevel`(`pr_type`, `pr_level`) USING BTREE,
   INDEX `pr_level`(`pr_level`) USING BTREE,
   INDEX `pr_cascade`(`pr_cascade`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for pagelinks
@@ -626,7 +626,7 @@ CREATE TABLE `pagelinks`  (
   PRIMARY KEY (`pl_from`, `pl_namespace`, `pl_title`) USING BTREE,
   INDEX `pl_namespace`(`pl_namespace`, `pl_title`, `pl_from`) USING BTREE,
   INDEX `pl_backlinks_namespace`(`pl_from_namespace`, `pl_namespace`, `pl_title`, `pl_from`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for protected_titles
@@ -642,7 +642,7 @@ CREATE TABLE `protected_titles`  (
   `pt_create_perm` varbinary(60) NOT NULL,
   PRIMARY KEY (`pt_namespace`, `pt_title`) USING BTREE,
   INDEX `pt_timestamp`(`pt_timestamp`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for querycache
@@ -654,7 +654,7 @@ CREATE TABLE `querycache`  (
   `qc_namespace` int(11) NOT NULL DEFAULT 0,
   `qc_title` varbinary(255) NOT NULL DEFAULT '',
   INDEX `qc_type`(`qc_type`, `qc_value`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for querycache_info
@@ -664,7 +664,7 @@ CREATE TABLE `querycache_info`  (
   `qci_type` varbinary(32) NOT NULL DEFAULT '',
   `qci_timestamp` binary(14) NOT NULL DEFAULT 19700101000000,
   PRIMARY KEY (`qci_type`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for querycachetwo
@@ -680,7 +680,7 @@ CREATE TABLE `querycachetwo`  (
   INDEX `qcc_type`(`qcc_type`, `qcc_value`) USING BTREE,
   INDEX `qcc_title`(`qcc_type`, `qcc_namespace`, `qcc_title`) USING BTREE,
   INDEX `qcc_titletwo`(`qcc_type`, `qcc_namespacetwo`, `qcc_titletwo`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for recentchanges
@@ -720,7 +720,7 @@ CREATE TABLE `recentchanges`  (
   INDEX `rc_actor`(`rc_actor`, `rc_timestamp`) USING BTREE,
   INDEX `rc_name_type_patrolled_timestamp`(`rc_namespace`, `rc_type`, `rc_patrolled`, `rc_timestamp`) USING BTREE,
   INDEX `rc_this_oldid`(`rc_this_oldid`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for redirect
@@ -734,7 +734,7 @@ CREATE TABLE `redirect`  (
   `rd_fragment` varbinary(255) NULL DEFAULT NULL,
   PRIMARY KEY (`rd_from`) USING BTREE,
   INDEX `rd_ns_title`(`rd_namespace`, `rd_title`, `rd_from`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for revision
@@ -757,7 +757,7 @@ CREATE TABLE `revision`  (
   INDEX `page_timestamp`(`rev_page`, `rev_timestamp`) USING BTREE,
   INDEX `rev_actor_timestamp`(`rev_user`, `rev_timestamp`, `rev_id`) USING BTREE,
   INDEX `rev_page_actor_timestamp`(`rev_page`, `rev_user`, `rev_timestamp`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 AVG_ROW_LENGTH = 1024 CHARACTER SET = binary MAX_ROWS = 10000000 ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 AVG_ROW_LENGTH = 1024 CHARACTER SET = `binary` MAX_ROWS = 10000000 ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for searchindex
@@ -783,7 +783,7 @@ CREATE TABLE `site_identifiers`  (
   PRIMARY KEY (`si_type`, `si_key`) USING BTREE,
   INDEX `si_site`(`si_site`) USING BTREE,
   INDEX `si_key`(`si_key`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for site_stats
@@ -798,7 +798,7 @@ CREATE TABLE `site_stats`  (
   `ss_active_users` bigint(20) UNSIGNED NULL DEFAULT NULL,
   `ss_images` bigint(20) UNSIGNED NULL DEFAULT NULL,
   PRIMARY KEY (`ss_row_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for sites
@@ -825,7 +825,7 @@ CREATE TABLE `sites`  (
   INDEX `site_protocol`(`site_protocol`) USING BTREE,
   INDEX `site_domain`(`site_domain`) USING BTREE,
   INDEX `site_forward`(`site_forward`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for templatelinks
@@ -839,7 +839,7 @@ CREATE TABLE `templatelinks`  (
   PRIMARY KEY (`tl_from`, `tl_namespace`, `tl_title`) USING BTREE,
   INDEX `tl_namespace`(`tl_namespace`, `tl_title`, `tl_from`) USING BTREE,
   INDEX `tl_backlinks_namespace`(`tl_from_namespace`, `tl_namespace`, `tl_title`, `tl_from`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for text
@@ -850,7 +850,7 @@ CREATE TABLE `text`  (
   `old_text` mediumblob NOT NULL,
   `old_flags` tinyblob NOT NULL,
   PRIMARY KEY (`old_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for updatelog
@@ -860,7 +860,7 @@ CREATE TABLE `updatelog`  (
   `ul_key` varbinary(255) NOT NULL,
   `ul_value` blob NULL,
   PRIMARY KEY (`ul_key`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for uploadstash
@@ -880,7 +880,7 @@ CREATE TABLE `uploadstash`  (
   `us_size` int(10) UNSIGNED NOT NULL,
   `us_sha1` varbinary(31) NOT NULL,
   `us_mime` varbinary(255) NULL DEFAULT NULL,
-  `us_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE','3D') CHARACTER SET binary COLLATE binary NULL DEFAULT NULL,
+  `us_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE','3D') CHARACTER SET `binary` COLLATE `binary` NULL DEFAULT NULL,
   `us_image_width` int(10) UNSIGNED NULL DEFAULT NULL,
   `us_image_height` int(10) UNSIGNED NULL DEFAULT NULL,
   `us_image_bits` smallint(5) UNSIGNED NULL DEFAULT NULL,
@@ -888,7 +888,7 @@ CREATE TABLE `uploadstash`  (
   UNIQUE INDEX `us_key`(`us_key`) USING BTREE,
   INDEX `us_user`(`us_user`) USING BTREE,
   INDEX `us_timestamp`(`us_timestamp`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user
@@ -914,7 +914,7 @@ CREATE TABLE `user`  (
   UNIQUE INDEX `user_name`(`user_name`) USING BTREE,
   INDEX `user_email_token`(`user_email_token`) USING BTREE,
   INDEX `user_email`(`user_email`(50)) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_former_groups
@@ -924,7 +924,7 @@ CREATE TABLE `user_former_groups`  (
   `ufg_user` int(10) UNSIGNED NOT NULL DEFAULT 0,
   `ufg_group` varbinary(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`ufg_user`, `ufg_group`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_groups
@@ -937,7 +937,7 @@ CREATE TABLE `user_groups`  (
   PRIMARY KEY (`ug_user`, `ug_group`) USING BTREE,
   INDEX `ug_group`(`ug_group`) USING BTREE,
   INDEX `ug_expiry`(`ug_expiry`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_newtalk
@@ -949,7 +949,7 @@ CREATE TABLE `user_newtalk`  (
   `user_last_timestamp` binary(14) NULL DEFAULT NULL,
   INDEX `un_user_id`(`user_id`) USING BTREE,
   INDEX `un_user_ip`(`user_ip`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_properties
@@ -961,7 +961,7 @@ CREATE TABLE `user_properties`  (
   `up_value` blob NULL,
   PRIMARY KEY (`up_user`, `up_property`) USING BTREE,
   INDEX `up_property`(`up_property`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for watchlist
@@ -977,7 +977,7 @@ CREATE TABLE `watchlist`  (
   UNIQUE INDEX `wl_user`(`wl_user`, `wl_namespace`, `wl_title`) USING BTREE,
   INDEX `wl_namespace_title`(`wl_namespace`, `wl_title`) USING BTREE,
   INDEX `wl_user_notificationtimestamp`(`wl_user`, `wl_notificationtimestamp`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for watchlist_expiry
@@ -988,6 +988,6 @@ CREATE TABLE `watchlist_expiry`  (
   `we_expiry` binary(14) NOT NULL,
   PRIMARY KEY (`we_item`) USING BTREE,
   INDEX `we_expiry`(`we_expiry`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = binary ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = `binary` ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
