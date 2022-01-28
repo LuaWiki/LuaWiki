@@ -329,7 +329,20 @@ function showPreview() {
     })
   }).then(res => res.json())
   .then(data => {
-    document.getElementById('viewer-panel').innerHTML = doMwConvert(data.result);
+    const tpl = document.createElement('template');
+    tpl.innerHTML = data.result;
+    
+    const treeWalker = document.createTreeWalker(tpl.content, NodeFilter.SHOW_TEXT, null, false);
+    let currentNode = null;
+
+    while(currentNode = treeWalker.nextNode()) {
+      currentNode.nodeValue = doMwConvert(currentNode.nodeValue);
+    }
+    
+    const panel = document.getElementById('viewer-panel');
+    panel.textContent = '';
+    panel.appendChild(tpl.content);
+    
     buildRef();
     buildMath();
     buildHighlight();
