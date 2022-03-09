@@ -40,7 +40,7 @@ end
 -- main parsing
 local nonparse = require('core/nonparse')
 local parser = require('core/parser')
-local wikitext = post_args.content and post_args.content:gsub('\r', ''):gsub('\n?$', '\n') or ''
+local wikitext = post_args.content and post_args.content:gsub('\r', ''):gsub('[^\n]$', '%0\n') or ''
 local wiki_state = {
   title = pagename,
   npb_index = 0,

@@ -64,7 +64,7 @@ end
 
 local wiki_grammar = nil
 local function parse_inside(a)
-  local inner_html = wiki_grammar:match(a:gsub('\n?$', '\n'))
+  local inner_html = wiki_grammar:match( (a:gsub('[^\n]$', '%0\n')) )
   if not inner_html then return '' end
   return inner_html:gsub('^<p>(.-)</p>', '%1'):gsub('<p>(.-)</p>$', '%1')
 end
