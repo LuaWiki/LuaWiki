@@ -43,7 +43,7 @@ function buildRef() {
               targetElement.className = '';
               targetElement.innerHTML = decodeEntities(x.textContent);
             }
-            x.outerHTML = `<sup>[<a href="#${anchor}">${refMap[name]}</a>]</sup>`;
+            x.outerHTML = `<sup>[<a href="#${anchor}">${g ? g + ' ' : ''}${refMap[name]}</a>]</sup>`;
             return;
           }
           refCounter++;
@@ -53,7 +53,7 @@ function buildRef() {
           refCounter++;
           anchor = `cite_note-${refCounter}`;
         }
-        $x.before(`<sup>[<a href="#${anchor}">${refCounter}</a>]</sup>`);
+        $x.before(`<sup>[<a href="#${anchor}">${g ? g + ' ' : ''}${refCounter}</a>]</sup>`);
         $x.attr('id', anchor);
         if (x.textContent) {
           $x.html(decodeEntities(x.textContent));
@@ -82,10 +82,14 @@ function buildMath() {
       decodedMath = '\\ce{' + decodedMath + '}';
     }
     if (x.parentElement.childNodes.length === 1) {
-      katex.render(decodedMath, x, {
-        displayMode: true,
-        fleqn: true
-      });
+      try {
+        katex.render(decodedMath, x, {
+          displayMode: true,
+          fleqn: true
+        });
+      } catch (e) {
+        console.error(e);
+      }
     } else {
       try {
         katex.render(decodedMath, x);
@@ -102,7 +106,12 @@ function buildMath() {
 function buildHighlight() {
   $('syntaxhighlight').each((_, x) => {
     x.className = 'language-' + x.lang + ' hljs';
-    x.innerHTML = hljs.highlight(decodeEntities(x.textContent.replace(/^[ \t]*\n/, '')),
-      {language: x.lang}).value;
+    try {
+      x.innerHTML = hljs.highlight(decodeEntities(x.textContent.replace(/^[ \t]*\n/, '')),
+        {language: x.lang}).value;
+    } catch (e) {
+      x.innerHTML = x.textContent.replace(/^[ \t]*\n/, '');
+      console.error(e);
+    }
   })
 }

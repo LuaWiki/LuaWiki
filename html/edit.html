@@ -4,8 +4,8 @@
   <title>LuaWiki Editor</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
   <link rel="stylesheet" href="/ooicon/style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/default.min.css">
+  <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.6/katex.min.css">
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/11.5.1/styles/default.min.css">
   <link rel="stylesheet" type="text/css" href="/wiki.css">
 <style>
 html {
@@ -207,9 +207,9 @@ Split(['#source-panel', '#viewer-panel'], {
 </script>
 
 <script src="/simplequery.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/mhchem.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js"></script>
+<script defer src="https://cdn.staticfile.org/KaTeX/0.15.6/katex.min.js"></script>
+<script defer src="https://cdn.staticfile.org/KaTeX/0.15.6/contrib/mhchem.min.js"></script>
+<script defer src="https://cdn.staticfile.org/highlight.js/11.5.1/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dialog-polyfill@latest/dist/dialog-polyfill.min.js"></script>
 <script src="/zh_convert.js"></script>
 <script src="/wiki.js"></script>
@@ -329,20 +329,7 @@ function showPreview() {
     })
   }).then(res => res.json())
   .then(data => {
-    const tpl = document.createElement('template');
-    tpl.innerHTML = data.result;
-    
-    const treeWalker = document.createTreeWalker(tpl.content, NodeFilter.SHOW_TEXT, null, false);
-    let currentNode = null;
-
-    while(currentNode = treeWalker.nextNode()) {
-      currentNode.nodeValue = doMwConvert(currentNode.nodeValue);
-    }
-    
-    const panel = document.getElementById('viewer-panel');
-    panel.textContent = '';
-    panel.appendChild(tpl.content);
-    
+    document.getElementById('viewer-panel').innerHTML = doMwConvert(data.result);
     buildRef();
     buildMath();
     buildHighlight();
