@@ -51,7 +51,7 @@ function buildRef() {
           refMap[name] = refCounter;
         } else {
           refCounter++;
-          anchor = `cite_note-${refCounter}`;
+          anchor = `cite_note-${g}${refCounter}`;
         }
         $x.before(`<sup>[<a href="#${anchor}">${g ? g + ' ' : ''}${refCounter}</a>]</sup>`);
         $x.attr('id', anchor);
