@@ -1,0 +1,164 @@
+<div class="editor">
+  <div id="source-panel" class="panel">
+    <div class="tool-bar">
+      <a title="bold" class="icon-bold-b" onclick="addBold()"></a>
+      <a title="italic" class="icon-italic-i" onclick="addItalic()"></a>
+      <a title="delete line" class="icon-strikethrough-s" onclick="addDel()"></a>
+      <a title="headings">H</a>
+      <span class="separator">|</span>
+      <a title="code" class="icon-code"></a>
+      <a title="quote" class="icon-quotes-ltr" onclick="addQuote()"></a>
+      <a title="bullet list" class="icon-listBullet-ltr"></a>
+      <a title="number list" class="icon-listNumbered-ltr"></a>
+      <span class="separator">|</span>
+      <a title="link" class="icon-link" onclick="addLink()"></a>
+      <a title="image" class="icon-image"></a>
+      <a title="table" class="icon-table"></a>
+      <a title="math equation" class="icon-mathematics" onclick="addMath()"></a>
+      <a title="nowiki" class="icon-noWikiText" onclick="addNowiki()"></a>
+      <a title="fold references" class="icon-outdent-ltr" onclick="foldRef()"></a>
+    </div>
+    <div id="source-editor"></div>
+  </div>
+  <div id="viewer-panel" class="panel parser-output"></div>
+</div>
+
+<script type="module">
+import Split from '/split.js'
+Split(['#source-panel', '#viewer-panel'], {
+  onDragEnd: function() {
+    if (editor) {
+      editor.resize();
+    }
+  }
+});
+</script>
+<script src="/ace-lw/ace.js"></script>
+<script>
+let aceCheck = setInterval(() => {
+  if (window.ace) {
+    clearInterval(aceCheck);
+    loadAfterAce();
+  }
+}, 1000)
+
+function loadAfterAce() {
+  var shadow = document.getElementById('source-editor').attachShadow({mode: 'open'});
+
+  const editorElem = document.createElement('div');
+  editorElem.id = 'editorElem'
+  editorElem.style.width = '100%';
+  editorElem.style.height = '100%';
+  shadow.appendChild(editorElem);
+
+  window.editor = ace.edit(shadow.querySelector('#editorElem'), {
+    mode: "ace/mode/mediawiki",
+    wrap: true
+  });
+
+  shadow.appendChild(document.getElementById('ace_editor.css'));
+
+  $('.btn-group button').click(function() {
+    $('.btn-group .active').removeClass('active');
+    let $this = $(this);
+    $this.addClass('active');
+    if ($this.hasClass('icon-edit')) {
+      $('.editor').removeClass('preview').addClass('source');
+      editor.resize();
+    } else if ($this.hasClass('icon-eye')) {
+      $('.editor').removeClass('source').addClass('preview');
+    } else {
+      $('.editor').removeClass('preview').removeClass('source');
+      editor.resize();
+    }
+  });
+
+  editor.setTheme("ace/theme/behave");
+  editor.setOption("showPrintMargin", false);
+  editor.setHighlightActiveLine(false);
+}
+</script>
+
+<style>
+.editor {
+  display: flex;
+  height: 100%;
+  min-height: 0px;
+}
+.editor .panel {
+  background: #fff;
+}
+.editor .gutter {
+  background-color: #eee;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.editor .gutter.gutter-horizontal {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+  cursor: col-resize;
+}
+.editor #source-editor {
+  height: calc(100% - 42px);
+}
+.editor #viewer-panel {
+  padding: 0 2em;
+  overflow: auto;
+}
+
+.editor .tool-bar {
+  background: #1c1c1e;
+  border-bottom: 1px solid #343434;
+  color: #ccc;
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  font-size: 16px;
+  height: 42px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: none;
+  
+  padding: 8px 10px;
+}
+.editor .tool-bar a.active, .tool-bar a:hover {
+  background: #212121;
+  border-color: #aaa;
+}
+.editor .tool-bar a {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none !important;
+  color: #ccc !important;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.editor .tool-bar a + a {
+  margin-left: 10px;
+}
+.editor .tool-bar .separator {
+  display: inline-block;
+  width: 0;
+  border-left: 1px solid #4d4d4d;
+  color: transparent;
+  text-indent: -10px;
+  margin: 0 10px;
+}
+.editor .tool-bar a::before {
+  line-height: 22px;
+}
+
+/* toggle view */
+.editor .preview #source-panel, .source #viewer-panel,
+.editor .preview .gutter, .editor .source .gutter {
+  display: none;
+}
+.editor .preview #viewer-panel, .editor .source #source-panel {
+  width: 100% !important;
+}
+</style>

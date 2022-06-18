@@ -54,6 +54,7 @@ local mainpage_html = ([=[<!DOCTYPE html>
 <html>
 <head>
   <title>维基百科，自由的百科全书</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.25, maximum-scale=5.0">
   <!--<link rel="stylesheet" href="https://picocss.com/css/pico.min.css">-->
   <link rel="stylesheet" href="https://cdn.staticfile.org/normalize/8.0.1/normalize.css">
   <link rel="stylesheet" href="https://cdn.staticfile.org/milligram/1.4.1/milligram.css">
@@ -101,19 +102,18 @@ body > nav a:hover {
 }
 #content {
   height: calc(100% - 41.6px);
-  overflow: auto;
-  padding: 1em;
 }
 #content.has-toc {
   display: grid;
   grid-template-columns: 13em 1fr;
   grid-column-gap: 2em;
+  padding: 1em;
 }
 #content aside {
   position: sticky;
   top: 0;
   align-self: start;
-  height: 90vh;
+  height: 100%;
   overflow: auto;
 }
 #content aside ul {
@@ -127,10 +127,22 @@ body > nav a:hover {
   opacity: 1;
   font-weight: bold;
 }
+#parser-output {
+  height: 100%;
+  overflow: auto;
+}
 @supports (-moz-appearance:none) {
-  .parser-output {
+  #parser-output {
     text-align: justify;
     hyphens: auto;
+  }
+}
+@media only screen and (max-width: 600px) {
+  #content aside {
+    display: none;
+  }
+  #content.has-toc {
+    display: block;
   }
 }
 </style>
@@ -163,108 +175,7 @@ body > nav a:hover {
 <script defer src="https://cdn.staticfile.org/highlight.js/11.5.1/highlight.min.js"></script>
 <script src="/zh_convert.js"></script>
 <script src="/wiki.js"></script>
-<script>
-let outputDiv = document.getElementById('parser-output');
-$(document).ready(function(){
-  const tpl = document.createElement('div');
-  tpl.innerHTML = doMwConvert(outputDiv.innerHTML);
-  const tpl2 = document.createElement('div');
-  tpl2.appendChild(tpl.childNodes[0]);
-  let headerCounter = 0;
-  let h2Sec = document.createElement('section');
-  let h3Sec = null;
-  let length = tpl.childNodes.length;
-  while (length--) {
-    let x = tpl.childNodes[0];
-    if (x.nodeName === 'H2') {
-      if (h3Sec) {
-        h2Sec.appendChild(h3Sec);
-        h3Sec = null;
-      }
-      tpl2.appendChild(h2Sec);
-      h2Sec = document.createElement('section');
-      h2Sec.id = 'toc' + (++headerCounter)
-      h2Sec.appendChild(x);
-    } else if (x.nodeName === 'H3') {
-      if (h3Sec) {
-        h2Sec.appendChild(h3Sec);
-      }
-      h3Sec = document.createElement('section');
-      h3Sec.id = 'toc' + (++headerCounter)
-      h3Sec.appendChild(x);
-    } else {
-      if (h3Sec) {
-        h3Sec.appendChild(x);
-      } else {
-        h2Sec.appendChild(x);
-      }
-    }
-  }
-  tpl2.appendChild(h2Sec);
-  outputDiv.innerHTML = tpl2.innerHTML;
-  
-  buildToc();
-  buildRef();
-  buildMath();
-  buildHighlight();
-});
-
-function buildToc() {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      const id = entry.target.getAttribute('id');
-      if (entry.intersectionRatio > 0) {
-        document.querySelector(`aside li a[href="#${id}"]`).parentElement.classList.add('active');
-      } else {
-        document.querySelector(`aside li a[href="#${id}"]`).parentElement.classList.remove('active');
-      }
-    });
-  });
-
-  document.querySelectorAll('section[id]').forEach((section) => {
-    observer.observe(section);
-  });
-  
-  const tocArr = [];
-  $('h2, h3').each((i, x) => {
-    if (x.nodeName === 'H2') {
-      tocArr.push({
-        name: x.innerText,
-        link: '#' + x.parentElement.id,
-        children: []
-      });
-    } else {
-      tocArr[tocArr.length - 1].children.push({
-        name: x.innerText,
-        link: '#' + x.parentElement.id
-      })
-    }
-  });
-  $('#content > aside').html('<ul>' + tocArr.map(x => {
-    let myChildren = x.children.length ? ('<ul>' + x.children.map(y => {
-      return `<li><a href="${y.link}">${y.name}</a></li>`;
-    }).join('') + '</ul>') : '';
-    return `<li><a href="${x.link}">${x.name}</a>
-      ${myChildren}
-    </li>`
-  }).join('') + '</ul>');
-}
-
-const hashStore = [ { hash: '' } ];
-let hashIndex = 0
-window.addEventListener('hashchange', function() {
-  hashStore[hashIndex].pos = outputDiv.scrollTop;
-  if (hashStore[hashIndex - 1] !== undefined && location.hash === hashStore[hashIndex - 1].hash) {
-    outputDiv.scrollTop = hashStore[--hashIndex].pos;
-  } else if (hashStore[hashIndex + 1] !== undefined && location.hash === hashStore[hashIndex + 1].hash) {
-    outputDiv.scrollTop = hashStore[++hashIndex].pos;
-  } else {
-    hashStore[++hashIndex] = {
-      hash: location.hash
-    };
-  }
-}, false);
-</script>
+<script src="/app.js"></script>
 </body>
 </html>
 ]=]):gsub('_CONTENT_', (parser_output:gsub('%%', '%%%%')))

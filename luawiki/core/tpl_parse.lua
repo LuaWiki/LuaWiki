@@ -1,4 +1,4 @@
-package.path = './modules/?.lua;' .. package.path
+# package.path = './modules/?.lua;' .. package.path
 
 local z = {}
 local re = require('lpeg.re')
@@ -68,7 +68,7 @@ local tpl_defs = {
   end,
   cache_module = function(m)
     if not z.ext_modules[m] then
-      local f = assert(loadfile('modules/'.. m .. '.lua', 't', env))
+      local f = assert(loadfile(ngx.config.prefix() .. 'modules/'.. m .. '.lua', 't', env))
       z.ext_modules[m] = f()
     end
   end,

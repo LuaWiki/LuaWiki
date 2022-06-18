@@ -35,7 +35,7 @@ local simple_tpl = re.compile[=[--lpeg
   simp_tpl <- { tpl }
   tpl      <- '{{' tpl_name ([^{}]+ / balanced)* '}}'
   balanced <- '{' ([^{}] / balanced)* '}'
-  tpl_name <- { ([_/!-] / [^%p%nl])+ }
+  tpl_name <- { ([_/!+-] / [^%p%nl])+ }
 ]=]
 
 local var_pat = re.compile([=[--lpeg
@@ -47,7 +47,7 @@ local mod_env = sandbox.env_table()
 mod_env.fun = require('iter')
 mod_env.require = function(m)
   local ok, f = xpcall(function()
-    return loadfile('modules/'.. m .. '.lua', 't', env)
+    return loadfile(ngx.config.prefix() .. 'modules/'.. m .. '.lua', 't', env)
   end, function(err)
     error('Module ' .. m .. ': ' .. err)
   end)
@@ -203,10 +203,10 @@ preproc.new = function(wiki_state, template_cache)
 
   function z:process(content)
     return re.gsub(content, simple_tpl, function(tpl_text, tpl_name)
-      tpl_name = tpl_name:sub(1, 1):upper() .. tpl_name:sub(2):gsub(' +$', ''):gsub(' ', '_')
+      tpl_name = tpl_name:sub(1, 1):upper() .. tpl_name:sub(2):gsub('%s+$', ''):gsub(' ', '_')
 
       if not self.tpl_cache[tpl_name] then
-        local f = io.open('wiki/template/' .. tpl_name .. '.tpl')
+        local f = io.open(ngx.config.prefix() .. 'wiki/template/' .. tpl_name .. '.tpl')
         if not f then
           if #content == #tpl_text then
             return tpl_text

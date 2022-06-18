@@ -903,7 +903,7 @@ CREATE TABLE `user`  (
   `user_newpass_time` binary(14) NULL DEFAULT NULL,
   `user_email` tinyblob NOT NULL,
   `user_touched` binary(14) NOT NULL,
-  `user_token` binary(32) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `user_token` binary(32) NULL DEFAULT NULL,
   `user_email_authenticated` binary(14) NULL DEFAULT NULL,
   `user_email_token` binary(32) NULL DEFAULT NULL,
   `user_email_token_expires` binary(14) NULL DEFAULT NULL,

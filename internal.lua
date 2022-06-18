@@ -1,5 +1,5 @@
 local z = {}
-local util = require('library_util')
+local util = require('utils/library_util')
 
 z.expr = function(args, in_text)
   return args[1]

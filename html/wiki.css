@@ -6,7 +6,7 @@ a.new {
   color: #d33;
 }
 
-#content {
+#parser-output {
   scroll-behavior: smooth;
 }
 
