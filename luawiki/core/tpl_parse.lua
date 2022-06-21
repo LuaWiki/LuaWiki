@@ -1,5 +1,3 @@
-# package.path = './modules/?.lua;' .. package.path
-
 local z = {}
 local re = require('lpeg.re')
 local env = _G

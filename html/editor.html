@@ -35,7 +35,7 @@ Split(['#source-panel', '#viewer-panel'], {
 </script>
 <script src="/ace-lw/ace.js"></script>
 <script>
-let aceCheck = setInterval(() => {
+window.aceCheck = setInterval(() => {
   if (window.ace) {
     clearInterval(aceCheck);
     loadAfterAce();
@@ -51,10 +51,13 @@ function loadAfterAce() {
   editorElem.style.height = '100%';
   shadow.appendChild(editorElem);
 
+  window.editorChanged = false;
   window.editor = ace.edit(shadow.querySelector('#editorElem'), {
     mode: "ace/mode/mediawiki",
     wrap: true
   });
+  
+  document.dispatchEvent(new Event('aceInit'));
 
   shadow.appendChild(document.getElementById('ace_editor.css'));
 
@@ -76,7 +79,70 @@ function loadAfterAce() {
   editor.setTheme("ace/theme/behave");
   editor.setOption("showPrintMargin", false);
   editor.setHighlightActiveLine(false);
+
+  window.addBold = encloseWith("'''");
+  window.addItalic = encloseWith("''");
+  window.addDel = encloseWith(`<s>`, `</s>`);
+  window.addQuote = encloseWith(`<blockquote>`, `</blockquote>`);
+  window.addMath = encloseWith(`<math>`, `</math>`);
+  window.addNowiki = encloseWith(`<nowiki>`, `</nowiki>`);
+
+  editor.commands.addCommand({
+    name: 'bold',
+    bindKey: {win: 'Ctrl-B',  mac: 'Command-B'},
+    exec: addBold
+  });
+  editor.commands.addCommand({
+    name: 'italic',
+    bindKey: {win: 'Ctrl-I',  mac: 'Command-I'},
+    exec: addItalic
+  });
+
+  function buildFormData(data) {
+    const formData = new FormData();
+    for (const key in data) {
+      formData.append(key, data[key]);
+    }
+    return formData;
+  }
+
+  function showPreview() {
+    fetch('/preview/test', {
+      method: 'POST',
+      body: buildFormData({
+        content: editor.getValue()
+      })
+    }).then(res => res.json())
+    .then(data => {
+      document.getElementById('viewer-panel').innerHTML = doMwConvert(data.result);
+      buildRef();
+      buildMath();
+      buildHighlight();
+    });
+  }
+
+  editor.session.on('change', function(delta) {
+    editorChanged = true;
+  });
+
+  setInterval(() => {
+    if (editorChanged) {
+      showPreview();
+      editorChanged = false;
+    }
+  }, 2000);
 }
+
+function encloseWith(start, end) {
+  if (!end) end = start;
+  return function() {
+    let selectedText = editor.session.getTextRange(editor.getSelectionRange());
+    if (selectedText && selectedText.indexOf('\n') < 0) {
+      editor.insert(start + selectedText + end);
+    }
+  }
+}
+
 </script>
 
 <style>
@@ -102,7 +168,7 @@ function loadAfterAce() {
   height: calc(100% - 42px);
 }
 .editor #viewer-panel {
-  padding: 0 2em;
+  padding: 2em;
   overflow: auto;
 }
 
@@ -121,6 +187,9 @@ function loadAfterAce() {
   scrollbar-width: none;
   
   padding: 8px 10px;
+}
+.editor .tool-bar::-webkit-scrollbar {
+  display: none;
 }
 .editor .tool-bar a.active, .tool-bar a:hover {
   background: #212121;

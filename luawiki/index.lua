@@ -54,6 +54,7 @@ local mainpage_html = ([=[<!DOCTYPE html>
 <html>
 <head>
   <title>维基百科，自由的百科全书</title>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.25, maximum-scale=5.0">
   <!--<link rel="stylesheet" href="https://picocss.com/css/pico.min.css">-->
   <link rel="stylesheet" href="https://cdn.staticfile.org/normalize/8.0.1/normalize.css">
@@ -130,6 +131,7 @@ body > nav a:hover {
 #parser-output {
   height: 100%;
   overflow: auto;
+  position: relative;
 }
 @supports (-moz-appearance:none) {
   #parser-output {
@@ -155,11 +157,17 @@ body > nav a:hover {
       </li>
     </ul>
     <ul>
-      <li>
-        <a href="javascript:openSearch()"><i class="icon icon-search"></i></a>
+      <li v-show="showEdit">
+        <a href="javascript:editPage()" title="edit"><i class="icon icon-edit"></i></a>
+      </li>
+      <li v-show="showSubmit">
+        <a href="javascript:submitPage()" title="submit"><i class="icon icon-check"></i></a>
       </li>
       <li>
-        <a href="javascript:gotoLogin()"><i class="icon icon-logIn-ltr"></i></a>
+        <a href="javascript:openSearch()" title="search"><i class="icon icon-search"></i></a>
+      </li>
+      <li>
+        <a href="javascript:gotoLogin()" title="login"><i class="icon icon-logIn-ltr"></i></a>
       </li>
     </ul>
   </nav>

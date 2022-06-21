@@ -53,13 +53,26 @@
     </footer><!-- ./ Footer -->
 
     <script>
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    });
+
     function login() {
       var formElement = document.querySelector("form");
       var formData = new FormData(formElement);
       fetch('/login', {
         method: 'POST',
         body: formData
-      });
+      }).then(res => res.json())
+        .then(res => {
+          if (res.code === 0) {
+            if (params && params.returnUrl) {
+              location.href = params.returnUrl;
+            } else {
+              location.href ='/';
+            }
+          }
+        });
     }
     </script>
   </body>

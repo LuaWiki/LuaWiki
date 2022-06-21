@@ -1,4 +1,4 @@
-define("ace/theme/behave",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
+ace.define("ace/theme/behave",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
 "use strict";
 
 exports.isDark = false;
@@ -163,7 +163,7 @@ exports.$id = "ace/theme/behave";
 var dom = require("../lib/dom");
 dom.importCssString(exports.cssText, exports.cssClass, false);
 });                (function() {
-                    window.require(["ace/theme/behave"], function(m) {
+                    ace.require(["ace/theme/behave"], function(m) {
                         if (typeof module == "object" && typeof exports == "object" && module) {
                             module.exports = m;
                         }
