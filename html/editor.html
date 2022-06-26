@@ -120,9 +120,57 @@ function loadAfterAce() {
       buildHighlight();
     });
   }
+  
+  let hRegex = /^(={2,})([^=]+)\1/;
+  window.navCache = {
+    prev: { line: 0 },
+    next: {}
+  };
+  
+  function calcPrev(row) {
+    let prev = {}
+    for(let i = row; i >= 0; i--) {
+      let line = editor.session.getLine(i);
+      let matched = line.match(hRegex);
+      if (!matched) continue;
+      prev.line = i;
+      prev.level = matched[1].length;
+      prev.title = matched[2].trim();
+      break;
+    }
+    if (!prev.line) {
+      prev.line = 0;
+    }
+    return prev;
+  }
+  
+  function calcNext(row) {
+    let next = {}
+    let endRow = editor.session.getLength();
+    for(let i = row; i < endRow; i++) {
+      let line = editor.session.getLine(i);
+      let matched = line.match(hRegex);
+      if (!matched) continue;
+      next.line = i;
+      next.level = matched[1].length;
+      next.title = matched[2].trim();
+      break;
+    }
+    if (!next.line) {
+      next.line = endRow;
+    }
+    return next;
+  }
+  
+  navCache.next = calcNext(0);
 
+  // instant preview
   editor.session.on('change', function(delta) {
     editorChanged = true;
+    
+    let row = editor.getFirstVisibleRow();
+    navCache.prev = calcPrev(row);
+    navCache.next = calcNext(row);
   });
 
   setInterval(() => {
@@ -131,6 +179,33 @@ function loadAfterAce() {
       editorChanged = false;
     }
   }, 2000);
+  
+  // scroll behavior
+  editor.session.on('changeScrollTop', function() {
+    let row = editor.getFirstVisibleRow();
+    console.log(row);
+    if (row > navCache.prev.line && row < navCache.next.line) {
+      // do nothing
+    } else if (row >= navCache.next.line) {
+      scrollToTitle(navCache.next.level, navCache.next.title);
+      navCache.prev = navCache.next;
+      navCache.next = calcNext(row);
+    } else if (row <= navCache.prev.line) {
+      scrollToTitle(navCache.prev.level, navCache.prev.title);
+      navCache.next = navCache.prev;
+      navCache.prev = calcPrev(row);
+    }
+  });
+}
+
+function scrollToTitle(level, title) {
+  let xpath = `.//h${level}[text()='${title}']`;
+  let viewer = document.getElementById('viewer-panel');
+  let matchingElement = document.evaluate(xpath, viewer, null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+  if (matchingElement) {
+    viewer.scrollTop = matchingElement.offsetTop;
+  }
 }
 
 function encloseWith(start, end) {
@@ -141,6 +216,63 @@ function encloseWith(start, end) {
       editor.insert(start + selectedText + end);
     }
   }
+}
+
+function realFoldAll(foldingStartMarker, foldingStopMarker) {
+  if (!foldingStartMarker || !foldingStopMarker) return;
+  let row = 0;
+  let endRow = editor.session.getLength();
+  
+  let line = null;
+  
+  function getFoldWidgetRange(offset) {
+    let match = line.match(foldingStartMarker);
+    if (match) {
+      var rObj = { startRow: row, startColumn: match.index + offset };
+      let newStart = match.index + match[0].length;
+      let sameLine = line.substring(newStart);
+      match = sameLine.match(foldingStopMarker);
+      if (match) {
+          match.index += newStart + offset;
+      } else {
+          while (++row < endRow) {
+              line = editor.session.getLine(row);
+              match = line.match(foldingStopMarker);
+              if (match || row - rObj.startRow === 10) break;
+          }
+      }
+
+      if (match) {
+          return new ace.Range(rObj.startRow, rObj.startColumn, row, match.index + match[0].length);
+      }
+    }
+  }
+  
+  line = editor.session.getLine(row);
+  let offset = 0
+  while (row < endRow) {
+    let range = getFoldWidgetRange(offset);
+    if (range) {
+      range.collapseChildren = 1;
+      editor.session.addFold('...', range);
+      let new_offset = range.end.column;
+      if (new_offset === offset) {
+        console.log(line);
+        break;
+      }
+      line = line.substring(new_offset - offset);
+      offset = new_offset;
+    } else {
+      line = editor.session.getLine(++row);
+      offset = 0;
+    }
+  }
+}
+
+function foldRef() {
+  realFoldAll(/\<ref(?:\>| [^\/]*?\>)/, /\<\/ref\>/);
+  realFoldAll(/\<ref [^\/>]*\//, /\>/);
+  realFoldAll(/{{(?:r[|]|sfn|efn|备注)/, /}}/);
 }
 
 </script>
@@ -170,6 +302,7 @@ function encloseWith(start, end) {
 .editor #viewer-panel {
   padding: 2em;
   overflow: auto;
+  position: relative;
 }
 
 .editor .tool-bar {

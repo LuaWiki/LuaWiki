@@ -6,11 +6,11 @@ a.new {
   color: #d33;
 }
 
-#parser-output {
+#parser-output, #viewer-panel {
   scroll-behavior: smooth;
 }
 
-.parser-output ul, .parser-output ol {
+#parser-output ul, #parser-output ol {
   margin: 0.3em 0 0 1.6em;
   padding: 0;
 }
