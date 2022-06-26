@@ -73,7 +73,7 @@ end
   
 ngx.say(cjson.encode({
   code = 0,
-  result = wiki_html:gsub('<((%a+)[^>]-)/>', function(p1, p2)
+  result = '<h1>' .. pagename:gsub('_', ' ') .. '</h1>' .. wiki_html:gsub('<((%a+)[^>]-)/>', function(p1, p2)
     if not html_stag_map[p2] then
       if p2 == 'references' then
         return '<div><' .. p1 .. '></' .. p2 .. '></div>'

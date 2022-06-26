@@ -251,7 +251,7 @@ function gotoLogin() {
 }
 
 async function editPage() {
-  let pagename = lastPath.match(/\/wiki\/([^#]+)/) && RegExp.$1;
+  window.pagename = lastPath.match(/\/wiki\/([^#]+)/) && RegExp.$1;
   if (!pagename) return;
   getRemoteHTML('/editor.html', '#/edit', '编辑', 'tool');
   appData.showEdit = false;

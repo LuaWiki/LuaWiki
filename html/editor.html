@@ -107,7 +107,7 @@ function loadAfterAce() {
   }
 
   function showPreview() {
-    fetch('/preview/test', {
+    fetch('/preview/' + (window.pagename || 'test'), {
       method: 'POST',
       body: buildFormData({
         content: editor.getValue()
@@ -181,8 +181,11 @@ function loadAfterAce() {
   }, 2000);
   
   // scroll behavior
-  editor.session.on('changeScrollTop', function() {
+  editor.renderer.on("afterRender", function(e) {
     let row = editor.getFirstVisibleRow();
+    if (editor.isRowFullyVisible(row)) {
+      row++;
+    }
     console.log(row);
     if (row > navCache.prev.line && row < navCache.next.line) {
       // do nothing
