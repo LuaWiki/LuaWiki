@@ -54,7 +54,8 @@ function loadAfterAce() {
   window.editorChanged = false;
   window.editor = ace.edit(shadow.querySelector('#editorElem'), {
     mode: "ace/mode/mediawiki",
-    wrap: true
+    wrap: true,
+    fontSize: '12pt'
   });
   
   document.dispatchEvent(new Event('aceInit'));
@@ -187,7 +188,9 @@ function loadAfterAce() {
       row++;
     }
     console.log(row);
-    if (row > navCache.prev.line && row < navCache.next.line) {
+    if (row <= 1) {
+      document.getElementById('viewer-panel').scrollTop = 0;
+    } else if (row > navCache.prev.line && row < navCache.next.line) {
       // do nothing
     } else if (row >= navCache.next.line) {
       scrollToTitle(navCache.next.level, navCache.next.title);
@@ -215,7 +218,7 @@ function encloseWith(start, end) {
   if (!end) end = start;
   return function() {
     let selectedText = editor.session.getTextRange(editor.getSelectionRange());
-    if (selectedText && selectedText.indexOf('\n') < 0) {
+    if (selectedText !== null && selectedText.indexOf('\n') < 0) {
       editor.insert(start + selectedText + end);
     }
   }
