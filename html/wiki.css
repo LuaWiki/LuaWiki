@@ -15,6 +15,10 @@ a.new {
   padding: 0;
 }
 
+h3 {
+  font-family: Baskerville, Georgia, "Liberation Serif", "Kaiti SC", STKaiti, "AR PL UKai CN", "AR PL UKai HK", "AR PL UKai TW", "AR PL UKai TW MBE", "AR PL KaitiM GB", KaiTi, KaiTi_GB2312, DFKai-SB, "TW\-Kai", serif; 
+}
+
 code {
   border-radius: 2px;
   padding: 1px 4px;
@@ -24,6 +28,10 @@ pre, code {
   background-color: #f8f9fa;
   color: #000;
   border: 1px solid #eaecf0;
+}
+
+table {
+  width: unset;
 }
 
 .wikitable {
@@ -48,8 +56,8 @@ pre, code {
   padding: 0.2em 0.4em;
 }
 
-div.floatleft, table.floatleft {
-  margin: 0 0.5em 0.5em 0;
+div.tleft, div.floatleft, table.floatleft {
+  margin: 0 1em 1em 0;
 }
 
 div.tleft, div.floatleft, table.floatleft {
@@ -57,8 +65,8 @@ div.tleft, div.floatleft, table.floatleft {
   clear: left;
 }
 
-div.floatright, table.floatright {
-  margin: 0 0 0.5em 0.5em;
+div.tright, div.floatright, table.floatright {
+  margin: 0 0 1em 1em;
 }
 
 div.tright, div.floatright, table.floatright {
@@ -114,6 +122,7 @@ div.tright, div.floatright, table.floatright {
 
 .mw-references-columns {
   column-width: 30em;
+  margin-bottom: 2.5rem;
 }
 references {
   display: block;

@@ -311,12 +311,13 @@ defs.formatted = re.compile([=[--lpeg
 ]=], defs)
 
 -- General Parsing
+-- note: '<' [btdh] stand for blockquote, table, div and h1-h7
 wiki_grammar = re.compile([=[--lpeg
   article        <- {| block+ |} -> fast_merge
   block          <- sol? (block_html / special_block / paragraph_plus)
   paragraph_plus <- {| (newline / pline) latter_plines? |} -> gen_par_plus
   latter_plines  <- {:html: block_html :} / {:special: special_block :} /
-                    pline ((![-={<*#:;] / !('<' [btdh])) pline)* latter_plines?
+                    pline ((![-={<*#:;] / &('<' [^btdh])) pline)* latter_plines?
   pline          <- (%formatted newline -> ' ') ~> merge_text
   special_block  <- &[-={*#:;] (horizontal_rule / heading / list_block / %table) newline?
   block_html     <- &[<] '<npb-' {%d+} -> extract_npb '/>'
