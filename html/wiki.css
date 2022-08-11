@@ -30,7 +30,7 @@ pre, code {
   border: 1px solid #eaecf0;
 }
 
-table {
+#parser-output table {
   width: unset;
 }
 

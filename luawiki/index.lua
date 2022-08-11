@@ -151,9 +151,17 @@ body > nav a:hover {
 <body>
   <nav class="container-fluid">
     <ul>
-      <li>
+      <li onclick="location.href='/'" style="cursor: pointer">
         <span class="logo"><i class="icon icon-logo-Wikipedia"></i></span>
         <strong>LUAWIKI</strong>
+      </li>
+    </ul>
+    <ul style="position: absolute; left: 15em;">
+      <li>
+        <a href="javascript:void()" title="article"><i class="icon icon-home"></i></a>
+      </li>
+      <li>
+        <a href="javascript:historyPage()" title="history"><i class="icon icon-history"></i></a>
       </li>
     </ul>
     <ul>
@@ -162,6 +170,9 @@ body > nav a:hover {
       </li>
       <li v-show="showSubmit">
         <a href="javascript:submitPage()" title="submit"><i class="icon icon-check"></i></a>
+      </li>
+      <li v-show="showSubmit">
+        <a href="javascript:cancelEdit()" title="cancel"><i class="icon icon-cancel"></i></a>
       </li>
       <li>
         <a href="javascript:openSearch()" title="search"><i class="icon icon-search"></i></a>

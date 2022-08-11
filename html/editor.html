@@ -58,7 +58,13 @@ function loadAfterAce() {
     fontSize: '12pt'
   });
   
-  document.dispatchEvent(new Event('aceInit'));
+  fetch('/page/wikitext/' + pagename).then(res => res.json())
+    .then(res => {
+      if (res.code === 0) {
+        editor.session.setValue(res.result);
+        window.editorChanged = true;
+      }
+    });
 
   shadow.appendChild(document.getElementById('ace_editor.css'));
 

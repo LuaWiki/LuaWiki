@@ -256,13 +256,12 @@ async function editPage() {
   getRemoteHTML('/editor.html', '#/edit', '编辑', 'tool');
   appData.showEdit = false;
   appData.showSubmit = true;
-  let res = await fetch('/page/wikitext/' + pagename).then(res => res.json());
-  if (res.code === 0) {
-    document.addEventListener('aceInit', () => {
-      editor.session.setValue(res.result);
-      window.editorChanged = true;
-    })
-  }
+}
+
+async function historyPage() {
+  window.pagename = lastPath.match(/\/wiki\/([^#]+)/) && RegExp.$1;
+  if (!pagename) return;
+  getRemoteHTML('/history.html', '#/history', '历史', 'tool');
 }
 
 async function submitPage() {
@@ -279,4 +278,9 @@ async function submitPage() {
     loadArticle(pagename);
     exitedEditor();
   }
+}
+
+function cancelEdit() {
+  if (!window.editor) return;
+  history.go(-1);
 }

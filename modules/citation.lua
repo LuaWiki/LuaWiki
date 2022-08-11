@@ -1,5 +1,4 @@
 local z = {}
-local inspect = require('inspect')
 
 z.authors = function(args)
   args = args[1]
@@ -32,7 +31,6 @@ end
 
 z.harv_id = function(args)
   args = args[1]
-  print(inspect(args))
   args.last1 = args.last1 or args.last
   local res = {}
   for i = 1, 9 do

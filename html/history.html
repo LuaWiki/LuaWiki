@@ -1,0 +1,39 @@
+<main class="wrapper">
+  <section class="container" style="padding-top: 7.5rem;">
+    <h1>版本历史</h1>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">发布时间</th>
+          <th scope="col">贡献者</th>
+          <th scope="col">编辑概要</th>
+          <th scope="col">数据变动</th>
+        </tr>
+      </thead>
+      <tbody id="historyTable"></tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+fetch(`/history/${pagename}`)
+  .then(res => res.json())
+  .then((res) => {
+  if (res.code === 0) {
+    $('#historyTable').html(res.result.map((x, i) => {
+      let revdiff = '';
+      if (res.result[i+1]) {
+        revdiff = x.rev_len - res.result[i+1].rev_len;
+        revdiff = (revdiff<0 ? '' : '+') + revdiff;
+      }
+      return `<tr>
+        <td>${x.rev_timestamp.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/,
+          '$1-$2-$3 $4:$5:$6')}</td>
+        <td>${x.user_name}</td>
+        <td>${x.comment_text}</td>
+        <td>${revdiff}</td>
+      </tr>`
+    }).join(''));
+  }
+})
+</script>

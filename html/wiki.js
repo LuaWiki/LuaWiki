@@ -9,15 +9,9 @@ function decodeEntities(encodedString) {
 
 function buildRef() {
   var $refs = $('references');
-  var $hidrefs = $('.hidden');
-  if (!$hidrefs.length) {
-    $('<div class="hidden"></div>').appendTo($refs.parent());
-    $hidrefs = $('.hidden');
-  }
-  $refs.children().appendTo($hidrefs);
   $refs.parent().addClass('mw-references-columns');
   
-  let groupMap = {}
+  let groupMap = {};
   $refs.each((_, x) => {
     let $x = $(x);
     let group = $x.attr('group') || '';
@@ -28,6 +22,17 @@ function buildRef() {
   
   function buildRefGroup(g, suffix) {
     let refMap = {}
+    
+    let $hidden = groupMap[g].find('.hidden');
+    var hiddenMap = {};
+    $hidden.find('ref').each((_, x) => {
+      let name = x.getAttribute('name');
+      if (name) {
+        hiddenMap[name] = x;
+      }
+    })
+    $hidden.remove();
+    
     let refCounter = 0;
     $('ref' + suffix).each((_, x) => {
       try {
@@ -49,6 +54,9 @@ function buildRef() {
           refCounter++;
           anchor = `cite_note-${name}-${refCounter}`;
           refMap[name] = refCounter;
+          if (hiddenMap[name]) {
+            $x.html(hiddenMap[name].innerHTML);
+          }
         } else {
           refCounter++;
           anchor = `cite_note-${g}${refCounter}`;
@@ -70,9 +78,12 @@ function buildRef() {
   }
   
   for (const g in groupMap) {
-    buildRefGroup(g, `[group="${g}"]`);
+    if (g) {
+      buildRefGroup(g, `[group="${g}"]`);
+    } else {
+      buildRefGroup(g, `:not([group]),ref[group=""]`);
+    }
   }
-  buildRefGroup('', `:not([group])`);
 }
 
 function buildMath() {
