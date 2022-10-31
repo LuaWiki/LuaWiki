@@ -3,6 +3,10 @@ local mwtext = {}
 local cjson = require('cjson.safe')
 local prettycjson = require('prettycjson')
 
+mwtext.jsonArray = function()
+  return setmetatable({}, cjson.array_mt)
+end
+
 mwtext.jsonEncode = function(value, flags)
   if not flags or flags < 4 then
     return cjson.encode(value)
