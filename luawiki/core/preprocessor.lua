@@ -44,12 +44,19 @@ local var_pat = re.compile([=[--lpeg
 
 local preproc = {}
 local mod_env = sandbox.env_table()
+mod_env.clone = require('table.clone')
 mod_env.fun = require('iter')
+-- clear error
+local function cerror(msg)
+  return error(msg, 0)
+end
+mod_env.cerror = cerror
+
 mod_env.require = function(m)
   local ok, f = xpcall(function()
     return loadfile(ngx.config.prefix() .. 'modules/'.. m .. '.lua', 't', env)
   end, function(err)
-    error('Module ' .. m .. ': ' .. err)
+    cerror('Module ' .. m .. ': ' .. err)
   end)
   if ok and f then
     return f()
@@ -138,7 +145,7 @@ preproc.new = function(wiki_state, template_cache)
           end)
         end
         return ret
-      else error(err) end
+      else cerror(err) end
     end
   end
 
@@ -179,18 +186,18 @@ preproc.new = function(wiki_state, template_cache)
 
     local m = tpl_parse.ext_modules[mname]
     local fname, f
-    if not m then error('Module ' .. (mname or '?') .. " doesn't exist.")
+    if not m then cerror('Module ' .. (mname or '?') .. " doesn't exist.")
     elseif type(m) == 'function' then
       fname, f = mname, m
     elseif type(m) == 'table' then
       fname = node.func or 'main'
       f = m[fname]
     else
-      error('Module ' .. (mname or '?') .. ' is corrupt.')
+      cerror('Module ' .. (mname or '?') .. ' is corrupt.')
     end
 
     if not f then
-      error("attempt to call '" .. mname .. '.' .. fname .. "' (a nil value)")
+      cerror("attempt to call '" .. mname .. '.' .. fname .. "' (a nil value)")
     end
 
     if debug_flag then
@@ -234,7 +241,10 @@ preproc.new = function(wiki_state, template_cache)
       self.eval_env._var._pagename = wiki_state.title
       --print(inspect(converted_args))
 
-      local expanded_wikitext = self:text_visitor(self.tpl_cache[tpl_name].ast)
+      local flag, expanded_wikitext = pcall(self.text_visitor, self, self.tpl_cache[tpl_name].ast)
+      if not flag then
+        expanded_wikitext = '<strong class="error">' .. expanded_wikitext .. '</strong>'
+      end
       return nonparse.decorate(wiki_state, expanded_wikitext)
     end)
   end

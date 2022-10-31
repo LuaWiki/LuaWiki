@@ -31,7 +31,7 @@ function buildRef() {
         hiddenMap[name] = x;
       }
     })
-    $hidden.remove();
+    //$hidden.remove();
     
     let refCounter = 0;
     $('ref' + suffix).each((_, x) => {

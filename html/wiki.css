@@ -146,6 +146,12 @@ cite {
 .refbegin dl dd {
   text-indent: -2em;
 }
+.nowrap {
+  white-space: nowrap;
+}
+.error {
+  color: #d33;
+}
 
 .katex-display {
   margin: unset;

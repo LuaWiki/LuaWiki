@@ -6,7 +6,7 @@ z.main = function(args)
   args = args[1]
   local lc_data = {
     T = args.T,
-    rules = {}
+    rules = mw.text.jsonArray()
   }
   
   for i = 1, 30 do

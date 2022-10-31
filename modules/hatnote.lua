@@ -18,7 +18,7 @@ function p.main(args)
 	local s = args[1]
 	local options = {}
 	if not s then
-		error('text参数缺失')
+		cerror('text参数缺失')
 	end
 	options.extraclasses = args.extraclasses
 	options.selfref = args.selfref

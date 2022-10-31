@@ -27,11 +27,12 @@ local tpl_grammar = re.compile([=[--lpeg
   param_expr    <- {| {:tag: param_name :} __ '=' __ any_text / any_text |}
   param_name    <- {~ param_word (__ -> '_' param_word)* ~} 
   param_word    <- ([_-] / [^%s%p])+
-  any_text      <- (another_tpl / inlink_like / { char_no_pipe [^|{[%te]* })+
+  any_text      <- (sub_tpl / inlink_like / { char_no_pipe [^|{[%te]* })+
                       ~> merge_text / ''
   char_no_pipe  <- [^|%te]
-  inlink_like   <- {'[['} (another_tpl / { [^[%eb] [^[{%eb]* })+ {']]'}
-  another_tpl   <- {~ (%ts ([^%te] [^{}]* / another_tpl)* %te) -> store_tpl ~}
+  inlink_like   <- {'[['} (sub_tpl / { [^[%eb] [^[{%eb]* })+ {']]'}
+  sub_tpl       <- {~ {another_tpl} -> store_tpl ~}
+  another_tpl   <- (%ts ([^%te%ts] [^{}]* / another_tpl)* %te)
   __            <- [ %t]*
 ]=], defs)
 

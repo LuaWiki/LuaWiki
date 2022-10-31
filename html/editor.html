@@ -43,16 +43,9 @@ window.aceCheck = setInterval(() => {
 }, 1000)
 
 function loadAfterAce() {
-  var shadow = document.getElementById('source-editor').attachShadow({mode: 'open'});
-
-  const editorElem = document.createElement('div');
-  editorElem.id = 'editorElem'
-  editorElem.style.width = '100%';
-  editorElem.style.height = '100%';
-  shadow.appendChild(editorElem);
 
   window.editorChanged = false;
-  window.editor = ace.edit(shadow.querySelector('#editorElem'), {
+  window.editor = ace.edit('source-editor', {
     mode: "ace/mode/mediawiki",
     wrap: true,
     fontSize: '12pt'
@@ -65,8 +58,6 @@ function loadAfterAce() {
         window.editorChanged = true;
       }
     });
-
-  shadow.appendChild(document.getElementById('ace_editor.css'));
 
   $('.btn-group button').click(function() {
     $('.btn-group .active').removeClass('active');
