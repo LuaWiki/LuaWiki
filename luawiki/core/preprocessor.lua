@@ -46,11 +46,7 @@ local preproc = {}
 local mod_env = sandbox.env_table()
 mod_env.clone = require('table.clone')
 mod_env.fun = require('iter')
--- clear error
-local function cerror(msg)
-  return error(msg, 0)
-end
-mod_env.cerror = cerror
+mod_env.cerror = require('utils/common').cerror
 
 mod_env.require = function(m)
   local ok, f = xpcall(function()

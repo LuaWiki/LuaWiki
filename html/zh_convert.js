@@ -1,3 +1,7 @@
+// deno-fmt-ignore-file
+// deno-lint-ignore-file
+// This code was bundled using `deno bundle` and it's not recommended to edit it manually
+
 var zh2hans = [
     [
         '㑯',
@@ -29638,8 +29642,7 @@ var zh2cn = [
         '鼠标'
     ], 
 ];
-let trie = {
-};
+let trie = {};
 let titleRule = null;
 const convPattern = /-\{(.*?)\}-/g;
 const varPattern = /^\s*(zh(?:-[a-z]{2,4})?):\s*(.*)/;
@@ -29669,15 +29672,14 @@ function addSingleConv(from, to) {
     let curNode = trie;
     for (const c of from){
         if (!curNode[c]) {
-            curNode[c] = {
-            };
+            curNode[c] = {};
         }
         curNode = curNode[c];
     }
     curNode._ = to;
 }
 function addConversionData(data) {
-    for (const pair of data){
+    for (const pair of zh2hans){
         addSingleConv(pair[0], pair[1]);
     }
 }
@@ -29687,8 +29689,7 @@ function mergeGlobalRules(data, variant) {
     }
     for (const rule of data.rules){
         const langExprs = rule.split(';');
-        const langMap = {
-        };
+        const langMap = {};
         let oneWaySuccess = false;
         for (const expr of langExprs){
             let matched = expr.match(/^(.+?)=>(.+)/);
@@ -29706,9 +29707,9 @@ function mergeGlobalRules(data, variant) {
                 }
                 continue;
             } else {
-                const found = expr.match(varPattern);
-                if (found) {
-                    langMap[found[1]] = found[2].trim();
+                const found1 = expr.match(varPattern);
+                if (found1) {
+                    langMap[found1[1]] = found1[2].trim();
                 } else {
                     let newDefault = expr.trim();
                     if (newDefault) {
@@ -29729,9 +29730,9 @@ function mergeGlobalRules(data, variant) {
         if (varFallback[variant]) {
             for (const fallback of varFallback[variant]){
                 if (langMap[fallback]) {
-                    for(const langVar in langMap){
-                        if (langVar !== fallback) {
-                            addSingleConv(langMap[langVar], langMap[fallback]);
+                    for(const langVar1 in langMap){
+                        if (langVar1 !== fallback) {
+                            addSingleConv(langMap[langVar1], langMap[fallback]);
                         }
                     }
                 }
@@ -29781,8 +29782,7 @@ function doConvert(str) {
 function pickVariant(str, variant) {
     str = str.trim();
     const rules = str.split(';');
-    const ruleMap = {
-    };
+    const ruleMap = {};
     for (let rule of rules){
         const found = rule.match(varPattern);
         if (found) {
@@ -29807,10 +29807,18 @@ function pickVariant(str, variant) {
     }
     return ruleMap['default'] || '';
 }
-function decodeEntities(encodedString) {
-  var textArea = document.createElement('textarea');
-  textArea.innerHTML = encodedString;
-  return textArea.value;
+const htmlTagPattern = /<[^>]*>/g;
+function convertNormal(str) {
+    const matches = str.matchAll(htmlTagPattern);
+    let matchEnd = 0;
+    const chunks = [];
+    for (const match of matches){
+        chunks.push(doConvert(str.substring(matchEnd, match.index)));
+        chunks.push(match[0]);
+        matchEnd = match.index + match[0].length;
+    }
+    chunks.push(doConvert(str.substring(matchEnd, str.length)));
+    return chunks.join('');
 }
 function doMwConvert(str) {
     str = str.replace(/\<noteta\>(.*?)\<\/noteta\>/gi, function(_, p1) {
@@ -29821,11 +29829,10 @@ function doMwConvert(str) {
     let matchEnd = 0;
     const resList = [];
     for (const match of matches){
-        resList.push(doConvert(str.substring(matchEnd, match.index)));
+        resList.push(convertNormal(str.substring(matchEnd, match.index)));
         resList.push(pickVariant(match[1], 'zh-cn'));
         matchEnd = match.index + match[0].length;
     }
-    resList.push(doConvert(str.substring(matchEnd, str.length)));
+    resList.push(convertNormal(str.substring(matchEnd, str.length)));
     return resList.join('');
 }
-

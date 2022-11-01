@@ -53,11 +53,28 @@ const appData = {
   });
 })();
 
+function elInViewport(el) {
+  const rect = el.getBoundingClientRect();
+  return (rect.top >= 0 && rect.bottom <= window.innerHeight);
+}
+
 let sectionObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       const id = entry.target.getAttribute('id');
       if (entry.intersectionRatio > 0) {
-        $(`aside li a[href="#${id}"]`).parent().addClass('active');
+        const $me = $(`aside li a[href="#${id}"]`);
+        const parent = $me.parent().get(0);
+        parent.className = 'active';
+        if (entry.target.className === 'h3sec') {
+          if (!elInViewport(parent)) {
+            parent.scrollIntoView();
+          }
+        } else if (entry.target.className === 'h2sec') {
+          let me = $me.get(0)
+          if (!elInViewport(me)) {
+            me.scrollIntoView()
+          }
+        }
       } else {
         $(`aside li a[href="#${id}"]`).parent().removeClass('active');
       }
@@ -87,6 +104,7 @@ function mainContentLoaded() {
   tpl2.appendChild(tpl.childNodes[0]);
   let headerCounter = 0;
   let h2Sec = document.createElement('section');
+  h2Sec.className = 'h2sec';
   let h3Sec = null;
   let length = tpl.childNodes.length;
   while (length--) {
@@ -98,6 +116,7 @@ function mainContentLoaded() {
       }
       tpl2.appendChild(h2Sec);
       h2Sec = document.createElement('section');
+      h2Sec.className = 'h2sec';
       h2Sec.id = 'toc' + (++headerCounter)
       h2Sec.appendChild(x);
     } else if (x.nodeName === 'H3') {
@@ -105,6 +124,7 @@ function mainContentLoaded() {
         h2Sec.appendChild(h3Sec);
       }
       h3Sec = document.createElement('section');
+      h3Sec.className = 'h3sec';
       h3Sec.id = 'toc' + (++headerCounter)
       h3Sec.appendChild(x);
     } else {

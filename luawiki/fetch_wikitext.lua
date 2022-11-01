@@ -1,4 +1,5 @@
 local mysql = require('resty.mysql')
+local cerror = require('utils/common').cerror
 local db, err = mysql:new()
 local wrap = ngx.quote_sql_str
 
@@ -9,7 +10,7 @@ local function fetch_wikitext(pagename)
     local ok, res
     
     local function sql_error(msg)
-      error(msg .. ': ' .. err .. ': ' .. errcode .. ' ' .. sqlstate)
+      cerror(msg .. ': ' .. err .. ': ' .. errcode .. ' ' .. sqlstate)
     end
 
     ok, err, errcode, sqlstate = db:connect(dbconf)
@@ -20,7 +21,7 @@ local function fetch_wikitext(pagename)
     if not res then sql_error('bad result') end
     
     local res = res[1]
-    if not res then error('Page not found: ' .. pagename) end
+    if not res then cerror('Page not found: ' .. pagename) end
     
     local revision_id = res.page_latest
     res, err, errcode, sqlstate = -- get revision text by revision id
@@ -28,7 +29,7 @@ local function fetch_wikitext(pagename)
     if not res then sql_error('bad result') end
     
     res = res[1]
-    if not res then error('Revision not found: ' .. pagename .. '#' .. revision_id) end
+    if not res then cerror('Revision not found: ' .. pagename .. '#' .. revision_id) end
 
     return res.old_text
   end)

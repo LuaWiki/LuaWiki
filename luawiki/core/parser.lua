@@ -88,7 +88,8 @@ local defs = {
   end,
   gen_heading = function(v)
     local htag = 'h' .. #v.htag
-    return '<' .. htag .. '>' .. v[1]:gsub('^[ ]*', ''):gsub('[ ]*$', '') ..
+    local h_text = v[1]:gsub('^[ ]*', ''):gsub('[ ]*$', '')
+    return '<' .. htag .. ' id="' .. h_text ..  '">' .. h_text ..
       '</' .. htag .. '>'
   end,
   -- t is formatted in form { { '#:', '123' }, { '###', '456' } }
