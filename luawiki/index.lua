@@ -158,7 +158,7 @@ body > nav a:hover {
     </ul>
     <ul style="position: absolute; left: 15em;">
       <li>
-        <a href="javascript:void()" title="article"><i class="icon icon-home"></i></a>
+        <a href="javascript:viewArticle()" title="article"><i class="icon icon-home"></i></a>
       </li>
       <li>
         <a href="javascript:historyPage()" title="history"><i class="icon icon-history"></i></a>

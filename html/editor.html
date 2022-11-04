@@ -202,10 +202,8 @@ function loadAfterAce() {
 }
 
 function scrollToTitle(level, title) {
-  let xpath = `.//h${level}[text()='${title}']`;
   let viewer = document.getElementById('viewer-panel');
-  let matchingElement = document.evaluate(xpath, viewer, null,
-    XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+  let matchingElement = viewer.querySelector(`h${level}#${title}`);
   if (matchingElement) {
     viewer.scrollTop = matchingElement.offsetTop;
   }

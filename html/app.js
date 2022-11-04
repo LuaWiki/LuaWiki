@@ -216,6 +216,7 @@ function exitedEditor() {
   window.ace = null;
 }
 
+// set page content and run scripts
 function setContentAndRunScript(content) {
   $content.html(content);
   $content.find("script").each((_, oldScript) => {
@@ -261,6 +262,7 @@ window.addEventListener("popstate", function(e) {
   }
 });
 
+// background request html content and set content and route
 async function getRemoteHTML(url, route, title, type) {
   let html = await fetch(url).then(res => res.text());
   routeHandler(route, html, title, type);
