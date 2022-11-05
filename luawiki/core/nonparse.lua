@@ -1,6 +1,6 @@
 local re = require('lpeg.re')
 local html_utils = require('utils/html_utils')
-local block_tags = { 'pre', 'syntaxhighlight', 'graph' }
+local block_tags = { 'pre', 'syntaxhighlight', 'graph', 'gallery' }
 local inline_tags = { 'nowiki', 'math' }
 
 local global_state = {}
@@ -40,7 +40,7 @@ local np_tags = [=[--lpeg
   np_inline_start <- '<' {:nw: np_inline_tag :} (%s [^>]*)? '>'
   np_inline_end   <- '</' (=nw) '>'
   
-  np_block_tag   <- 'pre' / 'syntaxhighlight' / 'graph'
+  np_block_tag   <- 'pre' / 'syntaxhighlight' / 'graph' / 'gallery'
   np_inline_tag  <- 'math' / 'score'
 ]=]
 

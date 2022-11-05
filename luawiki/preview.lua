@@ -70,17 +70,18 @@ local html_single_tags = {
 for _, v in ipairs(html_single_tags) do
   html_stag_map[v] = true
 end
+
+local parser_output = '<h1>' .. pagename .. '</h1>' .. wiki_html:gsub('<((%a+)[^>]-)/>', function(p1, p2)
+  if not html_stag_map[p2] then
+    return '<' .. p1 .. '></' .. p2 .. '>'
+  end
+end)
+
+local postprocessor = require('core/postprocessor')
+parser_output = postprocessor.process(parser_output)
   
 ngx.say(cjson.encode({
   code = 0,
-  result = '<h1>' .. pagename:gsub('_', ' ') .. '</h1>' .. wiki_html:gsub('<((%a+)[^>]-)/>', function(p1, p2)
-    if not html_stag_map[p2] then
-      if p2 == 'references' then
-        return '<div><' .. p1 .. '></' .. p2 .. '></div>'
-      else
-        return '<' .. p1 .. '></' .. p2 .. '>'
-      end
-    end
-  end),
+  result = parser_output,
   parse_time = ngx.now() - begin_time
 }))

@@ -46,6 +46,9 @@ if flag then
       end
     end
   end) .. '<!-- Total parse time: ' .. (ngx.now() - begin_time) .. '-->'
+  
+  local postprocessor = require('core/postprocessor')
+  parser_output = postprocessor.process(parser_output)
 else
   parser_output = wikitext or 'Page not found'
 end

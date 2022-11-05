@@ -272,7 +272,8 @@ defs.plain_text = re.compile([=[--lpeg
   inline_element <- np_inline / ref_inline / file_link / internal_link / external_link
   
   np_inline      <- '<nw-' %d+ -> extract_nw '/>'
-  ref_inline     <- {~ '<ref' (' ' [^>]*)? (<'/' '>' / '>' (!'</ref>' .)* -> parse_inside -> escape_html {'</ref>'}) ~}
+  ref_inline     <- {~ '<ref' (' ' [^>]*)? (<'/' '>' / '>' (!'</ref>' .)*
+    -> parse_inside {'</ref>'}) ~}
   
   internal_link  <- ('[[' {link_part} ('|' (!']]' . [^%eb]*)+ $> ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ [^%cr%nl%eb]+ $> ld_formatted)? ']') -> gen_extlink

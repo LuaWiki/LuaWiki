@@ -97,53 +97,13 @@ function mainContentLoaded() {
   outputDiv = document.getElementById('parser-output');
   hashStore = [ { hash: '' } ];
   hashIndex = 0;
-  
-  const tpl = document.createElement('div');
-  tpl.innerHTML = doMwConvert(outputDiv.innerHTML);
-  const tpl2 = document.createElement('div');
-  tpl2.appendChild(tpl.childNodes[0]);
-  let headerCounter = 0;
-  let h2Sec = document.createElement('section');
-  h2Sec.className = 'h2sec';
-  let h3Sec = null;
-  let length = tpl.childNodes.length;
-  while (length--) {
-    let x = tpl.childNodes[0];
-    if (x.nodeName === 'H2') {
-      if (h3Sec) {
-        h2Sec.appendChild(h3Sec);
-        h3Sec = null;
-      }
-      tpl2.appendChild(h2Sec);
-      h2Sec = document.createElement('section');
-      h2Sec.className = 'h2sec';
-      h2Sec.id = 'toc' + (++headerCounter)
-      h2Sec.appendChild(x);
-    } else if (x.nodeName === 'H3') {
-      if (h3Sec) {
-        h2Sec.appendChild(h3Sec);
-      }
-      h3Sec = document.createElement('section');
-      h3Sec.className = 'h3sec';
-      h3Sec.id = 'toc' + (++headerCounter)
-      h3Sec.appendChild(x);
-    } else {
-      if (h3Sec) {
-        h3Sec.appendChild(x);
-      } else {
-        h2Sec.appendChild(x);
-      }
-    }
-  }
-  tpl2.appendChild(h2Sec);
-  outputDiv.innerHTML = tpl2.innerHTML;
+  outputDiv.innerHTML = doMwConvert(outputDiv.innerHTML);
   $content.find('a[href^="/wiki/"]').click(async function(event) {
     let newTitle = this.href.match(/\/wiki\/(.*)/) && RegExp.$1;
     loadArticle(newTitle);
   })
   
   buildToc();
-  buildRef();
   
   $content.find('a:not(.external)').click(function(event) {
     event.preventDefault();

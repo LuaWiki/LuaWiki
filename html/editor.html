@@ -113,7 +113,6 @@ function loadAfterAce() {
     }).then(res => res.json())
     .then(data => {
       document.getElementById('viewer-panel').innerHTML = doMwConvert(data.result);
-      buildRef();
       buildMath();
       buildHighlight();
     });
