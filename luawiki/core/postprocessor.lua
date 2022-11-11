@@ -79,9 +79,6 @@ z.process = function(html)
 
   --- 2.generate reference groups
   local id_target = {}
-  local node_text = function(node)
-    return node.text or serialize(node.children, true)
-  end
   local function build_ref_group(g)
     
     local ref_map = {}
@@ -105,6 +102,7 @@ z.process = function(html)
     local ref_counter = 0
     
     local cite_store_g = cite_store[g]
+    if not cite_store_g then return end
     for _, x in ipairs(cite_store_g) do
       local name = x.name
       local anchor = 'cite_note-error'
@@ -132,7 +130,8 @@ z.process = function(html)
         anchor = ('cite_note-%s-%s'):format(name, ref_counter)
         ref_map[name] = ref_counter
         if hidden_map[name] then
-          x.text = node_text(hidden_map[name])
+          x.text = hidden_map[name].text
+          x.children = hidden_map[name].children
         end
       else
         ref_counter = ref_counter + 1

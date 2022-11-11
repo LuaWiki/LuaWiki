@@ -57,6 +57,7 @@ wikitext = nonparse.decorate(wiki_state, wikitext)
 
 local preprocessor = require('core/preprocessor').new(wiki_state)
 wikitext = preprocessor:process(wikitext)
+
 local wiki_html = parser.parse(wiki_state, wikitext)
 
 -- end timer

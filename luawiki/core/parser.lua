@@ -63,10 +63,17 @@ local function getFilePath(filename, width)
 end
 
 local wiki_grammar = nil
+local last_p = re.compile[=[--lpeg
+  all <- {~ s ~}
+  s <- ('<p>' { (!'</p>' .)* } '</p>' !.) -> '%1'
+        / . [^<]* s 
+]=]
+
 local function parse_inside(a)
   local inner_html = wiki_grammar:match( (a:gsub('[^\n]$', '%0\n')) )
   if not inner_html then return '' end
-  return inner_html:gsub('^<p>(.-)</p>', '%1'):gsub('<p>(.-)</p>$', '%1')
+  local str = inner_html:gsub('^<p>(.-)</p>', '%1')
+  return last_p:match(str) or str
 end
 
 local defs = {
@@ -121,13 +128,7 @@ local defs = {
   end,
   gen_par_plus = function(t)
     local p_content = table.concat(t)
-    local str = nil
-    if p_content:match('^</?references[^/>]*>') then
-      str = p_content:gsub('^(<references[^>]*>)', '<div>%1')
-                     :gsub('(</references[^>]*>)', '%1</div>')
-    else
-      str = '<p>' .. p_content .. '</p>'
-    end
+    local str = '<p>' .. p_content .. '</p>'
     if t.html then str = str .. t.html end
     if t.special then str = str .. t.special end
     return str
@@ -210,8 +211,12 @@ local defs = {
   end,
   parse_inside = parse_inside,
   gen_block_html = function(t)
-    return '<' .. t[1] .. t[2] .. (t[3] or '') ..
+    local str = '<' .. t[1] .. t[2] .. (t[3] or '') ..
       '</' .. t[1] .. '>'
+    if t[1] == 'references' then
+      str = '<div>' .. str .. '</div>'
+    end
+    return str
   end,
   decide_f_caption = function(s, i, p)
     local next_char = s:sub(i, i)
@@ -272,8 +277,7 @@ defs.plain_text = re.compile([=[--lpeg
   inline_element <- np_inline / ref_inline / file_link / internal_link / external_link
   
   np_inline      <- '<nw-' %d+ -> extract_nw '/>'
-  ref_inline     <- {~ '<ref' (' ' [^>]*)? (<'/' '>' / '>' (!'</ref>' .)*
-    -> parse_inside {'</ref>'}) ~}
+  ref_inline     <- {~ '<ref' (' ' [^>]*)? (<'/' '>' / '>' (!'</ref>' .)* -> parse_inside {'</ref>'}) ~}
   
   internal_link  <- ('[[' {link_part} ('|' (!']]' . [^%eb]*)+ $> ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ [^%cr%nl%eb]+ $> ld_formatted)? ']') -> gen_extlink
@@ -327,7 +331,7 @@ wiki_grammar = re.compile([=[--lpeg
   bhtml_body     <- (!bhtml_end . [^<]*)*
   bhtml_start    <- '<' {bhtml_tags} ' data-lw="' {:lw: %a+ :} '"' {[^<>]* '>'}
   bhtml_end      <- '</' bhtml_tags ' data-lw="' (=lw) '"' '>'
-  bhtml_tags     <- 'blockquote' /'table' / 'div' / 'h' [1-7]
+  bhtml_tags     <- 'blockquote' /'table' / 'div' / 'h' [1-7] / 'references'
 
   horizontal_rule <- ('-'^+4 -> '<hr>' (%formatted -> '<p>%1</p>')?) ~> merge_text
   heading        <- {| heading_tag {[^=]+} =htag [ %t]* |} -> gen_heading

@@ -1,7 +1,7 @@
 local re = require('lpeg.re')
 
 local block_tag_pat = [=[--lpeg
-  %nl? '<' {'/'}? {'blockquote' /'table' / 'div' / 'h' [1-7]} { [^<>]* '>' }
+  %nl? '<' {'/'}? {'blockquote' /'table' / 'div' / 'h' [1-7] / 'references'} { [^<>]* '>' }
 ]=]
 
 -- produce case insensitive pattern
