@@ -28,24 +28,10 @@ if flag then
   -- end timer
   ngx.update_time()
 
-  local html_stag_map = {}
-  local html_single_tags = {
-    'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 
-    'link', 'meta', 'param', 'source', 'track', 'wbr'
-  }
-  for _, v in ipairs(html_single_tags) do
-    html_stag_map[v] = true
-  end
+  local html_utils = require('utils/html_utils')
   
-  parser_output = '<h1>' .. title:gsub('_', ' ') .. '</h1>' .. parser_output:gsub('<((%a+)[^>]-)/>', function(p1, p2)
-    if not html_stag_map[p2] then
-      if p2 == 'references' then
-        return '<div><' .. p1 .. '></' .. p2 .. '></div>'
-      else
-        return '<' .. p1 .. '></' .. p2 .. '>'
-      end
-    end
-  end) .. '<!-- Total parse time: ' .. (ngx.now() - begin_time) .. '-->'
+  parser_output = '<h1>' .. title:gsub('_', ' ') .. '</h1>' .. html_utils.expand_single(parser_output) ..
+    '<!-- Total parse time: ' .. (ngx.now() - begin_time) .. '-->'
   
   local postprocessor = require('core/postprocessor')
   parser_output = postprocessor.process(parser_output)

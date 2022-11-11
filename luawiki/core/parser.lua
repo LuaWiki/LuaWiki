@@ -331,7 +331,7 @@ wiki_grammar = re.compile([=[--lpeg
   bhtml_body     <- (!bhtml_end . [^<]*)*
   bhtml_start    <- '<' {bhtml_tags} ' data-lw="' {:lw: %a+ :} '"' {[^<>]* '>'}
   bhtml_end      <- '</' bhtml_tags ' data-lw="' (=lw) '"' '>'
-  bhtml_tags     <- 'blockquote' /'table' / 'div' / 'h' [1-7] / 'references'
+  bhtml_tags     <- 'blockquote' /'table' / 'div' / 'h' [1-7] / 'references' / 'center'
 
   horizontal_rule <- ('-'^+4 -> '<hr>' (%formatted -> '<p>%1</p>')?) ~> merge_text
   heading        <- {| heading_tag {[^=]+} =htag [ %t]* |} -> gen_heading

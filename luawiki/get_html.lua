@@ -47,20 +47,8 @@ local wiki_html = parser.parse(wiki_state, wikitext)
 -- end timer
 ngx.update_time()
 
-local html_stag_map = {}
-local html_single_tags = {
-  'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 
-  'link', 'meta', 'param', 'source', 'track', 'wbr'
-}
-for _, v in ipairs(html_single_tags) do
-  html_stag_map[v] = true
-end
-
-local parser_output = '<h1>' .. pagename .. '</h1>' .. wiki_html:gsub('<((%a+)[^>]-)/>', function(p1, p2)
-  if not html_stag_map[p2] then
-    return '<' .. p1 .. '></' .. p2 .. '>'
-  end
-end)
+local html_utils = require('utils/html_utils')
+local parser_output = '<h1>' .. pagename .. '</h1>' .. html_utils.expand_single(wiki_html)
 
 local postprocessor = require('core/postprocessor')
 parser_output = postprocessor.process(parser_output)

@@ -1,7 +1,7 @@
 local re = require('lpeg.re')
 
 local block_tag_pat = [=[--lpeg
-  %nl? '<' {'/'}? {'blockquote' /'table' / 'div' / 'h' [1-7] / 'references'} { [^<>]* '>' }
+  %nl? '<' {'/'}? {'blockquote' /'table' / 'div' / 'h' [1-7] / 'references' / 'center'} { [^<>]* '>' }
 ]=]
 
 -- produce case insensitive pattern
@@ -94,6 +94,7 @@ end
 local function sanitize(wikitext)
   stack = {}
   tag_counter = {}
+  wikitext = wikitext:gsub('<references([^/>]*)/>', '<references%1></references>')
   local base_html = re.gsub(wikitext, block_tag_pat, block_tag_handler)
   for i = #stack, 1, -1 do
     base_html = base_html .. '</' .. stack[i][1] .. '>'
