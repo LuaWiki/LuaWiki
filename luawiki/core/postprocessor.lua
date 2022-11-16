@@ -6,6 +6,33 @@ local z = {}
 z.process = function(html)
   local root = html_parser.parse(html)
   if not root then return html end
+  
+  -- div inside p, add parent and index
+  local function traverse_a(node)
+    -- traverse children
+    if node.children then
+      for i, v in ipairs(node.children) do
+        v.parent = node
+        v.index = i
+        
+        if v.nodeName == 'div' and node.nodeName == 'p' then
+          local new_p = { nodeName = 'p', children = {} }
+          table.move(node.children, i+1, #node.children, 1, new_p.children)
+          if i == 1 then
+            node.parent.children[node.index] = v
+            table.insert(node.parent.children, node.index + 1, new_p)
+          else
+            node.children[i + 1] = nil
+            table.insert(node.parent.children, node.index + 1, v)
+            table.insert(node.parent.children, node.index + 2, new_p)
+          end
+        end
+        
+        traverse_a(v)
+      end
+    end
+  end
+  traverse_a(root)
 
   -- add sections
   local header_counter = 0
@@ -47,7 +74,7 @@ z.process = function(html)
   --- 1.find out <ref> and <references>
   local cite_store = {}
   local ref_store = {}
-  local function traverse(node)
+  local function traverse_r(node)
     if node.nodeName == 'ref' then
       local key = node.group or ''
       if cite_store[key] then
@@ -69,13 +96,13 @@ z.process = function(html)
     -- traverse children
     if node.children and node.class ~= 'hidden' then
       for i, v in ipairs(node.children) do
+        traverse_r(v)
         v.parent = node
         v.index = i
-        traverse(v)
       end
     end
   end
-  traverse(root2)
+  traverse_r(root2)
 
   --- 2.generate reference groups
   local id_target = {}

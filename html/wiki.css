@@ -16,7 +16,7 @@ a.new {
 }
 
 h3 {
-  font-family: Baskerville, Georgia, "Liberation Serif", "Kaiti SC", STKaiti, "AR PL UKai CN", "AR PL UKai HK", "AR PL UKai TW", "AR PL UKai TW MBE", "AR PL KaitiM GB", KaiTi, KaiTi_GB2312, DFKai-SB, "TW\-Kai", serif; 
+  font-family: Baskerville, Georgia, "Liberation Serif", "Kaiti SC", STKaiti, "AR PL UKai CN", "AR PL UKai HK", "AR PL UKai TW", "AR PL UKai TW MBE", "AR PL KaitiM GB", KaiTi, KaiTi_GB2312, DFKai-SB, "TW\-Kai", sans-serif; 
 }
 
 code {
@@ -28,6 +28,10 @@ pre, code {
   background-color: #f8f9fa;
   color: #000;
   border: 1px solid #eaecf0;
+}
+
+#parser-output p, #parser-output div, #parser-output li, #parser-output dd {
+  font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', 'Noto Serif CJK SC', STSong, serif;
 }
 
 #parser-output table {
@@ -167,4 +171,40 @@ syntaxhighlight {
   font-family: monospace;
   padding: 1em;
   tab-size: 4;
+}
+
+dialog {
+  border: none !important;
+  border-radius: 16px;
+  box-shadow: 0 0 #0000, 0 0 #0000, 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 1.6rem;
+  max-width: 400px;
+}
+
+dialog img {
+  display: block;
+  max-width: 75%;
+  margin: 0 auto;
+}
+
+@media print {
+  aside {
+    display: none;
+  }
+  #content.has-toc {
+    display: block !important;
+  }
+  #parser-output {
+    height: unset !important;
+    overflow: unset !important;
+  }
+  h2, h3 {
+    page-break-inside: avoid;
+  }
+  h2::after, h3::after {
+    content: "";
+    display: block;
+    height: 100px;
+    margin-bottom: -100px;
+  }
 }

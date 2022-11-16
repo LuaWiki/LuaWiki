@@ -47,7 +47,7 @@ local mainpage_html = ([=[<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.25, maximum-scale=5.0">
   <!--<link rel="stylesheet" href="https://picocss.com/css/pico.min.css">-->
   <link rel="stylesheet" href="https://cdn.staticfile.org/normalize/8.0.1/normalize.css">
-  <link rel="stylesheet" href="https://cdn.staticfile.org/milligram/1.4.1/milligram.css">
+  <link rel="stylesheet" href="/milligram.css">
   <link rel="stylesheet" href="/ooicon/style.css">
   <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.6/katex.min.css">
   <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/11.5.1/styles/default.min.css">
@@ -58,6 +58,7 @@ html, body {
   height: 100%;
 }
 body {
+  font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', 'Noto Sans CJK SC', sans-serif;
   font-weight: 400;
   color: #2b3135;
 }
@@ -184,6 +185,7 @@ body > nav a:hover {
 <script src="/zh_convert.js"></script>
 <script src="/wiki.js"></script>
 <script src="/app.js"></script>
+<script src="/modal.js"></script>
 </body>
 </html>
 ]=]):gsub('_CONTENT_', (parser_output:gsub('%%', '%%%%')))

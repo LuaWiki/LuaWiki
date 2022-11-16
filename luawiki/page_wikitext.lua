@@ -1,6 +1,7 @@
 local cjson = require('cjson')
 local mysql = require('resty.mysql')
 local wrap = ngx.quote_sql_str
+local inspect = require('inspect')
 
 math.randomseed(os.time())
 
@@ -96,6 +97,10 @@ elseif ngx.var.request_method == 'POST' then
     
     local comment = post_args.comment or ''
     local c_hash = ngx.crc32_short(comment)
+    if c_hash >= 0x80000000 then
+      c_hash = bit.band(c_hash, 0x7FFFFFFF)
+    end
+    
     local content = post_args.content and post_args.content:gsub('\r', ''):gsub('[^\n]$', '%0\n') or ''
 
     local r_sha1 = ngx.md5(content)
@@ -111,11 +116,12 @@ elseif ngx.var.request_method == 'POST' then
       'UPDATE page SET page_latest = @rev_id WHERE page_id = ' .. page_id .. ';',
     }
     
+    print('START TRANSACTION;' .. table.concat(statements) .. 'COMMIT;')
     -- create page
     res, err, errcode, sqlstate = -- insert new text
       db:query('START TRANSACTION;' .. table.concat(statements) .. 'COMMIT;')
     if not res then sql_error('bad result') end
-    
+    print(inspect(res))
   end)
   
   if not flag then

@@ -23,7 +23,7 @@ local defs = {
 
 local html_parser = re.compile([=[--lpeg
   Document <- {| {:nodeName: '' -> '#root' :} __ {:children: {| Element* |} :} __ !. |}
-  Element  <- !'</' {| (TextA / VoidA / RawText / Nested / VoidB / Comment / TextB) __ |} -> extract_attr
+  Element  <- !'</' {| TextA / VoidA / RawText / Nested / VoidB / Comment / TextB |} -> extract_attr
   RawText  <- '<' RawTextTag Attributes '>' __  {:text: ( !('</' =nodeName __ '>') .)* :}
               '</' =nodeName __ '>'
   RawTextTag <- {:nodeName: 'script' / 'style' / 'textarea' / 'title' / 'plaintext' :}

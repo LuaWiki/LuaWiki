@@ -83,13 +83,16 @@ let sectionObserver = new IntersectionObserver(entries => {
 
 $(document).ready(mainContentLoaded);
 
-async function loadArticle(title) {
-  let res = await fetch(`/page/html/${title}`).then(res => res.json());
+async function loadArticle(title, cache) {
+  let res = await fetch(`/page/html/${title}`, { 'cache': cache ? 'reload' : 'no-cache' })
+              .then(res => res.json());
   if (res.code === 0) {
     html = res.result + `<!-- Total parse time: ${res.parse_time}-->`;
     html = `<aside></aside><article id="parser-output">${html}</article>`;
     routeHandler(title, html, decodeURIComponent(title));
     mainContentLoaded();
+  } else {
+    newModal({ title: '页面不存在', img: '/image/404.svg' })
   }
 }
 
@@ -99,7 +102,7 @@ function mainContentLoaded() {
   hashIndex = 0;
   outputDiv.innerHTML = doMwConvert(outputDiv.innerHTML);
   $content.find('a[href^="/wiki/"]').click(async function(event) {
-    let newTitle = this.href.match(/\/wiki\/(.*)/) && RegExp.$1;
+    let newTitle = this.href.match(/\/wiki\/([^#]*)/) && RegExp.$1;
     loadArticle(newTitle);
   })
   
@@ -250,16 +253,33 @@ async function submitPage() {
   if (!window.editor) return;
   let pagename = lastPath.match(/\/wiki\/([^#]+)/) && RegExp.$1;
   if (!pagename) return;
-  const submitForm = new FormData();
-  submitForm.append('content', editor.session.getValue());
-  let res = await fetch('/page/wikitext/' + pagename, {
-    method: 'POST',
-    body: submitForm
-  }).then(res => res.json());
-  if (res.code === 0) {
-    loadArticle(pagename);
-    exitedEditor();
-  }
+  
+  newModal({
+    title: '添加概要',
+    img: '/image/submit.svg',
+    content: `
+      <form>
+        <fieldset>
+          <label for="nameField">编辑摘要</label>
+          <textarea type="text" id="summary" placeholder="总结一下编辑的内容"></textarea>
+        </fieldset>
+      </form>
+    `,
+    yes_text: '发布',
+    yes: async () => {
+      const submitForm = new FormData();
+      submitForm.append('content', editor.session.getValue());
+      submitForm.append('comment', $('#summary').val());
+      let res = await fetch('/page/wikitext/' + pagename, {
+        method: 'POST',
+        body: submitForm
+      }).then(res => res.json());
+      if (res.code === 0) {
+        loadArticle(pagename, true);
+        exitedEditor();
+      }
+    }
+  })
 }
 
 function cancelEdit() {
