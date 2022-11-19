@@ -18558,7 +18558,7 @@ var zh2hans = [
     [
         '，陞',
         '，升'
-    ], 
+    ]
 ];
 var zh2cn = [
     [
@@ -29640,7 +29640,7 @@ var zh2cn = [
     [
         '滑鼠',
         '鼠标'
-    ], 
+    ]
 ];
 let trie = {};
 let titleRule = null;
@@ -29679,7 +29679,7 @@ function addSingleConv(from, to) {
     curNode._ = to;
 }
 function addConversionData(data) {
-    for (const pair of zh2hans){
+    for (const pair of data){
         addSingleConv(pair[0], pair[1]);
     }
 }

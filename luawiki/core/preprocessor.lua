@@ -50,7 +50,7 @@ mod_env.cerror = require('utils/common').cerror
 
 mod_env.require = function(m)
   local ok, f = xpcall(function()
-    return loadfile(ngx.config.prefix() .. 'modules/'.. m .. '.lua', 't', env)
+    return loadfile(ngx.config.prefix() .. 'modules/'.. m .. '.lua', 't', mod_env)
   end, function(err)
     cerror('Module ' .. m .. ': ' .. err)
   end)
@@ -185,6 +185,7 @@ preproc.new = function(wiki_state, template_cache)
     if not m then cerror('Module ' .. (mname or '?') .. " doesn't exist.")
     elseif type(m) == 'function' then
       fname, f = mname, m
+      setfenv(f, mod_env)
     elseif type(m) == 'table' then
       fname = node.func or 'main'
       f = m[fname]
