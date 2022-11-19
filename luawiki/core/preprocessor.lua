@@ -185,7 +185,6 @@ preproc.new = function(wiki_state, template_cache)
     if not m then cerror('Module ' .. (mname or '?') .. " doesn't exist.")
     elseif type(m) == 'function' then
       fname, f = mname, m
-      setfenv(f, mod_env)
     elseif type(m) == 'table' then
       fname = node.func or 'main'
       f = m[fname]
