@@ -83,8 +83,8 @@ let sectionObserver = new IntersectionObserver(entries => {
 
 $(document).ready(mainContentLoaded);
 
-async function loadArticle(title, cache) {
-  let res = await fetch(`/page/html/${title}`, { 'cache': cache ? 'reload' : 'no-cache' })
+async function loadArticle(title, noCache) {
+  let res = await fetch(`/page/html/${title}` + (noCache ? '?r=' + Math.random(): ''))
               .then(res => res.json());
   if (res.code === 0) {
     html = res.result + `<!-- Total parse time: ${res.parse_time}-->`;
@@ -92,7 +92,14 @@ async function loadArticle(title, cache) {
     routeHandler(title, html, decodeURIComponent(title));
     mainContentLoaded();
   } else {
-    newModal({ title: '页面不存在', img: '/image/404.svg' })
+    newModal({
+      title: '页面不存在',
+      img: '/image/404.svg',
+      yes_text: '创建条目',
+      yes: () => {
+        editPage(title)
+      }
+    })
   }
 }
 
@@ -235,10 +242,10 @@ function gotoLogin() {
   location.href = '/login.html?returnUrl=' + location.pathname;
 }
 
-async function editPage() {
-  window.pagename = lastPath.match(/\/wiki\/([^#]+)/) && RegExp.$1;
+async function editPage(pageName) {
+  window.pagename = pageName || lastPath.match(/\/wiki\/([^#]+)/) && RegExp.$1;
   if (!pagename) return;
-  getRemoteHTML('/editor.html', '#/edit', '编辑', 'tool');
+  getRemoteHTML('/editor.html', '/wiki/' + window.pagename + '#/edit', '编辑', 'tool');
   appData.showEdit = false;
   appData.showSubmit = true;
 }
@@ -246,7 +253,7 @@ async function editPage() {
 async function historyPage() {
   window.pagename = lastPath.match(/\/wiki\/([^#]+)/) && RegExp.$1;
   if (!pagename) return;
-  getRemoteHTML('/history.html', '#/history', '历史', 'tool');
+  getRemoteHTML('/history.html', '/wiki/' + window.pagename + '#/history', '历史', 'tool');
 }
 
 async function submitPage() {

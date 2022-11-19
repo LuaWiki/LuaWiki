@@ -9,6 +9,7 @@ z.process = function(html)
   
   -- div inside p, add parent and index
   local function traverse_a(node)
+    node.nodeName = node.nodeName and string.lower(node.nodeName)
     -- traverse children
     if node.children then
       for i, v in ipairs(node.children) do

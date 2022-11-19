@@ -90,7 +90,7 @@ tpl_grammar = re.compile([=[--lpeg
   data        <- {| {:tag: '<%' -> 'data':} (!'%>' .)* -> parse_data '%>' |}
   expr        <- {| {:tag: '' -> 'expr':} {([^,()]+ / balanced)+} |}
   balanced    <- '(' ([^()] / balanced)* ')'
-  wikitext    <- ([^@}]+ / '|}')+ -> cleanup_text
+  wikitext    <- ([^@|}]+ / '|}' / '|')+ -> cleanup_text
   __          <- %s*
 ]=], tpl_defs)
 
