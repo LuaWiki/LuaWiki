@@ -6,6 +6,10 @@ a.new {
   color: #d33;
 }
 
+#parser-output {
+  padding: 1em 1em 1em 0;
+}
+
 #parser-output, #viewer-panel {
   scroll-behavior: smooth;
 }

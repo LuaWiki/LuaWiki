@@ -98,7 +98,6 @@ body > nav a:hover {
   display: grid;
   grid-template-columns: 13em 1fr;
   grid-column-gap: 2em;
-  padding: 1em;
 }
 #content aside {
   position: sticky;
@@ -106,6 +105,7 @@ body > nav a:hover {
   align-self: start;
   height: 100%;
   overflow: auto;
+  padding: 1em 0 1em 1em;
 }
 #content aside ul {
   list-style: none;

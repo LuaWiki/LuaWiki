@@ -115,13 +115,14 @@ elseif ngx.var.request_method == 'POST' then
         'SET @rev_id := LAST_INSERT_ID();',
       'UPDATE page SET page_latest = @rev_id WHERE page_id = ' .. page_id .. ';',
     }
-    
-    print('START TRANSACTION;' .. table.concat(statements) .. 'COMMIT;')
+
     -- create page
     res, err, errcode, sqlstate = -- insert new text
       db:query('START TRANSACTION;' .. table.concat(statements) .. 'COMMIT;')
+    while err == 'again' do
+      res, err, errcode, sqlstate = db:read_result()
+    end
     if not res then sql_error('bad result') end
-    print(inspect(res))
   end)
   
   if not flag then
@@ -136,6 +137,12 @@ elseif ngx.var.request_method == 'POST' then
     code = 0,
     result = 'success'
   }))
+
+  local ok, err = db:set_keepalive(10000, 100)
+  if not ok then
+    ngx.say("failed to set keepalive: ", err)
+    return
+  end
   
 else
   ngx.status = ngx.HTTP_NOT_ALLOWED
