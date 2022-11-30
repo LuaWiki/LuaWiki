@@ -95,8 +95,8 @@ local defs = {
   end,
   gen_heading = function(v)
     local htag = 'h' .. #v.htag
-    local h_text = v[1]:gsub('^[ ]*', ''):gsub('[ ]*$', '')
-    return '<' .. htag .. ' id="' .. h_text ..  '">' .. h_text ..
+    local h_text = v[1]:gsub('^ *', ''):gsub(' *$', '')
+    return '<' .. htag .. ' id="' .. h_text:gsub(' ', '_') ..  '">' .. h_text ..
       '</' .. htag .. '>'
   end,
   -- t is formatted in form { { '#:', '123' }, { '###', '456' } }
@@ -136,7 +136,10 @@ local defs = {
   gen_link = function(a, b)
     local href = nil
     if a:sub(1, 1) == '#' then href = a
-    else href = '/wiki/' ..a end
+    else
+      href = '/wiki/' .. a
+      table.insert(global_state.links, a)
+    end
     local s = '<a title="' .. a .. '" href="' .. href:gsub(' ', '_') .. '">'
     if b then return s .. b .. '</a>'
     else return s .. a .. '</a>' end
@@ -186,7 +189,7 @@ local defs = {
     end
     
     local filepath = getFilePath(t[1]:sub(1, 1):upper() .. t[1]:sub(2):gsub(' +$', ''):gsub(' ', '_'), t.size and t.size:gsub('x%d.*$', ''))
-    return prefix .. '<img src="' .. filepath .. '" ' .. (t.alt and ('alt="' .. t.alt .. '"') or '') .. t.height .. '>' .. suffix
+    return prefix .. '<img src="' .. filepath .. '" ' .. (t.alt and ('alt="' .. html_utils.strip_tags(t.alt) .. '"') or '') .. t.height .. '>' .. suffix
   end,
   gen_th = function(t)
     return '<th ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'

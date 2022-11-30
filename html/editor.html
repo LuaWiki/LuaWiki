@@ -201,6 +201,7 @@ function loadAfterAce() {
 }
 
 function scrollToTitle(level, title) {
+  title = title.replace(/ /g, '_')
   let viewer = document.getElementById('viewer-panel');
   let matchingElement = viewer.querySelector(`h${level}#${title}`);
   if (matchingElement) {

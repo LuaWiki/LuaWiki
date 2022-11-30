@@ -6,6 +6,8 @@ local nonparse = require('core/nonparse')
 local inspect = require('inspect')
 
 local debug_flag = false
+local ngx_path = ngx.config.prefix()
+
 local function print_msg(msg)
   if ngx then ngx.say(msg .. '<br>')
   else print(msg) end
@@ -50,7 +52,7 @@ mod_env.cerror = require('utils/common').cerror
 
 mod_env.require = function(m)
   local ok, f = xpcall(function()
-    return loadfile(ngx.config.prefix() .. 'modules/'.. m .. '.lua', 't', mod_env)
+    return loadfile(ngx_path .. 'modules/'.. m .. '.lua', 't', mod_env)
   end, function(err)
     cerror('Module ' .. m .. ': ' .. err)
   end)
@@ -209,7 +211,7 @@ preproc.new = function(wiki_state, template_cache)
       tpl_name = tpl_name:sub(1, 1):upper() .. tpl_name:sub(2):gsub('%s+$', ''):gsub(' ', '_')
 
       if not self.tpl_cache[tpl_name] then
-        local f = io.open(ngx.config.prefix() .. 'wiki/template/' .. tpl_name .. '.tpl')
+        local f = io.open(ngx_path .. 'wiki/template/' .. tpl_name .. '.tpl')
         if not f then
           if #content == #tpl_text then
             return tpl_text
@@ -239,7 +241,7 @@ preproc.new = function(wiki_state, template_cache)
 
       local flag, expanded_wikitext = pcall(self.text_visitor, self, self.tpl_cache[tpl_name].ast)
       if not flag then
-        expanded_wikitext = '<strong class="error">' .. expanded_wikitext .. '</strong>'
+        expanded_wikitext = '<strong class="error">' .. expanded_wikitext:gsub(ngx_path, '') .. '</strong>'
       end
       return nonparse.decorate(wiki_state, expanded_wikitext)
     end)

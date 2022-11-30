@@ -5,7 +5,10 @@ local z = {}
 
 z.process = function(html)
   local root = html_parser.parse(html)
-  if not root then return html end
+  if not root then
+    print('HTML PARSE ERROR!')
+    return html
+  end
   
   -- div inside p, add parent and index
   local function traverse_a(node)

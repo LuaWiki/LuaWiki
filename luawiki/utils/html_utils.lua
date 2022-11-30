@@ -16,6 +16,14 @@ z.decode_html = function(content)
   end
 end
 
+z.strip_tags = function(content)
+  if content then
+    return content:gsub('%b<>', '')
+  else
+    return ''
+  end
+end
+
 local html_stag_map = {}
 local html_single_tags = {
   'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 

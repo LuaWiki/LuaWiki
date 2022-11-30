@@ -12,7 +12,8 @@ if flag then
     npb_index = 0,
     nw_index = 0,
     npb_cache = {},
-    nw_cache = {}
+    nw_cache = {},
+    links = {}
   }
 
   -- start timer
