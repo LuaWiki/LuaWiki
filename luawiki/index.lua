@@ -40,10 +40,10 @@ else
   parser_output = wikitext or 'Page not found'
 end
 
-local mainpage_html = ([=[<!DOCTYPE html>
+local mainpage_html = [=[<!DOCTYPE html>
 <html>
 <head>
-  <title>维基百科，自由的百科全书</title>
+  <title>]=] .. title:gsub('_', ' ') .. ' - 维基百科，自由的百科全书' .. [=[</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.25, maximum-scale=5.0">
   <!--<link rel="stylesheet" href="https://picocss.com/css/pico.min.css">-->
@@ -101,9 +101,6 @@ body > nav a:hover {
   grid-column-gap: 2em;
 }
 #content aside {
-  position: sticky;
-  top: 0;
-  align-self: start;
   height: 100%;
   overflow: auto;
 }
@@ -181,7 +178,7 @@ body > nav a:hover {
   <div id="content" class="has-toc">
     <aside>
     </aside>
-    <article id="parser-output">_CONTENT_</article>
+    <article id="parser-output">]=] .. parser_output:gsub('%%', '%%%%') .. [=[</article>
   </div>
   
 <script src="/simplequery.js"></script>
@@ -194,6 +191,6 @@ body > nav a:hover {
 <script src="/modal.js"></script>
 </body>
 </html>
-]=]):gsub('_CONTENT_', (parser_output:gsub('%%', '%%%%')))
+]=]
 
 ngx.say(mainpage_html)

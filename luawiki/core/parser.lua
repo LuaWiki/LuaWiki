@@ -156,18 +156,21 @@ local defs = {
     local prefix = ''
     local suffix = ''
     local loc_class = ''
+    if t.type == 'thumbnail' or t.type == '缩略图' then
+      t.type = 'thumb'
+    end
     if t.loc == 'right' or t.loc == '右' then
       loc_class = ' tright'
     elseif t.loc == 'left' or t.loc == '左' then
       loc_class = ' tleft'
     elseif t.loc == 'center' then
       -- do nothing
-    elseif t.type == 'thumb' or t.type == '缩略图' then
+    elseif t.type == 'thumb' then
       loc_class = ' tright'
     end
     if t.type then
       if not t.size then t.size = '220px' end
-      if t.type == 'thumb' or t.type == '缩略图' then
+      if t.type == 'thumb' then
         local size_num = t.size:match('^(%d+)') or 220
         prefix = '<div class="thumbinner' .. loc_class .. '" style="width:' ..
           (size_num + 2) .. 'px">'
@@ -288,7 +291,7 @@ defs.plain_text = re.compile([=[--lpeg
   file_link      <- {| '[[' ([Ff] 'ile' / [Ii] 'mage') ':' {link_part} ('|' (f_type / f_border 
                       / f_location / f_align / f_size / f_link / f_alt
                       / f_caption))* ']]' |} -> gen_file
-  f_type         <- {:type: 'thumb' / 'frameless' / 'frame' / '缩略图' :}
+  f_type         <- {:type: 'thumbnail' / 'thumb' / 'frameless' / 'frame' / '缩略图' :}
   f_border       <- {:border: 'border' :}
   f_location     <- {:loc: 'right' / 'left' / 'center' / 'none' / '右' / '左' :}
   f_align        <- {:align: 'baseline' / 'middle' / 'sub' / 'super' / 'text-top' / 'text-bottom' / 'top' / 'bottom' :}

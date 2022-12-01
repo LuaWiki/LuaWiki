@@ -1,6 +1,50 @@
 local html_parser = require('html_parser')
+local counters = require('counters/init')
 
 local z = {}
+
+local function traverse_a(node)
+  node.nodeName = node.nodeName and string.lower(node.nodeName)
+  -- traverse children
+  if node.children then
+    for i, v in ipairs(node.children) do
+      v.parent = node
+      v.index = i
+      
+      if v.nodeName == 'div' and node.nodeName == 'p' then
+        local new_p = { nodeName = 'p', children = {} }
+        table.move(node.children, i+1, #node.children, 1, new_p.children)
+        if i == 1 then
+          node.children[i + 1] = nil
+          node.parent.children[node.index] = v
+          v.parent = node.parent
+          v.index = node.index
+          table.insert(node.parent.children, node.index + 1, new_p)
+          
+          traverse_a(v)
+        else
+          node.children[i] = nil
+          table.insert(node.parent.children, node.index + 1, v)
+          table.insert(node.parent.children, node.index + 2, new_p)
+        end
+      else
+        traverse_a(v)
+      end
+    end
+  end
+end
+
+local function get_counter(g, num)
+  if #g > 0 then
+    if counters[g] then
+      return counters[g]:render(num)
+    else
+      return g .. ' ' .. num
+    end
+  else
+    return num
+  end
+end
 
 z.process = function(html)
   local root = html_parser.parse(html)
@@ -11,35 +55,6 @@ z.process = function(html)
   --if true then return html end
   
   -- div inside p, add parent and index
-  local function traverse_a(node)
-    node.nodeName = node.nodeName and string.lower(node.nodeName)
-    -- traverse children
-    if node.children then
-      for i, v in ipairs(node.children) do
-        v.parent = node
-        v.index = i
-        
-        if v.nodeName == 'div' and node.nodeName == 'p' then
-          local new_p = { nodeName = 'p', children = {} }
-          table.move(node.children, i+1, #node.children, 1, new_p.children)
-          node.children[i + 1] = nil
-          if i == 1 then
-            node.parent.children[node.index] = v
-            v.parent = node.parent
-            v.index = node.index
-            table.insert(node.parent.children, node.index + 1, new_p)
-            
-            traverse_a(v)
-          else
-            table.insert(node.parent.children, node.index + 1, v)
-            table.insert(node.parent.children, node.index + 2, new_p)
-          end
-        else
-          traverse_a(v)
-        end
-      end
-    end
-  end
   traverse_a(root)
 
   -- add sections
@@ -157,7 +172,7 @@ z.process = function(html)
             target_element.children = x.children
           end
           x.nodeName = 'sup'
-          x.text = ('[<a href="#%s">%s%s</a>]'):format(anchor, #g > 0 and (g .. ' ') or '', ref_map[name])
+          x.text = ('[<a href="#%s">%s</a>]'):format(anchor, get_counter(g, ref_map[name]))
           x.children = nil
           goto continue
         end
@@ -173,7 +188,7 @@ z.process = function(html)
         anchor = ('cite_note-%s-%s'):format(g, ref_counter)
       end
       local cite_node = { nodeName = 'sup',
-        text = ('[<a href="#%s">%s%s</a>]'):format(anchor, #g > 0 and (g .. ' ') or '', ref_counter) }
+        text = ('[<a href="#%s">%s</a>]'):format(anchor, get_counter(g, ref_counter)) }
       x.id = anchor
       id_target[anchor] = x
       if not x.text and not (x.children and x.children[1]) then

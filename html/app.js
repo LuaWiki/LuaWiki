@@ -110,7 +110,9 @@ function mainContentLoaded() {
   $content.find('a[href^="/wiki/"]').click(async function(event) {
     let newTitle = this.href.match(/\/wiki\/([^#]*)/) && RegExp.$1;
     loadArticle(newTitle);
-  })
+  });
+  
+  document.title = outputDiv.children[0].innerText + ' - 维基百科，自由的百科全书'
   
   buildToc();
   
@@ -140,7 +142,7 @@ function buildToc() {
     sectionObserver.observe(section);
   });
   
-  const tocArr = [ { name: '序言', link: '#toc0', children: [] } ];
+  const tocArr = [ { name: '(序言)', link: '#toc0', children: [] } ];
   $('h2, h3').each((i, x) => {
     if (x.nodeName === 'H2') {
       tocArr.push({
