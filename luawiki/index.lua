@@ -106,10 +106,15 @@ body > nav a:hover {
   align-self: start;
   height: 100%;
   overflow: auto;
-  padding: 1em 0 1em 1em;
 }
 #content aside ul {
   list-style: none;
+}
+#content aside > ul > li {
+  padding-left: 1em;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 #content aside li a {
   color: #2b3135;

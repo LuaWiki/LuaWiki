@@ -1,5 +1,4 @@
 local html_parser = require('html_parser')
-local decode_html = require('utils/html_utils').decode_html
 
 local z = {}
 
@@ -9,6 +8,7 @@ z.process = function(html)
     print('HTML PARSE ERROR!')
     return html
   end
+  --if true then return html end
   
   -- div inside p, add parent and index
   local function traverse_a(node)
@@ -22,17 +22,21 @@ z.process = function(html)
         if v.nodeName == 'div' and node.nodeName == 'p' then
           local new_p = { nodeName = 'p', children = {} }
           table.move(node.children, i+1, #node.children, 1, new_p.children)
+          node.children[i + 1] = nil
           if i == 1 then
             node.parent.children[node.index] = v
+            v.parent = node.parent
+            v.index = node.index
             table.insert(node.parent.children, node.index + 1, new_p)
+            
+            traverse_a(v)
           else
-            node.children[i + 1] = nil
             table.insert(node.parent.children, node.index + 1, v)
             table.insert(node.parent.children, node.index + 2, new_p)
           end
+        else
+          traverse_a(v)
         end
-        
-        traverse_a(v)
       end
     end
   end
@@ -41,7 +45,7 @@ z.process = function(html)
   -- add sections
   local header_counter = 0
   local root2 = { nodeName = '#root', children = {} }
-  local h2sec = { nodeName = 'section', class = 'h2sec', children = {} }
+  local h2sec = { nodeName = 'section', class = 'h2sec', children = {}, id = 'toc0' }
   local h3sec = nil
   for i, x in ipairs(root.children) do
     if i == 1 then
@@ -100,9 +104,9 @@ z.process = function(html)
     -- traverse children
     if node.children and node.class ~= 'hidden' then
       for i, v in ipairs(node.children) do
-        traverse_r(v)
         v.parent = node
         v.index = i
+        traverse_r(v)
       end
     end
   end

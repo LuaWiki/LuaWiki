@@ -55,7 +55,7 @@ const appData = {
 
 function elInViewport(el) {
   const rect = el.getBoundingClientRect();
-  return (rect.top >= 0 && rect.bottom <= window.innerHeight);
+  return (rect.top >= 41.6 && rect.bottom <= window.innerHeight);
 }
 
 let sectionObserver = new IntersectionObserver(entries => {
@@ -63,16 +63,15 @@ let sectionObserver = new IntersectionObserver(entries => {
       const id = entry.target.getAttribute('id');
       if (entry.intersectionRatio > 0) {
         const $me = $(`aside li a[href="#${id}"]`);
-        const parent = $me.parent().get(0);
+        let parent = $me.parent().get(0);
         parent.className = 'active';
         if (entry.target.className === 'h3sec') {
           if (!elInViewport(parent)) {
             parent.scrollIntoView();
           }
         } else if (entry.target.className === 'h2sec') {
-          let me = $me.get(0)
-          if (!elInViewport(me)) {
-            me.scrollIntoView()
+          if (!elInViewport(parent)) {
+            parent.scrollIntoView()
           }
         }
       } else {
@@ -141,7 +140,7 @@ function buildToc() {
     sectionObserver.observe(section);
   });
   
-  const tocArr = [];
+  const tocArr = [ { name: '序言', link: '#toc0', children: [] } ];
   $('h2, h3').each((i, x) => {
     if (x.nodeName === 'H2') {
       tocArr.push({
