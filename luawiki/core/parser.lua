@@ -49,9 +49,9 @@ end
 local function getFilePath(filename, width)
   if not ngx then return '' end
   local md5hash = ngx.md5(filename)
-  if width then
-    local file_ext = ''
-    if not filename:match('[.]png') and not filename:match('[.]jpg') then
+  local file_ext = filename:match('[.]%a+$')
+  if width and file_ext ~= '.svg' then
+    if file_ext ~= '.jpg' then
       file_ext = '.png'
     end
     return 'https://upload.wikimedia.org/wikipedia/commons/thumb/' .. md5hash:sub(1,1) .. '/' .. md5hash:sub(1,2)
@@ -75,6 +75,12 @@ local function parse_inside(a)
   local str = inner_html:gsub('^<p>(.-)</p>', '%1')
   return last_p:match(str) or str
 end
+
+local t_cell = re.compile([=[--lpeg
+  all <- {~ (s / . [^<]*)* ~}
+  s <- '<' t_tag (%s [^>]*)? '>' (!('</' =tag '>') .)* -> parse_inside '</' =tag '>'
+  t_tag <- {:tag: 'th' / 'td' / 'caption' :}
+]=], { parse_inside = parse_inside })
 
 local defs = {
   cr = lpeg.P('\r'),
@@ -182,6 +188,7 @@ local defs = {
     end
     
     t.height = ''
+    local width = nil
     if t.size then
       if t.size == 'upright' then
         t.size = '220px'
@@ -189,10 +196,13 @@ local defs = {
         t.height = ' height="' .. t.size:sub(2) .. '"'
         t.size = t.size:gsub('x(%d+)px', function(p1) return 2*tonumber(p1) .. 'px' end)
       end
+      width = t.size:gsub('x%d.*$', '')
     end
     
-    local filepath = getFilePath(t[1]:sub(1, 1):upper() .. t[1]:sub(2):gsub(' +$', ''):gsub(' ', '_'), t.size and t.size:gsub('x%d.*$', ''))
-    return prefix .. '<img src="' .. filepath .. '" ' .. (t.alt and ('alt="' .. html_utils.strip_tags(t.alt) .. '"') or '') .. t.height .. '>' .. suffix
+    local filepath = getFilePath(t[1]:sub(1, 1):upper() .. t[1]:sub(2):gsub(' +$', ''):gsub(' ', '_'), width)
+    return prefix .. '<img src="' .. filepath .. '" ' ..
+      (t.alt and ('alt="' .. html_utils.strip_tags(t.alt) .. '"') or '') ..
+      (width and (' width="%s"'):format(width) or '') .. t.height .. '>' .. suffix
   end,
   gen_th = function(t)
     return '<th ' .. (t.attr and t.attr:gsub('%s$', '') or '') .. '>'
@@ -216,6 +226,10 @@ local defs = {
       .. '</table>'
   end,
   parse_inside = parse_inside,
+  table_inside = function(a)
+    a = t_cell:match(a) or a
+    return a:gsub(' data%-lw="%a+"', '')
+  end,
   gen_block_html = function(t)
     local str = '<' .. t[1] .. t[2] .. (t[3] or '') ..
       '</' .. t[1] .. '>'
@@ -326,9 +340,9 @@ defs.formatted = re.compile([=[--lpeg
 -- note: '<' [btdh] stand for blockquote, table, div and h1-h7
 wiki_grammar = re.compile([=[--lpeg
   article        <- {| block+ |} -> fast_merge
-  block          <- sol? (block_html / special_block / paragraph_plus)
+  block          <- sol? (block_html / thtml / special_block / paragraph_plus)
   paragraph_plus <- {| (newline / pline) latter_plines? |} -> gen_par_plus
-  latter_plines  <- {:html: block_html :} / {:special: special_block :} /
+  latter_plines  <- {:html: block_html / thtml :} / {:special: special_block :} /
                     pline ((![-={<*#:;] / &('<' [^btdh])) pline)* latter_plines?
   pline          <- (%formatted newline -> ' ') ~> merge_text
   special_block  <- &[-={*#:;] (horizontal_rule / heading / list_block / %table) newline?
@@ -337,7 +351,12 @@ wiki_grammar = re.compile([=[--lpeg
   bhtml_body     <- (!bhtml_end . [^<]*)*
   bhtml_start    <- '<' {bhtml_tags} ' data-lw="' {:lw: %a+ :} '"' {[^<>]* '>'}
   bhtml_end      <- '</' bhtml_tags ' data-lw="' (=lw) '"' '>'
-  bhtml_tags     <- 'blockquote' /'table' / 'div' / 'h' [1-7] / 'references' / 'center'
+  bhtml_tags     <- 'blockquote' / 'div' / 'h' [1-7] / 'references' / 'center'
+  
+  thtml          <- {| thtml_start thtml_body -> table_inside thtml_end |} -> gen_block_html
+  thtml_body     <- (!thtml_end . [^<]*)*
+  thtml_start    <- '<' {'table'} ' data-lw="' {:lw: %a+ :} '"' {[^<>]* '>'}
+  thtml_end      <- '</table data-lw="' (=lw) '"' '>'
 
   horizontal_rule <- ('-'^+4 -> '<hr>' (%formatted -> '<p>%1</p>')?) ~> merge_text
   heading        <- {| heading_tag {[^=]+} =htag [ %t]* |} -> gen_heading

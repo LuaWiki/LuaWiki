@@ -46,7 +46,7 @@ local html_parser = re.compile([=[--lpeg
   Attribute  <- {| {:name: Symbol :} __ (__ '=' __ {:value: String :})? __ |} / !'/>' [^> ]+ __
   String <- '"' {[^"]*} '"' / "'" {[^']*} "'" / {[^"'<>` ]+}
   
-  Symbol <- [a-zA-Z0-9_] [a-zA-Z0-9:_-]*
+  Symbol <- [a-zA-Z_] [a-zA-Z0-9:_-]*
   __     <- %s*
 ]=], defs)
 

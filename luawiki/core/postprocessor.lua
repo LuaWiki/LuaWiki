@@ -14,8 +14,8 @@ local function traverse_a(node)
       if v.nodeName == 'div' and node.nodeName == 'p' then
         local new_p = { nodeName = 'p', children = {} }
         table.move(node.children, i+1, #node.children, 1, new_p.children)
+        node.children[i + 1] = nil -- stop this loop
         if i == 1 then
-          node.children[i + 1] = nil
           node.parent.children[node.index] = v
           v.parent = node.parent
           v.index = node.index
@@ -91,6 +91,7 @@ z.process = function(html)
       end
     end
   end
+  if h3sec then table.insert(h2sec.children, h3sec) end
   table.insert(root2.children, h2sec)
 
   -- move refs
