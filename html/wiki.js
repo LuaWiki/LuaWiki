@@ -14,20 +14,25 @@ function buildMath() {
       try {
         katex.render(decodedMath, x, {
           displayMode: true,
-          fleqn: true
+          fleqn: true,
+          output: 'mathml'
         });
       } catch (e) {
         console.error(e);
       }
     } else {
       try {
-        katex.render(decodedMath, x);
+        katex.render(decodedMath, x, { output: 'mathml' });
       } catch (e) {
         katex.render(decodedMath, x, {
           displayMode: true,
-          fleqn: true
+          fleqn: true,
+          output: 'mathml'
         });
       }
+    }
+    if (x.children) {
+      x.parentNode.replaceChild(x.children[0], x);
     }
   })
 }

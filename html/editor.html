@@ -180,34 +180,31 @@ function loadAfterAce() {
   }, 2000);
   
   // scroll behavior
-  editor.renderer.on("afterRender", function(e) {
-    console.log(456)
-    let firstRow = editor.getFirstVisibleRow();
-    let lastRow = editor.getLastVisibleRow();
-    let cursor = editor.getCursorPosition();
-    let row = cursor.row;
-    if (row < firstRow || row > lastRow) {
-      row = firstRow;
-      if (editor.isRowFullyVisible(row)) {
-        row++;
-      }
-      if (row <= 1) {
-        document.getElementById('viewer-panel').scrollTop = 0;
-      } else if (row > navCache.prev.line && row < navCache.next.line) {
-        // do nothing
-      } else if (row >= navCache.next.line) {
-        scrollToTitle(navCache.next.level, navCache.next.title);
-        navCache.prev = navCache.next;
-        navCache.next = calcNext(row);
-      } else if (row <= navCache.prev.line) {
-        scrollToTitle(navCache.prev.level, navCache.prev.title);
-        navCache.next = navCache.prev;
-        navCache.prev = calcPrev(row);
-      }
-    } else {
-      let prev = calcPrev(row);
-      scrollToTitle(prev.level, prev.title);
+  editor.session.on("changeScrollTop", function(e) {
+    let row = editor.getFirstVisibleRow();
+    if (editor.isRowFullyVisible(row)) {
+      row++;
     }
+    console.log(row);
+    if (row <= 1) {
+      document.getElementById('viewer-panel').scrollTop = 0;
+    } else if (row > navCache.prev.line && row < navCache.next.line) {
+      // do nothing
+    } else if (row >= navCache.next.line) {
+      scrollToTitle(navCache.next.level, navCache.next.title);
+      navCache.prev = navCache.next;
+      navCache.next = calcNext(row);
+    } else if (row <= navCache.prev.line) {
+      scrollToTitle(navCache.prev.level, navCache.prev.title);
+      navCache.next = navCache.prev;
+      navCache.prev = calcPrev(row);
+    }
+  });
+  
+  editor.selection.on("changeCursor", function(e) {
+    let cursor = editor.getCursorPosition();
+    let prev = calcPrev(cursor.row);
+    scrollToTitle(prev.level, prev.title);
   });
 }
 
@@ -221,7 +218,12 @@ function scrollToTitle(level, title) {
     matchingElement = viewer.querySelector(`h${level}[id="${title}"]`);
   }
   if (matchingElement) {
-    viewer.scrollTop = matchingElement.offsetTop;
+    let sTop = matchingElement.offsetTop;
+    while (matchingElement.offsetParent && matchingElement.offsetParent != viewer) {
+      matchingElement = matchingElement.offsetParent;
+      sTop += matchingElement.offsetTop;
+    } ;
+    viewer.scrollTop = sTop;
   }
 }
 

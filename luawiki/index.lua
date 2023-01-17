@@ -178,7 +178,7 @@ body > nav a:hover {
   <div id="content" class="has-toc">
     <aside>
     </aside>
-    <article id="parser-output">]=] .. parser_output:gsub('%%', '%%%%') .. [=[</article>
+    <article id="parser-output">]=] .. parser_output .. [=[</article>
   </div>
   
 <script src="/simplequery.js"></script>

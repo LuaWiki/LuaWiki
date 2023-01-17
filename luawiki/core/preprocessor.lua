@@ -33,12 +33,12 @@ local var_meta = {
   end
 }
 
-local simple_tpl = re.compile[=[--lpeg
+local simple_tpl = re.compile([=[--lpeg
   simp_tpl <- { tpl }
-  tpl      <- '{{' tpl_name ([^{}]+ / balanced)* '}}'
+  tpl      <- !<'{' '{{' tpl_name ([^{}]+ / balanced)* '}}'
   balanced <- '{' ([^{}] / balanced)* '}'
   tpl_name <- { ([_/!+-] / [^%p%nl])+ }
-]=]
+]=])
 
 local var_pat = re.compile([=[--lpeg
   '$' ( '[' {(!']' !%nl .)+} ']' / {[_%w]+})

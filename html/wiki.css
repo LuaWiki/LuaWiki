@@ -1,3 +1,6 @@
+@namespace url('http://www.w3.org/1999/xhtml');
+@namespace m url('http://www.w3.org/1998/Math/MathML');
+
 .hidden {
   display: none;
 }
@@ -158,6 +161,26 @@ cite {
 }
 .error {
   color: #d33;
+}
+
+@font-face {
+    font-family: Latin Modern Math;
+    src: url('https://fred-wang.github.io/MathFonts/LatinModern/latinmodern-math.woff2'), url('https://fred-wang.github.io/MathFonts/LatinModern/latinmodern-math.woff');
+}
+m|math {
+  font-family: Latin Modern Math;
+}
+
+/* render fixes */
+m|math[display="block"] {
+  display: inline-block;
+}
+m|mtd {
+  text-align: left;
+  padding: 0;
+}
+m|mtd.mml-eqn-num {
+  padding: 0.5ex 0.4em;
 }
 
 .katex-display {

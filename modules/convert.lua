@@ -117,7 +117,7 @@ end
 
 z.main = function(args)
   args = args[1]
-  local value = tonumber((args['1']:gsub(',', '')))
+  local value = tonumber((args['1']:gsub('−', '-'):gsub(',', '')))
   
   local unit1 = get_data(args['2'])
   if not unit1 then

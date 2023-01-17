@@ -38,7 +38,7 @@ var MediaWikiHighlightRules = function() {
                 push: [{
                     regex: /(?=}}|[|])/,
                     next: "pop"
-                }, 'template', 'link_internal', {
+                }, 'comment', 'template', 'link_internal', {
                     defaultToken: 'text'
                 }]
             }, {
@@ -47,7 +47,7 @@ var MediaWikiHighlightRules = function() {
                 push: [{
                     regex: /(?=}}|[|])/,
                     next: "pop"
-                }, 'template', 'link_internal', {
+                }, 'comment', 'template', 'link_internal', {
                     defaultToken: 'text'
                 }]
             }]
