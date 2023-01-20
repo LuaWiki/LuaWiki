@@ -144,9 +144,9 @@ local defs = {
     if a:sub(1, 1) == '#' then href = a
     else
       href = '/wiki/' .. a
-      table.insert(global_state.links, a)
+      global_state.links[a] = true
     end
-    local s = '<a title="' .. a .. '" href="' .. href:gsub(' ', '_') .. '">'
+    local s = '<a class="internal" title="' .. a .. '" href="' .. href:gsub(' ', '_') .. '">'
     if b then return s .. b .. '</a>'
     else return s .. a .. '</a>' end
   end,

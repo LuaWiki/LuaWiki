@@ -70,6 +70,7 @@ end
 z.join_last = function(args)
   local list = args[1]
   util.check_type(1, list, 'table')
+  if not list.n then list.n = #list end
   if list.n == 0 then return '' end
   if list.n == 1 then return list[1] end
   util.check_type(2, args[2], 'string')

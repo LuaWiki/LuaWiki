@@ -75,6 +75,7 @@ preproc.new = function(wiki_state, template_cache)
     ipairs = ipairs,
     push = table.insert,
     join = table.concat,
+    fun = mod_env.fun,
     _var =  {},
     _tpl = {},
     _tpl_expand = {}

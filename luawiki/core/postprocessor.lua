@@ -1,7 +1,21 @@
+-- LuaWiki postprocesoor
+-- 
+-- 1. Fix <div> inside <p> problem
+-- 2. Section wrapping
+-- 3. Move references
+-- 4. Mark red links
+
 local html_parser = require('html_parser')
 local counters = require('counters/init')
 
+local mysql = require('resty.mysql')
+local cerror = require('utils/common').cerror
+local db, err = mysql:new()
+local wrap = ngx.quote_sql_str
+
 local z = {}
+
+local inspect = require('inspect')
 
 local function traverse_a(node)
   node.nodeName = node.nodeName and string.lower(node.nodeName)
@@ -34,30 +48,9 @@ local function traverse_a(node)
   end
 end
 
-local function get_counter(g, num)
-  if #g > 0 then
-    if counters[g] then
-      return counters[g]:render(num)
-    else
-      return g .. ' ' .. num
-    end
-  else
-    return num
-  end
-end
-
-z.process = function(html)
-  local root = html_parser.parse(html)
-  if not root then
-    print('HTML PARSE ERROR!')
-    return html
-  end
-  --if true then return html end
-  
-  -- div inside p, add parent and index
-  traverse_a(root)
-
-  -- add sections
+-- wrap content into sections
+-- return new root node
+local function wrap_section(root)
   local header_counter = 0
   local root2 = { nodeName = '#root', children = {} }
   local h2sec = { nodeName = 'section', class = 'h2sec', children = {}, id = 'toc0' }
@@ -94,7 +87,23 @@ z.process = function(html)
   if h3sec then table.insert(h2sec.children, h3sec) end
   table.insert(root2.children, h2sec)
 
-  -- move refs
+  return root2
+end
+
+local function get_counter(g, num)
+  if #g > 0 then
+    if counters[g] then
+      return counters[g]:render(num)
+    else
+      return g .. ' ' .. num
+    end
+  else
+    return num
+  end
+end
+
+-- move references to correct places
+local function move_refs(root)
   --- 1.find out <ref> and <references>
   local cite_store = {}
   local ref_store = {}
@@ -126,7 +135,7 @@ z.process = function(html)
       end
     end
   end
-  traverse_r(root2)
+  traverse_r(root)
 
   --- 2.generate reference groups
   local id_target = {}
@@ -207,8 +216,74 @@ z.process = function(html)
   for k in pairs(ref_store) do
     build_ref_group(k)
   end
+end
+
+z.process = function(html, wiki_state)
+  if not wiki_state then
+    print('No wiki_state!')
+    return html
+  end
   
-  return html_parser.serialize(root2)
+  local function sql_error(msg)
+    cerror(msg .. ': ' .. err .. ': ' .. errcode .. ' ' .. sqlstate)
+  end
+
+  local ok = db:connect(dbconf)
+  if ok then
+    local links = {}
+    for k in pairs(wiki_state.links) do
+      table.insert(links, wrap(k))
+    end
+    ok = db:send_query('SELECT page_title FROM page WHERE page_title IN (' .. table.concat(links, ',') .. ')')
+    if not ok then
+      print('query links error')
+    end
+  end
+
+  local root = html_parser.parse(html)
+  if not root then
+    print('HTML PARSE ERROR!')
+    return html
+  end
+  --if true then return html end
+  
+  -- div inside p, add parent and index
+  traverse_a(root)
+
+  -- add sections
+  root = wrap_section(root)
+
+  -- move refs
+  move_refs(root)
+  
+  local res = db:read_result()
+  if not res then res = {} end
+  
+  local blue_links = {}
+  for _, v in ipairs(res) do
+    blue_links[v.page_title] = true
+  end
+  
+  -- tag red links
+  local function link_state(node)
+    if node.nodeName == 'a' and node.class == 'internal' then
+      if blue_links[node.title] then
+        node.class = nil
+      else
+        node.class = 'new'
+      end
+      return
+    end
+    if node.children then
+      for _, v in ipairs(node.children) do
+        link_state(v)
+      end
+    end
+  end
+  
+  link_state(root)
+  
+  return html_parser.serialize(root)
 end
 
 return z

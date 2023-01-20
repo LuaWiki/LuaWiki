@@ -52,7 +52,7 @@ local html_utils = require('utils/html_utils')
 local parser_output = '<h1>' .. pagename .. '</h1>' .. html_utils.expand_single(wiki_html)
 
 local postprocessor = require('core/postprocessor')
-parser_output = postprocessor.process(parser_output)
+parser_output = postprocessor.process(parser_output, wiki_state)
   
 ngx.say(cjson.encode({
   code = 0,
