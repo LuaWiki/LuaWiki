@@ -87,7 +87,7 @@ async function loadArticle(title, noCache) {
               .then(res => res.json());
   if (res.code === 0) {
     html = res.result + `<!-- Total parse time: ${res.parse_time}-->`;
-    html = `<aside></aside><article id="parser-output">${html}</article>`;
+    html = `<aside></aside><article id="content-text" class="parser-output">${html}</article>`;
     routeHandler(title, html, decodeURIComponent(title));
     mainContentLoaded();
   } else {
@@ -103,7 +103,7 @@ async function loadArticle(title, noCache) {
 }
 
 function mainContentLoaded() {
-  outputDiv = document.getElementById('parser-output');
+  outputDiv = document.getElementById('content-text');
   hashStore = [ { hash: '' } ];
   hashIndex = 0;
   outputDiv.innerHTML = doMwConvert(outputDiv.innerHTML);

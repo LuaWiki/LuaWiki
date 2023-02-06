@@ -121,13 +121,13 @@ body > nav a:hover {
   opacity: 1;
   font-weight: bold;
 }
-#parser-output {
+.parser-output {
   height: 100%;
   overflow: auto;
   position: relative;
 }
 @supports (-moz-appearance:none) {
-  #parser-output {
+  .parser-output {
     text-align: justify;
     hyphens: auto;
   }
@@ -178,7 +178,7 @@ body > nav a:hover {
   <div id="content" class="has-toc">
     <aside>
     </aside>
-    <article id="parser-output">]=] .. parser_output .. [=[</article>
+    <article id="content-text" class="parser-output">]=] .. parser_output .. [=[</article>
   </div>
   
 <script src="/simplequery.js"></script>

@@ -9,15 +9,15 @@ a.new {
   color: #d33;
 }
 
-#parser-output {
+.parser-output {
   padding: 1em 1em 1em 0;
 }
 
-#parser-output, #viewer-panel {
+.parser-output, #viewer-panel {
   scroll-behavior: smooth;
 }
 
-#parser-output ul, #parser-output ol {
+.parser-output ul, .parser-output ol {
   margin: 0.3em 0 0 1.6em;
   padding: 0;
 }
@@ -37,11 +37,11 @@ pre, code {
   border: 1px solid #eaecf0;
 }
 
-#parser-output p, #parser-output div, #parser-output li, #parser-output dd {
-  font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', 'Noto Serif CJK SC', STSong, serif;
+.parser-output :not(section, h1, h2, h3) {
+  font-family: Baskerville, Georgia, "Liberation Serif", 'Noto Serif CJK SC', STZhongsong, STSong, serif;
 }
 
-#parser-output table {
+.parser-output table {
   width: unset;
 }
 
@@ -220,7 +220,7 @@ dialog img {
   #content.has-toc {
     display: block !important;
   }
-  #parser-output {
+  .parser-output {
     height: unset !important;
     overflow: unset !important;
   }

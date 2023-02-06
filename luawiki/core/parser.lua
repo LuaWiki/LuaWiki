@@ -302,9 +302,9 @@ defs.plain_text = re.compile([=[--lpeg
   internal_link  <- ('[[' {link_part} ('|' (!']]' . [^%eb]*)+ $> ld_formatted)? ']]') -> gen_link
   external_link  <- ('[' { 'http' 's'? '://' [^ %t%eb]+ } ([ %t]+ [^%cr%nl%eb]+ $> ld_formatted)? ']') -> gen_extlink
 
-  file_link      <- {| '[[' ([Ff] 'ile' / [Ii] 'mage') ':' {link_part} ('|' (f_type / f_border 
+  file_link      <- {| '[[' ([Ff] 'ile' / [Ii] 'mage') ':' {link_part} ('|' %s* (f_type / f_border 
                       / f_location / f_align / f_size / f_link / f_alt
-                      / f_caption))* ']]' |} -> gen_file
+                      / f_caption) %s*)* ']]' |} -> gen_file
   f_type         <- {:type: 'thumbnail' / 'thumb' / 'frameless' / 'frame' / '缩略图' :}
   f_border       <- {:border: 'border' :}
   f_location     <- {:loc: 'right' / 'left' / 'center' / 'none' / '右' / '左' :}

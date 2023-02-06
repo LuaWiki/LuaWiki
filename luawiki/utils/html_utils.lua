@@ -34,9 +34,10 @@ for _, v in ipairs(html_single_tags) do
 end
 
 z.expand_single = function(content)
-  return content:gsub('<((%a+)[^>]-)/>', function(p1, p2)
-    if not html_stag_map[p2] then
-      return '<' .. p1 .. '></' .. p2 .. '>'
+  return content:gsub('<(%a+)([^>]-)/>', function(p1, p2)
+    p1 = p1:lower()
+    if not html_stag_map[p1] then
+      return '<' .. p1 .. p2 .. '></' .. p1 .. '>'
     end
   end)
 end
