@@ -1,0 +1,24 @@
+services:
+  app:
+    image: luawiki:latest
+    ports:
+      - 8080:80
+    environment:
+      MYSQL_HOST: mariadb
+      MYSQL_USER: luawiki
+      MYSQL_PASSWORD: secret
+      MYSQL_DB: mywiki
+
+  mysql:
+    image: mariadb:10.10.2
+    volumes:
+      - luawiki-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_HOST: localhost
+      MARIADB_USER: luawiki
+      MARIADB_PASSWORD: secret
+      MARIADB_DATABASE: mywiki
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+
+volumes:
+  luawiki-mysql-data:
