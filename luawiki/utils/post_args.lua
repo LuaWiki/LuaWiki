@@ -1,3 +1,8 @@
+-- This file defines post_args(), a function that returns a table of arguments from a POST request
+-- It handles both multipart and non-multipart requests
+-- It uses resty/multipart/parser to parse the body data
+-- It reads the body data from a temporary file if needed
+
 local mp_parser = require('resty/multipart/parser')
 
 local function getFile(file_name)

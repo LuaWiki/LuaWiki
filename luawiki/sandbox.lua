@@ -1,3 +1,7 @@
+-- A sandbox module that creates a safe environment for executing Lua code
+-- It allows only a subset of global variables and functions from the base and standard libraries
+-- It prevents modifications to read-only tables and metatables
+
 local sandbox = {}
 
 -- note: math.random math.randomseed string.dump can be potentially unsafe
