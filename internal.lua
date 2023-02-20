@@ -1,6 +1,9 @@
 local z = {}
 local util = require('utils/library_util')
 
+-- This function takes two arguments: args and in_text. It ignores the
+-- second argument and returns the first element of args, which is a table.
+-- This function is used to evaluate expressions in text templates.
 z.expr = function(args, in_text)
   return args[1]
 end

@@ -1,3 +1,6 @@
+-- Defines a grammar for template syntax and a function to reorganize the parsed
+-- arguments into a table. It also stores sub-templates in another table and
+-- replaces them with placeholders.
 local re = require('lpeg.re')
 local lpeg = require('lpeg')
 
@@ -36,6 +39,10 @@ local tpl_grammar = re.compile([=[--lpeg
   __            <- [ %t]*
 ]=], defs)
 
+-- The function takes a table of parsed arguments and returns a new table with
+-- the template name and the parameters indexed by name or number. It also removes
+-- any trailing whitespace from the template name and the parameter names.
+-- It assigns a counter to unnamed parameters and increments it for each one.
 local function reorganize(t)
   local counter = 0
   local new_t = {}

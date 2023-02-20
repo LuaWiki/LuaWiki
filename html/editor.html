@@ -208,6 +208,8 @@ function loadAfterAce() {
   });
 }
 
+// This function scrolls to a heading element with a given level and id in
+// a viewer panel element. It uses query selector and offset top properties.
 function scrollToTitle(level, title) {
   let viewer = document.getElementById('viewer-panel');
   let matchingElement = null;
@@ -227,6 +229,8 @@ function scrollToTitle(level, title) {
   }
 }
 
+// The function encloseWith returns another function that inserts
+// start and end strings around a selected text in an editor.
 function encloseWith(start, end) {
   if (!end) end = start;
   return function() {
@@ -237,6 +241,9 @@ function encloseWith(start, end) {
   }
 }
 
+// The function creates and adds folds to the editor session based
+// on regular expressions that match the start and end of foldable
+// regions. It also collapses any nested folds within a region.
 function realFoldAll(foldingStartMarker, foldingStopMarker) {
   if (!foldingStartMarker || !foldingStopMarker) return;
   let row = 0;

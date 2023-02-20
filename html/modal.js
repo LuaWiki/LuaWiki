@@ -1,5 +1,7 @@
-// generate new modal
-// return: Element
+// The function creates and displays a modal dialog with optional image,
+// title, content and buttons. It also accepts callback functions for the
+// yes and no buttons. It removes the dialog from the document when it is
+// closed or confirmed.
 function newModal({ title, img, content, yes, no, yes_text, no_text }) {
   const dialog = document.createElement('dialog');
   if (img) {

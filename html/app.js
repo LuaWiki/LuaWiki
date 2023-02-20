@@ -59,26 +59,26 @@ function elInViewport(el) {
 }
 
 let sectionObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      const id = entry.target.getAttribute('id');
-      if (entry.intersectionRatio > 0) {
-        const $me = $(`aside li a[href="#${id}"]`);
-        let parent = $me.parent().get(0);
-        parent.className = 'active';
-        if (entry.target.className === 'h3sec') {
-          if (!elInViewport(parent)) {
-            parent.scrollIntoView();
-          }
-        } else if (entry.target.className === 'h2sec') {
-          if (!elInViewport(parent)) {
-            parent.scrollIntoView()
-          }
+  entries.forEach(entry => {
+    const id = entry.target.getAttribute('id');
+    if (entry.intersectionRatio > 0) {
+      const $me = $(`aside li a[href="#${id}"]`);
+      let parent = $me.parent().get(0);
+      parent.className = 'active';
+      if (entry.target.className === 'h3sec') {
+        if (!elInViewport(parent)) {
+          parent.scrollIntoView();
         }
-      } else {
-        $(`aside li a[href="#${id}"]`).parent().removeClass('active');
+      } else if (entry.target.className === 'h2sec') {
+        if (!elInViewport(parent)) {
+          parent.scrollIntoView()
+        }
       }
-    });
+    } else {
+      $(`aside li a[href="#${id}"]`).parent().removeClass('active');
+    }
   });
+});
 
 $(document).ready(mainContentLoaded);
 
