@@ -342,8 +342,10 @@ wiki_grammar = re.compile([=[--lpeg
   article        <- {| block+ |} -> fast_merge
   block          <- sol? (block_html / thtml / special_block / paragraph_plus)
   paragraph_plus <- {| (newline / pline) latter_plines? |} -> gen_par_plus
-  latter_plines  <- {:html: block_html / thtml :} / {:special: special_block :} /
-                    pline ((![-={<*#:;] / &('<' [^btdh])) pline)* latter_plines?
+  latter_plines  <- html_and_spc / pline_seq lat_pl_helper
+  lat_pl_helper  <- html_and_spc? / pline_seq lat_pl_helper
+  html_and_spc   <- {:html: block_html / thtml :} / {:special: special_block :}
+  pline_seq      <- pline ((![-={<*#:;] / &('<' [^btdh])) pline)*
   pline          <- (%formatted newline -> ' ') ~> merge_text
   special_block  <- &[-={*#:;] (horizontal_rule / heading / list_block / %table) newline?
   block_html     <- &[<] '<npb-' {%d+} -> extract_npb '/>'

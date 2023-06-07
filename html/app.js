@@ -59,6 +59,8 @@ function elInViewport(el) {
 }
 
 let activeEntries = {};
+let entriesToAdd = new Set();
+let entriesToRemove = new Set();
 
 let sectionObserver = new IntersectionObserver(entries => {
   entries.forEach(entry => {
@@ -67,24 +69,52 @@ let sectionObserver = new IntersectionObserver(entries => {
       if (!activeEntries[id]) {
         const $me = $(`aside li a[href="#${id}"]`);
         let parent = $me.parent().get(0);
-        parent.className = 'active';
-        if (entry.target.className === 'h3sec') {
-          if (!elInViewport(parent)) {
-            parent.scrollIntoView();
-          }
-        } else if (entry.target.className === 'h2sec') {
-          if (!elInViewport(parent)) {
-            parent.scrollIntoView()
-          }
-        }
-        activeEntries[id] = true;
+        entriesToAdd.add(parent);
+        activeEntries[id] = parent;
       }
     } else if (activeEntries[id]) {
-      $(`aside li a[href="#${id}"]`).parent().removeClass('active');
+      entriesToRemove.add(activeEntries[id]);
       delete activeEntries[id];
     }
   });
 });
+
+let allowFunctionExecution = true;
+let scrollTimeout;
+
+setInterval(() => {
+  if (!allowFunctionExecution) {
+    return;
+  }
+  if (entriesToAdd.size) {
+    entriesToAdd.forEach(entry => {
+      entry.classList.add('active');
+    });
+    entriesToAdd.clear();
+  }
+  if (entriesToRemove.size === 0) return;
+  entriesToRemove.forEach(entry => {
+    const id = entry.id;
+    if (!activeEntries[id]) {
+      entry.classList.remove('active');
+    }
+  });
+  entriesToRemove.clear();
+
+  const sortedIds = Object.keys(activeEntries).sort();
+  const el1 = activeEntries[sortedIds[0]];
+  if (sortedIds.length === 1) {
+    if (!elInViewport(el1)) {
+      activeEntries[sortedIds[0]].scrollIntoView();
+    }
+  } else {
+    const el2 = activeEntries[sortedIds[sortedIds.length - 1]];
+    if (el1.getBoundingClientRect().top >= 41.6 && el2.getBoundingClientRect().bottom <= window.innerHeight)
+      return;
+    
+    el1.scrollIntoView();
+  }
+}, 500);
 
 $(document).ready(mainContentLoaded);
 
@@ -121,6 +151,16 @@ function mainContentLoaded() {
   document.title = outputDiv.children[0].innerText + ' - 维基百科，自由的百科全书'
   
   buildToc();
+
+  outputDiv.addEventListener('scroll', function() {
+    allowFunctionExecution = false;
+  
+    clearTimeout(scrollTimeout);
+  
+    scrollTimeout = setTimeout(function() {
+      allowFunctionExecution = true;
+    }, 200);
+  });
   
   $content.find('a:not(.external)').click(function(event) {
     event.preventDefault();
