@@ -8,6 +8,7 @@ let hashIndex = 0;
 let $content = $('#content');
 let oldestState = { content: $content.html(), title: document.title, type: 'main' };
 let lastPath = location.pathname;
+window.pagename = lastPath.match(/\/wiki\/([^#]+)/) && RegExp.$1;
 
 let loggedIn = document.cookie.includes('session=');
 
@@ -287,6 +288,10 @@ async function getRemoteHTML(url, route, title, type) {
 
 function gotoLogin() {
   location.href = '/login.html?returnUrl=' + location.pathname;
+}
+
+function gotoRegister() {
+  getRemoteHTML('/reg.html', 'register.php?returnto=' + window.pagename, '注册', 'tool');
 }
 
 async function editPage(pageName) {

@@ -1,0 +1,52 @@
+<div class="container">
+  <h1>Create New Account</h1>
+  <div class="form-container">
+    <div class="form-title">Sign Up</div>
+    <form id="signup-form">
+      <input type="text" class="form-input" name="username" placeholder="Username" required>
+      <input type="password" class="form-input" name="password" placeholder="Password" required>
+      <input type="email" class="form-input" name="user_email" placeholder="Email (optional)">
+      <input type="button" class="form-submit" value="Create Account" onclick="submitForm()">
+    </form>
+  </div>
+</div>
+
+<script>
+  function getReturnToParameter() {
+    const url = new URL(window.location.href);
+    const returnto = url.searchParams.get("returnto");
+    return returnto ? decodeURIComponent(returnto) : null;
+  }
+  function submitForm() {
+    const form = document.getElementById('signup-form');
+    const formData = new FormData(form);
+    const returnto = getReturnToParameter();
+
+    fetch('/register', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if(response.ok) {
+        return response.json();
+      } else {
+        // If we get a non-200 response, we convert it to JSON so we can get the error message
+        return response.json().then(err => {
+          throw err; 
+        });
+      }
+    })
+    .then(data => {
+      console.log('Account created successfully!');
+      
+      if (returnto) {
+        // do something
+	loadArticle(returnto, true);
+      }
+    })
+    .catch(error => {
+      // Display the error message to the user
+      alert(error.error);
+    });
+  }
+</script>

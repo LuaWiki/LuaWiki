@@ -53,7 +53,6 @@ local mainpage_html = [=[<!DOCTYPE html>
   <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.6/katex.min.css">
   <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/11.5.1/styles/default.min.css">
   <link rel="stylesheet" type="text/css" href="/wiki.css">
-</head>
 <style>
 html, body {
   height: 100%;
@@ -141,6 +140,7 @@ body > nav a:hover {
   }
 }
 </style>
+</head>
 <body>
   <nav class="container-fluid">
     <ul>
