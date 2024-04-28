@@ -85,8 +85,10 @@ body > nav a:hover {
 }
 .logo {
   display: inline-block;
-  padding: 0.2em;
-  line-height: 1;
+  width: 20px;
+  height: 20px;
+  line-height: 25px;
+  padding-left: 2px;
   background: black;
   border-radius: 50%;
   color: #fff;
